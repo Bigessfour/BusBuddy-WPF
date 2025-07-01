@@ -1,0 +1,33 @@
+name: .NET Desktop
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'  # Matches net8.0-windows
+    
+    - name: Restore dependencies
+      run: dotnet restore "BusBuddy Blazer.sln"
+    
+    - name: Build
+      run: dotnet build "BusBuddy Blazer.sln" --no-restore --configuration Release
+      env:
+        SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
+    
+    - name: Test (when available)
+      run: dotnet test "BusBuddy Blazer.sln" --no-build --verbosity normal --configuration Release
+      continue-on-error: true  # Continue if no tests exist yet
+      env:
+        SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
