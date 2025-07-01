@@ -25,32 +25,21 @@
         </StackPanel>
         
         <!-- Main Content Area -->
-        <TabControl x:Name="MainTabControl" Grid.Column="1" 
-                    TabStripPlacement="Top" Background="White">
-            <TabItem x:Name="RoutesTab" Header="Routes Management">
-                <Grid>
-                    <TextBlock Text="Routes will be displayed here" 
-                               HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               FontSize="16" Foreground="Gray"/>
-                    <DataGrid x:Name="RoutesGrid" Margin="10" AutoGenerateColumns="True"/>
-                </Grid>
-            </TabItem>
-            <TabItem x:Name="BusesTab" Header="Bus Fleet Management" Visibility="Collapsed">
-                <Grid>
-                    <TextBlock Text="Bus fleet data will be displayed here" 
-                               HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               FontSize="16" Foreground="Gray"/>
-                    <DataGrid x:Name="BusesGrid" Margin="10" AutoGenerateColumns="True"/>
-                </Grid>
-            </TabItem>
-            <TabItem x:Name="DriversTab" Header="Driver Management" Visibility="Collapsed">
-                <Grid>
-                    <TextBlock Text="Driver information will be displayed here" 
-                               HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               FontSize="16" Foreground="Gray"/>
-                    <DataGrid x:Name="DriversGrid" Margin="10" AutoGenerateColumns="True"/>
-                </Grid>
-            </TabItem>
-        </TabControl>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- Header -->
+            <Border Grid.Row="0" Background="#FFF" BorderBrush="#DDD" BorderThickness="0,0,0,1">
+                <TextBlock x:Name="HeaderText" Text="Routes Management" 
+                           FontSize="20" FontWeight="Bold" 
+                           VerticalAlignment="Center" Margin="20,0"/>
+            </Border>
+            
+            <!-- Content -->
+            <ContentPresenter x:Name="MainContent" Grid.Row="1" Margin="10"/>
+        </Grid>
     </Grid>
 </Window>

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using BusBuddy.Views;
 
 namespace BusBuddy
 {
@@ -9,50 +10,45 @@ namespace BusBuddy
         public DashboardWindow()
         {
             InitializeComponent();
-            // Initialize with Routes tab visible
-            ShowRoutesTab();
+            // Initialize with Routes view
+            ShowRoutesView();
+            UpdateButtonStyles(RoutesButton);
         }
 
         private void Routes_Click(object sender, RoutedEventArgs e)
         {
-            ShowRoutesTab();
+            ShowRoutesView();
             UpdateButtonStyles(RoutesButton);
         }
 
         private void Buses_Click(object sender, RoutedEventArgs e)
         {
-            ShowBusesTab();
+            ShowBusesView();
             UpdateButtonStyles(BusesButton);
         }
 
         private void Drivers_Click(object sender, RoutedEventArgs e)
         {
-            ShowDriversTab();
+            ShowDriversView();
             UpdateButtonStyles(DriversButton);
         }
 
-        private void ShowRoutesTab()
+        private void ShowRoutesView()
         {
-            MainTabControl.SelectedItem = RoutesTab;
-            RoutesTab.Visibility = Visibility.Visible;
-            BusesTab.Visibility = Visibility.Collapsed;
-            DriversTab.Visibility = Visibility.Collapsed;
+            MainContent.Content = new RoutesManagementView();
+            HeaderText.Text = "Routes Management";
         }
 
-        private void ShowBusesTab()
+        private void ShowBusesView()
         {
-            MainTabControl.SelectedItem = BusesTab;
-            RoutesTab.Visibility = Visibility.Collapsed;
-            BusesTab.Visibility = Visibility.Visible;
-            DriversTab.Visibility = Visibility.Collapsed;
+            MainContent.Content = new BusesManagementView();
+            HeaderText.Text = "Bus Fleet Management";
         }
 
-        private void ShowDriversTab()
+        private void ShowDriversView()
         {
-            MainTabControl.SelectedItem = DriversTab;
-            RoutesTab.Visibility = Visibility.Collapsed;
-            BusesTab.Visibility = Visibility.Collapsed;
-            DriversTab.Visibility = Visibility.Visible;
+            MainContent.Content = new DriversManagementView();
+            HeaderText.Text = "Driver Management";
         }
 
         private void UpdateButtonStyles(Button activeButton)
