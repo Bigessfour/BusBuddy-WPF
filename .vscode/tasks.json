@@ -1,0 +1,22 @@
+{
+    // Build and run tasks for BusBuddy WPF
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "pwsh",
+            "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "./build.ps1"],
+            "group": "build",
+            "problemMatcher": ["$msCompile"]
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "command": "pwsh",
+            "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "./test.ps1"],
+            "group": "test",
+            "problemMatcher": []
+        }
+    ]
+}
