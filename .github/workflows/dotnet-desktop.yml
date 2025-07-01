@@ -18,6 +18,17 @@ jobs:
       with:
         dotnet-version: '8.0.x'  # Matches net8.0-windows
     
+    - name: Verify Syncfusion License (Optional)
+      run: |
+        if ($env:SYNCFUSION_LICENSE_KEY) {
+          Write-Host "✅ Syncfusion license key is configured"
+        } else {
+          Write-Host "⚠️  Syncfusion license key not found - may cause runtime issues"
+        }
+      shell: pwsh
+      env:
+        SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
+    
     - name: Restore dependencies
       run: dotnet restore "BusBuddy Blazer.sln"
     
@@ -26,8 +37,9 @@ jobs:
       env:
         SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
     
-    - name: Test (when available)
-      run: dotnet test "BusBuddy Blazer.sln" --no-build --verbosity normal --configuration Release
-      continue-on-error: true  # Continue if no tests exist yet
-      env:
-        SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
+    # Test step disabled until test projects are added
+    # - name: Test (when available)
+    #   run: dotnet test "BusBuddy Blazer.sln" --no-build --verbosity normal --configuration Release
+    #   continue-on-error: true  # Continue if no tests exist yet
+    #   env:
+    #     SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
