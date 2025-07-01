@@ -23,7 +23,8 @@ jobs:
         if ($env:SYNCFUSION_LICENSE_KEY) {
           Write-Host "✅ Syncfusion license key is configured"
         } else {
-          Write-Host "⚠️  Syncfusion license key not found - may cause runtime issues"
+          Write-Host "⚠️ Syncfusion license key not found - may cause runtime issues"
+          Write-Host "💡 Add SYNCFUSION_LICENSE_KEY secret in GitHub repository settings"
         }
       shell: pwsh
       env:
@@ -31,6 +32,8 @@ jobs:
     
     - name: Restore dependencies
       run: dotnet restore "BusBuddy Blazer.sln"
+      env:
+        SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
     
     - name: Build
       run: dotnet build "BusBuddy Blazer.sln" --no-restore --configuration Release
