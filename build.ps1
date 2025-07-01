@@ -1,2 +1,2 @@
 # PowerShell build script for BusBuddy WPF
-dotnet build .
+dotnet build "BusBuddy Blazer.sln"
