@@ -12,8 +12,12 @@ public partial class App : Application
 {
     protected override void OnStartup(StartupEventArgs e)
     {
-        // Register Syncfusion Community License (replace with your actual key)
-        SyncfusionLicenseProvider.RegisterLicense("YOUR LICENSE KEY");
+        // Register Syncfusion License Key from environment variable
+        string? licenseKey = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY");
+        if (!string.IsNullOrEmpty(licenseKey))
+        {
+            SyncfusionLicenseProvider.RegisterLicense(licenseKey);
+        }
         base.OnStartup(e);
     }
 }

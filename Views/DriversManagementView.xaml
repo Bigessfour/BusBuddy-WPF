@@ -1,0 +1,26 @@
+<UserControl x:Class="BusBuddy.Views.DriversManagementView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+    xmlns:vm="clr-namespace:BusBuddy.ViewModels"
+    Height="Auto" Width="Auto">
+    <UserControl.DataContext>
+        <vm:DriversViewModel/>
+    </UserControl.DataContext>
+    <Grid>
+        <syncfusion:SfDataGrid x:Name="DriversGrid" ItemsSource="{Binding Drivers}" AutoGenerateColumns="False" SelectionMode="Single" Margin="0,0,0,48">
+            <syncfusion:SfDataGrid.Columns>
+                <syncfusion:GridTextColumn MappingName="Id" HeaderText="ID"/>
+                <syncfusion:GridTextColumn MappingName="Name" HeaderText="Name"/>
+                <syncfusion:GridTextColumn MappingName="LicenseNumber" HeaderText="License Number"/>
+                <syncfusion:GridTextColumn MappingName="Status" HeaderText="Status"/>
+            </syncfusion:SfDataGrid.Columns>
+        </syncfusion:SfDataGrid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="8">
+            <Button Content="Add" Command="{Binding AddCommand}" Style="{DynamicResource MaterialDarkButton}" Margin="4,0"/>
+            <Button Content="Edit" Command="{Binding EditCommand}" Style="{DynamicResource MaterialDarkButton}" Margin="4,0"/>
+            <Button Content="Delete" Command="{Binding DeleteCommand}" Style="{DynamicResource MaterialDarkButton}" Margin="4,0"/>
+        </StackPanel>
+        <!-- Dialog implementation would use Syncfusion WPF dialog controls if available, else fallback to standard WPF dialog pattern -->
+    </Grid>
+</UserControl>
