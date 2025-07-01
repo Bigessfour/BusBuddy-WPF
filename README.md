@@ -1,21 +1,78 @@
 # BusBuddy WPF Application
 
-This project is a WPF application for managing bus records (ID, Name, Route) using Syncfusion WPF DataGrid and Entity Framework Core with SQL Server Express. It is built with .NET 8 and follows BusBuddy project guidelines.
+A comprehensive WPF application for school transportation management, built with Syncfusion WPF controls and Entity Framework Core.
 
-## Features
-- View and edit bus records in a Syncfusion DataGrid
-- Data stored in SQL Server Express via Entity Framework Core
-- Community License registration for Syncfusion controls
+## 🚌 Features
+- **Route Management**: View and manage bus routes with Syncfusion SfDataGrid
+- **Bus Fleet Management**: Track bus information, capacity, and status
+- **Driver Management**: Manage driver records and assignments
+- **Modern UI**: Syncfusion MaterialDark theme with professional styling
+- **Database Integration**: Entity Framework Core with SQL Server Express
+- **MVVM Architecture**: Clean separation with ViewModels and RelayCommand
 
-## Setup
-1. Ensure SQL Server Express is installed and running.
-2. Update the connection string in `App.config` or `appsettings.json` as needed.
-3. Build and run the project using VS Code tasks or `dotnet build`/`dotnet run`.
+## 🛠️ Technology Stack
+- **.NET 8.0** (WPF Framework)
+- **Syncfusion WPF Controls** (SfDataGrid, MaterialDark Theme)
+- **Entity Framework Core** with SQL Server Express
+- **MVVM Pattern** with RelayCommand implementation
 
-## Guidelines
-- Use only official Syncfusion documentation for all Syncfusion control usage.
-- Follow BusBuddy guidelines for file management, code formatting, and repository hygiene.
-- Prefer PowerShell scripts for build/test automation.
+## 🚀 Setup Instructions
 
-## License
-Syncfusion Community License is required for development. Register your license key in `App.xaml.cs` as per [Syncfusion documentation](https://help.syncfusion.com/wpf/licensing/overview).
+### Prerequisites
+- .NET 8.0 SDK
+- SQL Server Express (LocalDB)
+- Syncfusion Community License Key
+
+### Installation
+1. **Clone the repository**:
+   ```pwsh
+   git clone https://github.com/Bigessfour/BusBuddy-WPF.git
+   cd "BusBuddy-WPF"
+   ```
+
+2. **Set up Syncfusion License**:
+   ```pwsh
+   $env:SYNCFUSION_LICENSE_KEY = "YOUR_LICENSE_KEY_HERE"
+   ```
+
+3. **Configure Database**:
+   - Update connection string in `appsettings.json` if needed
+   - Default: `Server=localhost;Database=busbuddy;Trusted_Connection=True;MultipleActiveResultSets=True;`
+
+4. **Build and Run**:
+   ```pwsh
+   dotnet restore
+   dotnet build "BusBuddy Blazer.sln"
+   dotnet run --project BusBuddy.csproj
+   ```
+
+## 📁 Project Structure
+```
+├── Data/                    # Entity Framework DbContext
+├── Models/                  # Entity models (Bus, Driver, Route, etc.)
+├── ViewModels/             # MVVM ViewModels with RelayCommand
+├── Views/                  # UserControl views for management
+├── DashboardWindow.xaml    # Main application window
+├── appsettings.json        # Configuration and connection strings
+└── App.xaml.cs            # Application startup and Syncfusion licensing
+```
+
+## 🎯 Development Guidelines
+- **Syncfusion Usage**: Only use [official Syncfusion WPF documentation](https://help.syncfusion.com/wpf)
+- **Code Standards**: Follow BusBuddy guidelines for formatting and file management
+- **Build Tools**: Use PowerShell scripts (`build.ps1`, `test.ps1`) for automation
+- **Git Hygiene**: Clean repository with proper `.gitignore` for .NET projects
+
+## 📚 Key Components
+- **SfDataGrid**: Professional data grids for Routes, Buses, and Drivers
+- **TabControl**: Multi-module interface organization
+- **MaterialDark Theme**: Consistent modern styling throughout
+- **Entity Framework**: Database-first approach with proper connection management
+
+## 🔧 Build Tasks
+- **Build**: `dotnet build "BusBuddy Blazer.sln"`
+- **Run**: `dotnet run --project BusBuddy.csproj`
+- **Clean**: `dotnet clean "BusBuddy Blazer.sln"`
+
+## 📄 License
+This project uses Syncfusion Community License. Ensure you have a valid license key set as an environment variable before running the application.
