@@ -16,7 +16,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 {
     private ObservableCollection<Route> _routes = new();
     private ObservableCollection<Driver> _drivers = new();
-    private ObservableCollection<Vehicle> _vehicles = new();
+    private ObservableCollection<Bus> _buses = new();
     public ObservableCollection<Route> Routes
     {
         get => _routes;
@@ -27,10 +27,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         get => _drivers;
         set { _drivers = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Drivers))); }
     }
-    public ObservableCollection<Vehicle> Vehicles
+    public ObservableCollection<Bus> Buses
     {
-        get => _vehicles;
-        set { _vehicles = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Vehicles))); }
+        get => _buses;
+        set { _buses = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Buses))); }
     }
     public ObservableCollection<string> RouteNames { get; set; } = new ObservableCollection<string> { "Truck Plaza", "East Route", "West Route", "SPED" };
     private readonly BusBuddyContext _context;
@@ -45,13 +45,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void LoadData()
     {
         Routes = new ObservableCollection<Route>(_context.Routes
-            .Include(r => r.AMVehicle)
+            .Include(r => r.AMBus)
             .Include(r => r.AMDriver)
-            .Include(r => r.PMVehicle)
+            .Include(r => r.PMBus)
             .Include(r => r.PMDriver)
             .ToList());
         Drivers = new ObservableCollection<Driver>(_context.Drivers.ToList());
-        Vehicles = new ObservableCollection<Vehicle>(_context.Vehicles.ToList());
+        Buses = new ObservableCollection<Bus>(_context.Buses.ToList());
     }
     private void SaveButton_Click(object sender, RoutedEventArgs e)
     {

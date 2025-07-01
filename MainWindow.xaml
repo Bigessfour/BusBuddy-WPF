@@ -19,8 +19,8 @@
                             <syncfusion:GridDateTimeColumn HeaderText="Date" MappingName="Date"/>
                             <syncfusion:GridComboBoxColumn HeaderText="Route Name" MappingName="RouteName" 
                                                           ItemsSource="{Binding RouteNames}"/>
-                            <syncfusion:GridComboBoxColumn HeaderText="AM Vehicle" MappingName="AMVehicleID" 
-                                                          ItemsSource="{Binding Vehicles}" 
+                            <syncfusion:GridComboBoxColumn HeaderText="AM Bus" MappingName="AMBusID" 
+                                                          ItemsSource="{Binding Buses}" 
                                                           DisplayMemberPath="BusNumber" 
                                                           SelectedValuePath="ID"/>
                             <syncfusion:GridNumericColumn HeaderText="AM Begin Miles" MappingName="AMBeginMiles"/>
@@ -30,8 +30,8 @@
                                                           ItemsSource="{Binding Drivers}" 
                                                           DisplayMemberPath="DriverName" 
                                                           SelectedValuePath="ID"/>
-                            <syncfusion:GridComboBoxColumn HeaderText="PM Vehicle" MappingName="PMVehicleID" 
-                                                          ItemsSource="{Binding Vehicles}" 
+                            <syncfusion:GridComboBoxColumn HeaderText="PM Bus" MappingName="PMBusID" 
+                                                          ItemsSource="{Binding Buses}" 
                                                           DisplayMemberPath="BusNumber" 
                                                           SelectedValuePath="ID"/>
                             <syncfusion:GridNumericColumn HeaderText="PM Begin Miles" MappingName="PMBeginMiles"/>
@@ -47,7 +47,7 @@
                             HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="SaveButton_Click"/>
                 </Grid>
             </TabItem>
-            <!-- Add more TabItems for Drivers, Vehicles, etc., in similar structure -->
+            <!-- Add more TabItems for Drivers, Buses, etc., in similar structure -->
         </TabControl>
     </Grid>
 </Window>

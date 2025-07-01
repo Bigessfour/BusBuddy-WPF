@@ -1,10 +1,8 @@
 using System;
 
-// This file is deprecated and should be removed. All vehicle-related logic is now handled by Bus.cs and the Bus entity.
-
 namespace BusBuddy.Models
 {
-    public class Vehicle
+    public class Bus
     {
         public int ID { get; set; }
         public string BusNumber { get; set; } = string.Empty;

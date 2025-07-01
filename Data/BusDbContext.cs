@@ -3,19 +3,11 @@ using BusBuddy.Models;
 
 namespace BusBuddy.Data
 {
-    public class Bus
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Route { get; set; } = string.Empty;
-    }
-
     public class BusDbContext : DbContext
     {
         public DbSet<Bus> Buses { get; set; } = null!;
         public DbSet<Route> Routes { get; set; } = null!;
         public DbSet<Driver> Drivers { get; set; } = null!;
-        public DbSet<Vehicle> Vehicles { get; set; } = null!;
         public DbSet<Activity> Activities { get; set; } = null!;
         public DbSet<Fuel> Fuel { get; set; } = null!;
         public DbSet<Maintenance> Maintenance { get; set; } = null!;

@@ -7,9 +7,9 @@ namespace BusBuddy.Models
         public int ID { get; set; }
         public DateTime FuelDate { get; set; }
         public string FuelLocation { get; set; } = string.Empty;
-        public int? VehicleID { get; set; }
-        public int? OdometerReading { get; set; }
-        public string FuelType { get; set; } = string.Empty;
-        public Vehicle Vehicle { get; set; } = new Vehicle();
+        public int? BusID { get; set; }
+        public double? Gallons { get; set; }
+        public double? Cost { get; set; }
+        public Bus? Bus { get; set; }
     }
 }

@@ -11,9 +11,9 @@ namespace BusBuddy.Models
         public TimeSpan? LeaveTime { get; set; }
         public TimeSpan? EventTime { get; set; }
         public string RequestedBy { get; set; } = string.Empty;
-        public int? AssignedVehicleID { get; set; }
-        public int? DriverID { get; set; }
-        public Vehicle AssignedVehicle { get; set; } = new Vehicle();
-        public Driver Driver { get; set; } = new Driver();
+        public int? AssignedBusID { get; set; }
+        public int? AssignedDriverID { get; set; }
+        public Bus AssignedBus { get; set; } = new Bus();
+        public Driver AssignedDriver { get; set; } = new Driver();
     }
 }
