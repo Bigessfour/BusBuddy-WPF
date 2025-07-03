@@ -131,9 +131,9 @@ public partial class Dashboard : MetroForm
         {
             _logger.LogInformation("Schedule Management button clicked");
 
-            // TODO: Open Schedule Management form
-            MessageBox.Show("Schedule Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Bus schedules\n• Time tables\n• Schedule conflicts",
-                "Schedule Management", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Open Schedule Management form
+            var scheduleForm = ServiceContainer.GetService<ScheduleManagementForm>();
+            scheduleForm.ShowDialog();
         }
         catch (Exception ex)
         {

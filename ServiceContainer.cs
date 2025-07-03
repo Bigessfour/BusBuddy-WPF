@@ -70,6 +70,7 @@ namespace Bus_Buddy
 
             // Business Services
             services.AddScoped<IBusService, BusService>();
+            services.AddScoped<IActivityService, ActivityService>();
 
             // Forms (as transient so they can be created multiple times if needed)
             services.AddTransient<Dashboard>();
@@ -78,6 +79,8 @@ namespace Bus_Buddy
             services.AddTransient<Bus_Buddy.Forms.DriverManagementForm>();
             services.AddTransient<Bus_Buddy.Forms.DriverEditForm>();
             services.AddTransient<Bus_Buddy.Forms.RouteManagementForm>();
+            services.AddTransient<Bus_Buddy.Forms.ScheduleManagementForm>();
+            services.AddTransient<Bus_Buddy.Forms.ActivityEditForm>();
         }
 
         public static T GetService<T>() where T : notnull
