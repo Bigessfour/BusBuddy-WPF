@@ -72,6 +72,7 @@ namespace Bus_Buddy
             services.AddScoped<IBusService, BusService>();
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IScheduleService, ScheduleService>();
+            services.AddScoped<IStudentService, StudentService>();
             services.AddScoped<BusBuddyScheduleDataProvider>();
 
             // Forms (as transient so they can be created multiple times if needed)
@@ -83,6 +84,8 @@ namespace Bus_Buddy
             services.AddTransient<Bus_Buddy.Forms.RouteManagementForm>();
             services.AddTransient<Bus_Buddy.Forms.ScheduleManagementForm>();
             services.AddTransient<Bus_Buddy.Forms.ActivityEditForm>();
+            services.AddTransient<Bus_Buddy.Forms.StudentManagementForm>();
+            services.AddTransient<Bus_Buddy.Forms.StudentEditForm>();
         }
 
         public static T GetService<T>() where T : notnull

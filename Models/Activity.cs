@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -5,58 +6,358 @@ namespace Bus_Buddy.Models;
 
 /// <summary>
 /// Represents an activity record for bus operations
-/// Based on Activity Table from BusBuddy Tables schema
+/// Based on Activities Table from BusBuddy Tables schema
+/// Matches requirements: Date, Activity, Destination, Leave Time, Event Time, Requested By, Assigned Vehicle, Driver
+/// Enhanced for Syncfusion data binding with INotifyPropertyChanged support
 /// </summary>
-[Table("Activity")]
-public class Activity
+[Table("Activities")]
+public class Activity : INotifyPropertyChanged
 {
+    private DateTime _date;
+    private string _activityType = string.Empty;
+    private string _destination = string.Empty;
+    private TimeSpan _leaveTime;
+    private TimeSpan _eventTime;
+    private string _requestedBy = string.Empty;
+    private int _assignedVehicleId;
+    private int _driverId;
+    private int? _studentsCount;
+    private string? _notes;
+    private string _status = "Scheduled";
+    private int? _routeId;
+    private int? _startOdometer;
+    private int? _endOdometer;
+
     [Key]
     public int ActivityId { get; set; }
 
     [Required]
-    public int VehicleId { get; set; }
+    [Display(Name = "Date")]
+    public DateTime Date
+    {
+        get => _date;
+        set
+        {
+            if (_date != value)
+            {
+                _date = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ActivityDate));
+            }
+        }
+    }
 
     [Required]
-    public int RouteId { get; set; }
+    [StringLength(50)]
+    [Display(Name = "Activity")]
+    public string ActivityType
+    {
+        get => _activityType;
+        set
+        {
+            if (_activityType != value)
+            {
+                _activityType = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     [Required]
-    public int DriverId { get; set; }
+    [StringLength(200)]
+    [Display(Name = "Destination")]
+    public string Destination
+    {
+        get => _destination;
+        set
+        {
+            if (_destination != value)
+            {
+                _destination = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     [Required]
-    [Display(Name = "Activity Date")]
-    public DateTime ActivityDate { get; set; }
+    [Display(Name = "Leave Time")]
+    public TimeSpan LeaveTime
+    {
+        get => _leaveTime;
+        set
+        {
+            if (_leaveTime != value)
+            {
+                _leaveTime = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(StartTime));
+            }
+        }
+    }
 
     [Required]
-    [StringLength(10)]
-    [Display(Name = "Activity Type")]
-    public string ActivityType { get; set; } = string.Empty; // Morning, Afternoon, Field Trip
+    [Display(Name = "Event Time")]
+    public TimeSpan EventTime
+    {
+        get => _eventTime;
+        set
+        {
+            if (_eventTime != value)
+            {
+                _eventTime = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(EndTime));
+            }
+        }
+    }
 
-    [Display(Name = "Start Time")]
-    public TimeSpan? StartTime { get; set; }
+    [Required]
+    [StringLength(100)]
+    [Display(Name = "Requested By")]
+    public string RequestedBy
+    {
+        get => _requestedBy;
+        set
+        {
+            if (_requestedBy != value)
+            {
+                _requestedBy = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
+    }
 
-    [Display(Name = "End Time")]
-    public TimeSpan? EndTime { get; set; }
+    [Required]
+    [ForeignKey("AssignedVehicle")]
+    [Display(Name = "Assigned Vehicle")]
+    public int AssignedVehicleId
+    {
+        get => _assignedVehicleId;
+        set
+        {
+            if (_assignedVehicleId != value)
+            {
+                _assignedVehicleId = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(VehicleId));
+            }
+        }
+    }
 
-    [Display(Name = "Start Odometer")]
-    public int? StartOdometer { get; set; }
+    [Required]
+    [ForeignKey("Driver")]
+    [Display(Name = "Driver")]
+    public int DriverId
+    {
+        get => _driverId;
+        set
+        {
+            if (_driverId != value)
+            {
+                _driverId = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
-    [Display(Name = "End Odometer")]
-    public int? EndOdometer { get; set; }
+    [Display(Name = "Students Count")]
+    public int? StudentsCount
+    {
+        get => _studentsCount;
+        set
+        {
+            if (_studentsCount != value)
+            {
+                _studentsCount = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     [StringLength(500)]
     [Display(Name = "Notes")]
-    public string? Notes { get; set; }
+    public string? Notes
+    {
+        get => _notes;
+        set
+        {
+            if (_notes != value)
+            {
+                _notes = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
-    [Display(Name = "Students Count")]
-    public int? StudentsCount { get; set; }
+    [StringLength(20)]
+    [Display(Name = "Status")]
+    public string Status
+    {
+        get => _status;
+        set
+        {
+            if (_status != value)
+            {
+                _status = value ?? "Scheduled";
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Additional properties for enhanced functionality with change notifications
+    [Display(Name = "Activity Date")]
+    [NotMapped]
+    public DateTime ActivityDate
+    {
+        get => Date;
+        set => Date = value;
+    }
+
+    [Display(Name = "Start Time")]
+    [NotMapped]
+    public TimeSpan? StartTime
+    {
+        get => LeaveTime;
+        set => LeaveTime = value ?? TimeSpan.Zero;
+    }
+
+    [Display(Name = "End Time")]
+    [NotMapped]
+    public TimeSpan? EndTime
+    {
+        get => EventTime;
+        set => EventTime = value ?? TimeSpan.Zero;
+    }
+
+    // Compatibility properties for existing code with change notifications
+    [NotMapped]
+    [Display(Name = "Vehicle ID")]
+    public int VehicleId
+    {
+        get => AssignedVehicleId;
+        set => AssignedVehicleId = value;
+    }
+
+    [NotMapped]
+    [Display(Name = "Route ID")]
+    public int? RouteId
+    {
+        get => _routeId;
+        set
+        {
+            if (_routeId != value)
+            {
+                _routeId = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    [NotMapped]
+    [Display(Name = "Start Odometer")]
+    public int? StartOdometer
+    {
+        get => _startOdometer;
+        set
+        {
+            if (_startOdometer != value)
+            {
+                _startOdometer = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    [NotMapped]
+    [Display(Name = "End Odometer")]
+    public int? EndOdometer
+    {
+        get => _endOdometer;
+        set
+        {
+            if (_endOdometer != value)
+            {
+                _endOdometer = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    // Extended properties for maximum flexibility
+    [StringLength(100)]
+    [Display(Name = "Activity Category")]
+    public string? ActivityCategory { get; set; } // Sports, Field Trip, Special Event, etc.
+
+    [Display(Name = "Estimated Cost")]
+    [Column(TypeName = "decimal(10,2)")]
+    public decimal? EstimatedCost { get; set; }
+
+    [Display(Name = "Actual Cost")]
+    [Column(TypeName = "decimal(10,2)")]
+    public decimal? ActualCost { get; set; }
+
+    [Display(Name = "Approval Required")]
+    public bool ApprovalRequired { get; set; } = true;
+
+    [Display(Name = "Approved")]
+    public bool Approved { get; set; } = false;
+
+    [StringLength(100)]
+    [Display(Name = "Approved By")]
+    public string? ApprovedBy { get; set; }
+
+    [Display(Name = "Approval Date")]
+    public DateTime? ApprovalDate { get; set; }
+
+    [Display(Name = "Created Date")]
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+    [Display(Name = "Updated Date")]
+    public DateTime? UpdatedDate { get; set; }
+
+    [StringLength(100)]
+    [Display(Name = "Created By")]
+    public string? CreatedBy { get; set; }
+
+    [StringLength(100)]
+    [Display(Name = "Updated By")]
+    public string? UpdatedBy { get; set; }
+
+    // Computed properties for Syncfusion scheduling
+    [NotMapped]
+    [Display(Name = "Duration")]
+    public TimeSpan Duration => EventTime - LeaveTime;
+
+    [NotMapped]
+    [Display(Name = "Full Start DateTime")]
+    public DateTime FullStartDateTime => Date.Date.Add(LeaveTime);
+
+    [NotMapped]
+    [Display(Name = "Full End DateTime")]
+    public DateTime FullEndDateTime => Date.Date.Add(EventTime);
+
+    [NotMapped]
+    [Display(Name = "Is All Day")]
+    public bool IsAllDay => Duration.TotalHours >= 23;
 
     // Navigation properties
-    [ForeignKey("VehicleId")]
-    public virtual Bus Vehicle { get; set; } = null!;
+    public virtual Bus AssignedVehicle { get; set; } = null!;
 
-    [ForeignKey("RouteId")]
-    public virtual Route Route { get; set; } = null!;
+    // Legacy navigation for backward compatibility
+    [NotMapped]
+    public virtual Bus Vehicle => AssignedVehicle;
 
-    [ForeignKey("DriverId")]
     public virtual Driver Driver { get; set; } = null!;
+
+    // Legacy navigation for routes (for backward compatibility)
+    [NotMapped]
+    public virtual Route? Route { get; set; }
+
+    // INotifyPropertyChanged implementation for Syncfusion data binding
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

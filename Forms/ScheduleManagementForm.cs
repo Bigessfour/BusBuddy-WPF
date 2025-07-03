@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Syncfusion.WinForms.Controls;
 using Syncfusion.Windows.Forms.Schedule;
 using Syncfusion.Schedule;
+using Syncfusion.Windows.Forms.Tools;
 using System.ComponentModel;
 
 namespace Bus_Buddy.Forms;
@@ -27,10 +28,10 @@ public partial class ScheduleManagementForm : SfForm
     private BusBuddyScheduleAppointment? _selectedAppointment;
 
     // UI Components
-    private Panel panelHeader = null!;
-    private Panel panelControls = null!;
-    private Panel panelSchedule = null!;
-    private Label labelTitle = null!;
+    private Syncfusion.Windows.Forms.Tools.GradientPanel panelHeader = null!;
+    private Syncfusion.Windows.Forms.Tools.GradientPanel panelControls = null!;
+    private Syncfusion.Windows.Forms.Tools.GradientPanel panelSchedule = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelTitle = null!;
 
     // Enhanced Schedule Control with proper data binding
     private ScheduleControl scheduleControl = null!;
@@ -42,8 +43,8 @@ public partial class ScheduleManagementForm : SfForm
     private SfButton btnRefresh = null!;
 
     // Step 3: View Controls (to be added)
-    private ComboBox cmbViewType = null!;
-    private DateTimePicker dtpNavigate = null!;
+    private ComboBoxAdv cmbViewType = null!;
+    private Syncfusion.Windows.Forms.Tools.DateTimePickerAdv dtpNavigate = null!;
 
     #endregion
 
@@ -118,7 +119,7 @@ public partial class ScheduleManagementForm : SfForm
     #region Step 2: Panel Creation
     private void CreateHeaderPanel()
     {
-        panelHeader = new Panel
+        panelHeader = new GradientPanel
         {
             Height = 70,
             Dock = DockStyle.Top,
@@ -126,7 +127,7 @@ public partial class ScheduleManagementForm : SfForm
             Padding = new Padding(20, 15, 20, 15)
         };
 
-        labelTitle = new Label
+        labelTitle = new AutoLabel
         {
             Text = "📅 Activity Schedule Management",
             Font = new Font("Segoe UI", 18F, FontStyle.Bold),
@@ -141,7 +142,7 @@ public partial class ScheduleManagementForm : SfForm
 
     private void CreateControlsPanel()
     {
-        panelControls = new Panel
+        panelControls = new GradientPanel
         {
             Height = 80,
             Dock = DockStyle.Top,
@@ -156,7 +157,7 @@ public partial class ScheduleManagementForm : SfForm
 
     private void CreateSchedulePanel()
     {
-        panelSchedule = new Panel
+        panelSchedule = new GradientPanel
         {
             Dock = DockStyle.Fill,
             BackColor = Color.White,
@@ -318,7 +319,7 @@ public partial class ScheduleManagementForm : SfForm
         btnRefresh.Click += BtnRefresh_Click;
 
         // View Type Selector
-        var lblView = new Label
+        var lblView = new AutoLabel
         {
             Text = "View:",
             Location = new Point(530, 25),
@@ -326,7 +327,7 @@ public partial class ScheduleManagementForm : SfForm
             Font = new Font("Segoe UI", 9F)
         };
 
-        cmbViewType = new ComboBox
+        cmbViewType = new ComboBoxAdv
         {
             Location = new Point(575, 20),
             Size = new Size(100, 30),
@@ -337,7 +338,7 @@ public partial class ScheduleManagementForm : SfForm
         cmbViewType.SelectedIndexChanged += CmbViewType_SelectedIndexChanged;
 
         // Date Navigator
-        var lblNavigate = new Label
+        var lblNavigate = new AutoLabel
         {
             Text = "Go to:",
             Location = new Point(690, 25),
@@ -345,7 +346,7 @@ public partial class ScheduleManagementForm : SfForm
             Font = new Font("Segoe UI", 9F)
         };
 
-        dtpNavigate = new DateTimePicker
+        dtpNavigate = new DateTimePickerAdv
         {
             Location = new Point(740, 20),
             Size = new Size(150, 30),
@@ -484,7 +485,7 @@ public partial class ScheduleManagementForm : SfForm
                 return;
             }
 
-            var result = MessageBox.Show(
+            var result = Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
                 $"Are you sure you want to delete the activity '{_selectedAppointment.Subject}'?",
                 "Confirm Delete",
                 MessageBoxButtons.YesNo,
@@ -596,19 +597,22 @@ public partial class ScheduleManagementForm : SfForm
     private void ShowError(string message)
     {
         _logger.LogError("Schedule Management Error: {Message}", message);
-        MessageBox.Show(message, "Schedule Management Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        Syncfusion.Windows.Forms.MessageBoxAdv.Show(this, message, "Schedule Management Error",
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
     }
 
     private void ShowInfo(string message)
     {
         _logger.LogInformation("Schedule Management Info: {Message}", message);
-        MessageBox.Show(message, "Schedule Management", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        Syncfusion.Windows.Forms.MessageBoxAdv.Show(this, message, "Schedule Management",
+            MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private void ShowSuccess(string message)
     {
         _logger.LogInformation("Schedule Management Success: {Message}", message);
-        MessageBox.Show(message, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        Syncfusion.Windows.Forms.MessageBoxAdv.Show(this, message, "Success",
+            MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     private static bool HasProperty(object obj, string propertyName)

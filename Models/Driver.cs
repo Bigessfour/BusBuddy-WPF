@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,58 +7,195 @@ namespace Bus_Buddy.Models;
 /// <summary>
 /// Represents a school bus driver
 /// Based on Drivers Table from BusBuddy Tables schema
+/// Matches requirements: Driver Name, Driver Phone, Driver Email, Address, City, State, Zip, Drivers Licence Type, Training Complete
+/// Enhanced for Syncfusion data binding with INotifyPropertyChanged support
 /// </summary>
 [Table("Drivers")]
-public class Driver
+public class Driver : INotifyPropertyChanged
 {
+    private string _driverName = string.Empty;
+    private string? _driverPhone;
+    private string? _driverEmail;
+    private string? _address;
+    private string? _city;
+    private string? _state;
+    private string? _zip;
+    private string _driversLicenceType = string.Empty;
+    private bool _trainingComplete = false;
+    private string _status = "Active";
+
     [Key]
     public int DriverId { get; set; }
 
     [Required]
     [StringLength(100)]
     [Display(Name = "Driver Name")]
-    public string DriverName { get; set; } = string.Empty;
-
-    // Additional properties for better data management
-    [StringLength(50)]
-    [Display(Name = "First Name")]
-    public string FirstName { get; set; } = string.Empty;
-
-    [StringLength(50)]
-    [Display(Name = "Last Name")]
-    public string LastName { get; set; } = string.Empty;
+    public string DriverName
+    {
+        get => _driverName;
+        set
+        {
+            if (_driverName != value)
+            {
+                _driverName = value ?? string.Empty;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FullName));
+            }
+        }
+    }
 
     [StringLength(20)]
     [Display(Name = "Driver Phone")]
-    public string? DriverPhone { get; set; }
-
-    // Alias for compatibility
-    [NotMapped]
-    public string? Phone => DriverPhone;
+    public string? DriverPhone
+    {
+        get => _driverPhone;
+        set
+        {
+            if (_driverPhone != value)
+            {
+                _driverPhone = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(Phone));
+            }
+        }
+    }
 
     [StringLength(100)]
     [EmailAddress]
     [Display(Name = "Driver Email")]
-    public string? DriverEmail { get; set; }
+    public string? DriverEmail
+    {
+        get => _driverEmail;
+        set
+        {
+            if (_driverEmail != value)
+            {
+                _driverEmail = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     [StringLength(200)]
-    public string? Address { get; set; }
+    [Display(Name = "Address")]
+    public string? Address
+    {
+        get => _address;
+        set
+        {
+            if (_address != value)
+            {
+                _address = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FullAddress));
+            }
+        }
+    }
 
     [StringLength(50)]
-    public string? City { get; set; }
+    [Display(Name = "City")]
+    public string? City
+    {
+        get => _city;
+        set
+        {
+            if (_city != value)
+            {
+                _city = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FullAddress));
+            }
+        }
+    }
 
     [StringLength(2)]
-    public string? State { get; set; }
+    [Display(Name = "State")]
+    public string? State
+    {
+        get => _state;
+        set
+        {
+            if (_state != value)
+            {
+                _state = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FullAddress));
+            }
+        }
+    }
 
     [StringLength(10)]
-    public string? Zip { get; set; }
+    [Display(Name = "Zip")]
+    public string? Zip
+    {
+        get => _zip;
+        set
+        {
+            if (_zip != value)
+            {
+                _zip = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FullAddress));
+            }
+        }
+    }
 
     [Required]
     [StringLength(20)]
     [Display(Name = "Drivers Licence Type")]
-    public string DriversLicenceType { get; set; } = string.Empty; // CDL or Passenger
+    public string DriversLicenceType
+    {
+        get => _driversLicenceType;
+        set
+        {
+            if (_driversLicenceType != value)
+            {
+                _driversLicenceType = value ?? string.Empty;
+                OnPropertyChanged();
+            }
+        }
+    }
 
-    // Additional license-related properties
+    [Display(Name = "Training Complete?")]
+    public bool TrainingComplete
+    {
+        get => _trainingComplete;
+        set
+        {
+            if (_trainingComplete != value)
+            {
+                _trainingComplete = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(QualificationStatus));
+            }
+        }
+    }
+
+    [StringLength(20)]
+    [Display(Name = "Status")]
+    public string Status
+    {
+        get => _status;
+        set
+        {
+            if (_status != value)
+            {
+                _status = value ?? "Active";
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsAvailable));
+            }
+        }
+    }
+
+    // Additional properties for enhanced functionality
+    [StringLength(50)]
+    [Display(Name = "First Name")]
+    public string? FirstName { get; set; }
+
+    [StringLength(50)]
+    [Display(Name = "Last Name")]
+    public string? LastName { get; set; }
+
     [StringLength(20)]
     [Display(Name = "License Number")]
     public string? LicenseNumber { get; set; }
@@ -76,18 +214,135 @@ public class Driver
     [Display(Name = "Endorsements")]
     public string? Endorsements { get; set; }
 
-    [Display(Name = "Training Complete?")]
-    public bool TrainingComplete { get; set; } = false;
-
     [Display(Name = "Hire Date")]
     public DateTime? HireDate { get; set; }
 
+    [Display(Name = "Created Date")]
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+    [Display(Name = "Updated Date")]
+    public DateTime? UpdatedDate { get; set; }
+
+    // Extended properties for maximum flexibility
+    [StringLength(100)]
+    [Display(Name = "Emergency Contact Name")]
+    public string? EmergencyContactName { get; set; }
+
     [StringLength(20)]
-    [Display(Name = "Status")]
-    public string Status { get; set; } = "Active"; // Active, Inactive, Suspended, Terminated
+    [Display(Name = "Emergency Contact Phone")]
+    public string? EmergencyContactPhone { get; set; }
+
+    [StringLength(100)]
+    [Display(Name = "Medical Restrictions")]
+    public string? MedicalRestrictions { get; set; }
+
+    [Display(Name = "Background Check Date")]
+    public DateTime? BackgroundCheckDate { get; set; }
+
+    [Display(Name = "Background Check Expiry")]
+    public DateTime? BackgroundCheckExpiry { get; set; }
+
+    [Display(Name = "Drug Test Date")]
+    public DateTime? DrugTestDate { get; set; }
+
+    [Display(Name = "Drug Test Expiry")]
+    public DateTime? DrugTestExpiry { get; set; }
+
+    [Display(Name = "Physical Exam Date")]
+    public DateTime? PhysicalExamDate { get; set; }
+
+    [Display(Name = "Physical Exam Expiry")]
+    public DateTime? PhysicalExamExpiry { get; set; }
+
+    [StringLength(1000)]
+    [Display(Name = "Notes")]
+    public string? Notes { get; set; }
+
+    [StringLength(100)]
+    [Display(Name = "Created By")]
+    public string? CreatedBy { get; set; }
+
+    [StringLength(100)]
+    [Display(Name = "Updated By")]
+    public string? UpdatedBy { get; set; }
+
+    // Computed properties for UI and reporting
+    [NotMapped]
+    [Display(Name = "Full Name")]
+    public string FullName
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(FirstName) && !string.IsNullOrEmpty(LastName))
+                return $"{FirstName} {LastName}";
+            return DriverName;
+        }
+    }
+
+    [NotMapped]
+    [Display(Name = "Full Address")]
+    public string FullAddress
+    {
+        get
+        {
+            var parts = new[] { Address, City, State, Zip }.Where(p => !string.IsNullOrEmpty(p));
+            return string.Join(", ", parts);
+        }
+    }
+
+    [NotMapped]
+    [Display(Name = "Qualification Status")]
+    public string QualificationStatus
+    {
+        get
+        {
+            if (!TrainingComplete) return "Training Required";
+            if (LicenseExpiryDate.HasValue && LicenseExpiryDate.Value < DateTime.Now) return "License Expired";
+            if (LicenseExpiryDate.HasValue && LicenseExpiryDate.Value < DateTime.Now.AddDays(30)) return "License Expiring";
+            return "Qualified";
+        }
+    }
+
+    [NotMapped]
+    [Display(Name = "License Status")]
+    public string LicenseStatus
+    {
+        get
+        {
+            if (!LicenseExpiryDate.HasValue) return "Unknown";
+            var daysUntilExpiry = (LicenseExpiryDate.Value - DateTime.Now).Days;
+            return daysUntilExpiry switch
+            {
+                < 0 => "Expired",
+                < 30 => "Expiring Soon",
+                _ => "Current"
+            };
+        }
+    }
+
+    [NotMapped]
+    [Display(Name = "Is Available")]
+    public bool IsAvailable => Status == "Active" && TrainingComplete && LicenseStatus != "Expired";
+
+    [NotMapped]
+    [Display(Name = "Needs Attention")]
+    public bool NeedsAttention => !TrainingComplete || LicenseStatus == "Expired" || LicenseStatus == "Expiring Soon";
+
+    // Compatibility properties
+    [NotMapped]
+    public string? Phone => DriverPhone;
 
     // Navigation properties
     public virtual ICollection<Route> AMRoutes { get; set; } = new List<Route>();
     public virtual ICollection<Route> PMRoutes { get; set; } = new List<Route>();
     public virtual ICollection<Activity> Activities { get; set; } = new List<Activity>();
+    public virtual ICollection<ActivitySchedule> ScheduledActivities { get; set; } = new List<ActivitySchedule>();
+
+    // INotifyPropertyChanged implementation for Syncfusion data binding
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

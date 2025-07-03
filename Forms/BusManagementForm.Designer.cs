@@ -1,6 +1,7 @@
 using Syncfusion.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
 using Syncfusion.WinForms.Controls;
+using Syncfusion.WinForms.DataGrid;
 using System.Windows.Forms;
 
 namespace Bus_Buddy.Forms;
@@ -20,8 +21,8 @@ partial class BusManagementForm
     private AutoLabel titleLabel;
     private AutoLabel statusLabel;
 
-    // Data grid for displaying buses
-    private DataGridView busDataGrid;
+    // Data grid for displaying buses - Using Syncfusion SfDataGrid
+    private SfDataGrid busDataGrid;
 
     // Action buttons
     private SfButton addBusButton;
@@ -64,9 +65,9 @@ partial class BusManagementForm
         this.titleLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
         this.statusLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
 
-        // Initialize data grid
-        this.busDataGrid = new System.Windows.Forms.DataGridView();
-        ((System.ComponentModel.ISupportInitialize)(this.busDataGrid)).BeginInit();
+        // Initialize data grid - Using Syncfusion SfDataGrid
+        this.busDataGrid = new Syncfusion.WinForms.DataGrid.SfDataGrid();
+        this.busDataGrid.BeginInit();
 
         // Initialize buttons
         this.addBusButton = new Syncfusion.WinForms.Controls.SfButton();
@@ -130,22 +131,21 @@ partial class BusManagementForm
         this.statusLabel.TabIndex = 1;
         this.statusLabel.Text = "Loading...";
 
-        // Bus Data Grid
-        this.busDataGrid.AllowUserToAddRows = false;
-        this.busDataGrid.AllowUserToDeleteRows = false;
-        this.busDataGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-        this.busDataGrid.BackgroundColor = System.Drawing.Color.White;
-        this.busDataGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-        this.busDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        // Bus Data Grid - Syncfusion SfDataGrid Configuration
+        this.busDataGrid.AllowEditing = false;
+        this.busDataGrid.AllowDeleting = false;
+        this.busDataGrid.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.Fill;
+        this.busDataGrid.BackColor = System.Drawing.Color.White;
         this.busDataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
         this.busDataGrid.Location = new System.Drawing.Point(20, 40);
-        this.busDataGrid.MultiSelect = false;
         this.busDataGrid.Name = "busDataGrid";
-        this.busDataGrid.ReadOnly = true;
-        this.busDataGrid.RowHeadersVisible = false;
-        this.busDataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+        this.busDataGrid.ShowRowHeader = false;
+        this.busDataGrid.SelectionMode = Syncfusion.WinForms.DataGrid.Enums.GridSelectionMode.Single;
+        this.busDataGrid.SelectionUnit = Syncfusion.WinForms.DataGrid.Enums.SelectionUnit.Row;
         this.busDataGrid.Size = new System.Drawing.Size(960, 520);
         this.busDataGrid.TabIndex = 0;
+        this.busDataGrid.Style.BorderColor = System.Drawing.Color.FromArgb(227, 227, 227);
+        this.busDataGrid.Style.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
         // Configure action buttons
         ConfigureActionButton(this.addBusButton, "Add Bus", 20, 15, 0, System.Drawing.Color.FromArgb(76, 175, 80));
@@ -188,7 +188,7 @@ partial class BusManagementForm
         this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
 
         // Complete data grid initialization
-        ((System.ComponentModel.ISupportInitialize)(this.busDataGrid)).EndInit();
+        this.busDataGrid.EndInit();
 
         // Resume layout
         this.ResumeLayout(false);

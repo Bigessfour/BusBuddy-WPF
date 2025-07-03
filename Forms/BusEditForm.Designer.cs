@@ -18,43 +18,43 @@ partial class BusEditForm
     private GradientPanel contentPanel;
     private GradientPanel buttonPanel;
     private AutoLabel titleLabel;
-    private GroupBox basicInfoGroupBox;
-    private GroupBox detailsGroupBox;
-    private GroupBox financialGroupBox;
+    private Syncfusion.Windows.Forms.Tools.GradientPanel basicInfoGroupBox;
+    private Syncfusion.Windows.Forms.Tools.GradientPanel detailsGroupBox;
+    private Syncfusion.Windows.Forms.Tools.GradientPanel financialGroupBox;
 
     // Basic Information Controls
     private AutoLabel busNumberLabel;
-    private TextBox busNumberTextBox;
+    private Syncfusion.Windows.Forms.Tools.TextBoxExt busNumberTextBox;
     private AutoLabel yearLabel;
-    private NumericUpDown yearNumeric;
+    private Syncfusion.Windows.Forms.Tools.IntegerTextBox yearNumeric;
     private AutoLabel makeLabel;
-    private ComboBox makeComboBox;
+    private Syncfusion.Windows.Forms.Tools.ComboBoxAdv makeComboBox;
     private AutoLabel modelLabel;
-    private TextBox modelTextBox;
+    private Syncfusion.Windows.Forms.Tools.TextBoxExt modelTextBox;
     private AutoLabel seatingCapacityLabel;
-    private NumericUpDown seatingCapacityNumeric;
+    private Syncfusion.Windows.Forms.Tools.IntegerTextBox seatingCapacityNumeric;
 
     // Details Controls
     private AutoLabel vinLabel;
-    private TextBox vinTextBox;
+    private Syncfusion.Windows.Forms.Tools.TextBoxExt vinTextBox;
     private AutoLabel licenseNumberLabel;
-    private TextBox licenseNumberTextBox;
+    private Syncfusion.Windows.Forms.Tools.TextBoxExt licenseNumberTextBox;
     private AutoLabel lastInspectionLabel;
-    private DateTimePicker lastInspectionDatePicker;
+    private Syncfusion.Windows.Forms.Tools.DateTimePickerAdv lastInspectionDatePicker;
     private AutoLabel odometerLabel;
-    private NumericUpDown odometerNumeric;
+    private Syncfusion.Windows.Forms.Tools.IntegerTextBox odometerNumeric;
     private AutoLabel statusLabel;
-    private ComboBox statusComboBox;
+    private Syncfusion.Windows.Forms.Tools.ComboBoxAdv statusComboBox;
 
     // Financial Controls
     private AutoLabel purchaseDateLabel;
-    private DateTimePicker purchaseDatePicker;
+    private Syncfusion.Windows.Forms.Tools.DateTimePickerAdv purchaseDatePicker;
     private AutoLabel purchasePriceLabel;
-    private NumericUpDown purchasePriceNumeric;
+    private Syncfusion.Windows.Forms.Tools.CurrencyTextBox purchasePriceNumeric;
     private AutoLabel insurancePolicyLabel;
-    private TextBox insurancePolicyTextBox;
+    private Syncfusion.Windows.Forms.Tools.TextBoxExt insurancePolicyTextBox;
     private AutoLabel insuranceExpiryLabel;
-    private DateTimePicker insuranceExpiryDatePicker;
+    private Syncfusion.Windows.Forms.Tools.DateTimePickerAdv insuranceExpiryDatePicker;
 
     // Action buttons
     private SfButton saveButton;
@@ -94,53 +94,47 @@ partial class BusEditForm
         this.titleLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
 
         // Initialize group boxes
-        this.basicInfoGroupBox = new System.Windows.Forms.GroupBox();
-        this.detailsGroupBox = new System.Windows.Forms.GroupBox();
-        this.financialGroupBox = new System.Windows.Forms.GroupBox();
+        this.basicInfoGroupBox = new Syncfusion.Windows.Forms.Tools.GradientPanel();
+        this.detailsGroupBox = new Syncfusion.Windows.Forms.Tools.GradientPanel();
+        this.financialGroupBox = new Syncfusion.Windows.Forms.Tools.GradientPanel();
 
         // Initialize basic information controls
         this.busNumberLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.busNumberTextBox = new System.Windows.Forms.TextBox();
+        this.busNumberTextBox = new Syncfusion.Windows.Forms.Tools.TextBoxExt();
         this.yearLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.yearNumeric = new System.Windows.Forms.NumericUpDown();
+        this.yearNumeric = new Syncfusion.Windows.Forms.Tools.IntegerTextBox();
         this.makeLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.makeComboBox = new System.Windows.Forms.ComboBox();
+        this.makeComboBox = new Syncfusion.Windows.Forms.Tools.ComboBoxAdv();
         this.modelLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.modelTextBox = new System.Windows.Forms.TextBox();
+        this.modelTextBox = new Syncfusion.Windows.Forms.Tools.TextBoxExt();
         this.seatingCapacityLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.seatingCapacityNumeric = new System.Windows.Forms.NumericUpDown();
+        this.seatingCapacityNumeric = new Syncfusion.Windows.Forms.Tools.IntegerTextBox();
 
         // Initialize details controls
         this.vinLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.vinTextBox = new System.Windows.Forms.TextBox();
+        this.vinTextBox = new Syncfusion.Windows.Forms.Tools.TextBoxExt();
         this.licenseNumberLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.licenseNumberTextBox = new System.Windows.Forms.TextBox();
+        this.licenseNumberTextBox = new Syncfusion.Windows.Forms.Tools.TextBoxExt();
         this.lastInspectionLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.lastInspectionDatePicker = new System.Windows.Forms.DateTimePicker();
+        this.lastInspectionDatePicker = new Syncfusion.Windows.Forms.Tools.DateTimePickerAdv();
         this.odometerLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.odometerNumeric = new System.Windows.Forms.NumericUpDown();
+        this.odometerNumeric = new Syncfusion.Windows.Forms.Tools.IntegerTextBox();
         this.statusLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.statusComboBox = new System.Windows.Forms.ComboBox();
+        this.statusComboBox = new Syncfusion.Windows.Forms.Tools.ComboBoxAdv();
 
         // Initialize financial controls
         this.purchaseDateLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.purchaseDatePicker = new System.Windows.Forms.DateTimePicker();
+        this.purchaseDatePicker = new Syncfusion.Windows.Forms.Tools.DateTimePickerAdv();
         this.purchasePriceLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.purchasePriceNumeric = new System.Windows.Forms.NumericUpDown();
+        this.purchasePriceNumeric = new Syncfusion.Windows.Forms.Tools.CurrencyTextBox();
         this.insurancePolicyLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.insurancePolicyTextBox = new System.Windows.Forms.TextBox();
+        this.insurancePolicyTextBox = new Syncfusion.Windows.Forms.Tools.TextBoxExt();
         this.insuranceExpiryLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
-        this.insuranceExpiryDatePicker = new System.Windows.Forms.DateTimePicker();
+        this.insuranceExpiryDatePicker = new Syncfusion.Windows.Forms.Tools.DateTimePickerAdv();
 
         // Initialize buttons
         this.saveButton = new Syncfusion.WinForms.Controls.SfButton();
         this.cancelButton = new Syncfusion.WinForms.Controls.SfButton();
-
-        // Begin initialization of numeric controls
-        ((System.ComponentModel.ISupportInitialize)(this.yearNumeric)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.seatingCapacityNumeric)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.odometerNumeric)).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)(this.purchasePriceNumeric)).BeginInit();
 
         // Main Panel
         this.mainPanel.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -150,9 +144,9 @@ partial class BusEditForm
         this.mainPanel.Size = new System.Drawing.Size(800, 650);
         this.mainPanel.TabIndex = 0;
 
-        // Header Panel
+        // Header Panel with enhanced Office2016 styling
         this.headerPanel.BorderStyle = System.Windows.Forms.BorderStyle.None;
-        this.headerPanel.BackgroundColor = new Syncfusion.Drawing.BrushInfo(System.Drawing.Color.FromArgb(63, 81, 181));
+        this.headerPanel.BackgroundColor = new Syncfusion.Drawing.BrushInfo(Color.FromArgb(52, 152, 219));
         this.headerPanel.Dock = System.Windows.Forms.DockStyle.Top;
         this.headerPanel.Location = new System.Drawing.Point(0, 0);
         this.headerPanel.Name = "headerPanel";
@@ -187,32 +181,29 @@ partial class BusEditForm
         this.contentPanel.TabIndex = 3;
         this.contentPanel.Padding = new System.Windows.Forms.Padding(20);
 
-        // Basic Information Group Box
-        this.basicInfoGroupBox.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+        // Basic Information Group Panel with Office2016 styling
+        this.basicInfoGroupBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
         this.basicInfoGroupBox.Location = new System.Drawing.Point(20, 20);
         this.basicInfoGroupBox.Name = "basicInfoGroupBox";
         this.basicInfoGroupBox.Size = new System.Drawing.Size(360, 180);
         this.basicInfoGroupBox.TabIndex = 0;
-        this.basicInfoGroupBox.TabStop = false;
-        this.basicInfoGroupBox.Text = "Basic Information";
+        this.basicInfoGroupBox.BackgroundColor = new Syncfusion.Drawing.BrushInfo(Color.FromArgb(248, 249, 250));
 
-        // Details Group Box
-        this.detailsGroupBox.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+        // Details Group Panel with Office2016 styling
+        this.detailsGroupBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
         this.detailsGroupBox.Location = new System.Drawing.Point(400, 20);
         this.detailsGroupBox.Name = "detailsGroupBox";
         this.detailsGroupBox.Size = new System.Drawing.Size(360, 180);
         this.detailsGroupBox.TabIndex = 1;
-        this.detailsGroupBox.TabStop = false;
-        this.detailsGroupBox.Text = "Vehicle Details";
+        this.detailsGroupBox.BackgroundColor = new Syncfusion.Drawing.BrushInfo(Color.FromArgb(248, 249, 250));
 
-        // Financial Group Box
-        this.financialGroupBox.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+        // Financial Group Panel with Office2016 styling
+        this.financialGroupBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
         this.financialGroupBox.Location = new System.Drawing.Point(20, 220);
         this.financialGroupBox.Name = "financialGroupBox";
         this.financialGroupBox.Size = new System.Drawing.Size(740, 120);
         this.financialGroupBox.TabIndex = 2;
-        this.financialGroupBox.TabStop = false;
-        this.financialGroupBox.Text = "Financial & Insurance Information";
+        this.financialGroupBox.BackgroundColor = new Syncfusion.Drawing.BrushInfo(Color.FromArgb(248, 249, 250));
 
         // Configure Basic Information Controls
         ConfigureBasicInfoControls();
@@ -223,9 +214,9 @@ partial class BusEditForm
         // Configure Financial Controls
         ConfigureFinancialControls();
 
-        // Configure action buttons
-        ConfigureActionButton(this.saveButton, "Save", 590, 15, 0, System.Drawing.Color.FromArgb(76, 175, 80));
-        ConfigureActionButton(this.cancelButton, "Cancel", 700, 15, 1, System.Drawing.Color.FromArgb(158, 158, 158));
+        // Configure action buttons with Office2016 colors
+        ConfigureActionButton(this.saveButton, "Save", 590, 15, 0, Color.FromArgb(76, 175, 80));
+        ConfigureActionButton(this.cancelButton, "Cancel", 700, 15, 1, Color.FromArgb(158, 158, 158));
 
         // Add event handlers
         this.saveButton.Click += new System.EventHandler(this.SaveButton_Click);
@@ -257,12 +248,6 @@ partial class BusEditForm
         this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
         this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
         this.MaximizeBox = false;
-
-        // Complete numeric control initialization
-        ((System.ComponentModel.ISupportInitialize)(this.yearNumeric)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.seatingCapacityNumeric)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.odometerNumeric)).EndInit();
-        ((System.ComponentModel.ISupportInitialize)(this.purchasePriceNumeric)).EndInit();
 
         // Resume layout
         this.ResumeLayout(false);
@@ -299,7 +284,7 @@ partial class BusEditForm
         this.makeComboBox.Location = new System.Drawing.Point(105, 55);
         this.makeComboBox.Size = new System.Drawing.Size(150, 23);
         this.makeComboBox.Font = new System.Drawing.Font("Segoe UI", 9F);
-        this.makeComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        this.makeComboBox.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
 
         // Model
         this.modelLabel.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -365,7 +350,7 @@ partial class BusEditForm
         this.lastInspectionDatePicker.Location = new System.Drawing.Point(105, 85);
         this.lastInspectionDatePicker.Size = new System.Drawing.Size(120, 23);
         this.lastInspectionDatePicker.Font = new System.Drawing.Font("Segoe UI", 9F);
-        this.lastInspectionDatePicker.Format = DateTimePickerFormat.Short;
+        this.lastInspectionDatePicker.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
 
         // Odometer
         this.odometerLabel.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -386,7 +371,7 @@ partial class BusEditForm
         this.statusComboBox.Location = new System.Drawing.Point(105, 145);
         this.statusComboBox.Size = new System.Drawing.Size(120, 23);
         this.statusComboBox.Font = new System.Drawing.Font("Segoe UI", 9F);
-        this.statusComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        this.statusComboBox.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
 
         // Add controls to details group
         this.detailsGroupBox.Controls.Add(this.vinLabel);
@@ -412,7 +397,7 @@ partial class BusEditForm
         this.purchaseDatePicker.Location = new System.Drawing.Point(115, 25);
         this.purchaseDatePicker.Size = new System.Drawing.Size(120, 23);
         this.purchaseDatePicker.Font = new System.Drawing.Font("Segoe UI", 9F);
-        this.purchaseDatePicker.Format = DateTimePickerFormat.Short;
+        this.purchaseDatePicker.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
 
         // Purchase Price
         this.purchasePriceLabel.Font = new System.Drawing.Font("Segoe UI", 9F);
@@ -443,7 +428,7 @@ partial class BusEditForm
         this.insuranceExpiryDatePicker.Location = new System.Drawing.Point(445, 55);
         this.insuranceExpiryDatePicker.Size = new System.Drawing.Size(120, 23);
         this.insuranceExpiryDatePicker.Font = new System.Drawing.Font("Segoe UI", 9F);
-        this.insuranceExpiryDatePicker.Format = DateTimePickerFormat.Short;
+        this.insuranceExpiryDatePicker.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
 
         // Add controls to financial group
         this.financialGroupBox.Controls.Add(this.purchaseDateLabel);
@@ -456,18 +441,32 @@ partial class BusEditForm
         this.financialGroupBox.Controls.Add(this.insuranceExpiryDatePicker);
     }
 
-    private void ConfigureActionButton(SfButton button, string title, int x, int y, int tabIndex, System.Drawing.Color color)
+    private void ConfigureActionButton(SfButton button, string title, int x, int y, int tabIndex, Color color)
     {
         button.AccessibleName = title;
         button.BackColor = color;
-        button.ForeColor = System.Drawing.Color.White;
-        button.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
-        button.Location = new System.Drawing.Point(x, y);
+        button.ForeColor = Color.White;
+        button.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        button.Location = new Point(x, y);
         button.Name = title.Replace(" ", "").ToLower() + "Button";
-        button.Size = new System.Drawing.Size(90, 35);
+        button.Size = new Size(90, 35);
         button.TabIndex = tabIndex;
         button.Text = title;
         button.UseVisualStyleBackColor = false;
+
+        // Add hover effects for better user experience
+        button.MouseEnter += (s, e) =>
+        {
+            if (button.Enabled)
+                button.BackColor = Color.FromArgb(Math.Min(255, color.R + 20),
+                                                Math.Min(255, color.G + 20),
+                                                Math.Min(255, color.B + 20));
+        };
+        button.MouseLeave += (s, e) =>
+        {
+            if (button.Enabled)
+                button.BackColor = color;
+        };
     }
 
     #endregion

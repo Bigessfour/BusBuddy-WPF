@@ -1,6 +1,7 @@
 using Syncfusion.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
 using Syncfusion.WinForms.Controls;
+using Syncfusion.WinForms.DataGrid;
 using System.Windows.Forms;
 
 namespace Bus_Buddy.Forms;
@@ -20,8 +21,8 @@ partial class DriverManagementForm
     private AutoLabel titleLabel;
     private AutoLabel statusLabel;
 
-    // Data grid for displaying drivers
-    private DataGridView driverDataGrid;
+    // Data grid for displaying drivers - Using Syncfusion SfDataGrid
+    private SfDataGrid driverDataGrid;
 
     // Action buttons
     private SfButton addDriverButton;
@@ -65,9 +66,9 @@ partial class DriverManagementForm
         this.titleLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
         this.statusLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
 
-        // Initialize data grid
-        this.driverDataGrid = new System.Windows.Forms.DataGridView();
-        ((System.ComponentModel.ISupportInitialize)(this.driverDataGrid)).BeginInit();
+        // Initialize data grid - Using Syncfusion SfDataGrid
+        this.driverDataGrid = new Syncfusion.WinForms.DataGrid.SfDataGrid();
+        this.driverDataGrid.BeginInit();
 
         // Initialize buttons
         this.addDriverButton = new Syncfusion.WinForms.Controls.SfButton();
@@ -85,9 +86,9 @@ partial class DriverManagementForm
         this.mainPanel.Size = new System.Drawing.Size(1100, 700);
         this.mainPanel.TabIndex = 0;
 
-        // Header Panel
+        // Header Panel with Office2016 styling
         this.headerPanel.BorderStyle = System.Windows.Forms.BorderStyle.None;
-        this.headerPanel.BackgroundColor = new Syncfusion.Drawing.BrushInfo(System.Drawing.Color.FromArgb(156, 39, 176));
+        this.headerPanel.BackgroundColor = new Syncfusion.Drawing.BrushInfo(Color.FromArgb(52, 152, 219));
         this.headerPanel.Dock = System.Windows.Forms.DockStyle.Top;
         this.headerPanel.Location = new System.Drawing.Point(0, 0);
         this.headerPanel.Name = "headerPanel";
@@ -132,33 +133,30 @@ partial class DriverManagementForm
         this.statusLabel.TabIndex = 1;
         this.statusLabel.Text = "Loading...";
 
-        // Driver Data Grid
-        this.driverDataGrid.AllowUserToAddRows = false;
-        this.driverDataGrid.AllowUserToDeleteRows = false;
-        this.driverDataGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-        this.driverDataGrid.BackgroundColor = System.Drawing.Color.White;
-        this.driverDataGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-        this.driverDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        this.driverDataGrid.ColumnHeadersHeight = 30;
+        // Driver Data Grid - Syncfusion SfDataGrid Configuration
+        this.driverDataGrid.AllowEditing = false;
+        this.driverDataGrid.AllowDeleting = false;
+        this.driverDataGrid.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.Fill;
+        this.driverDataGrid.BackColor = System.Drawing.Color.White;
+        this.driverDataGrid.HeaderRowHeight = 30;
         this.driverDataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
         this.driverDataGrid.Location = new System.Drawing.Point(20, 40);
-        this.driverDataGrid.MultiSelect = false;
         this.driverDataGrid.Name = "driverDataGrid";
-        this.driverDataGrid.ReadOnly = true;
-        this.driverDataGrid.RowHeadersVisible = false;
-        this.driverDataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+        this.driverDataGrid.ShowRowHeader = false;
+        this.driverDataGrid.SelectionMode = Syncfusion.WinForms.DataGrid.Enums.GridSelectionMode.Single;
+        this.driverDataGrid.SelectionUnit = Syncfusion.WinForms.DataGrid.Enums.SelectionUnit.Row;
         this.driverDataGrid.Size = new System.Drawing.Size(1060, 520);
         this.driverDataGrid.TabIndex = 0;
-        this.driverDataGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DriverDataGrid_CellDoubleClick);
-        this.driverDataGrid.SelectionChanged += new System.EventHandler(this.DriverDataGrid_SelectionChanged);
+        this.driverDataGrid.Style.BorderColor = System.Drawing.Color.FromArgb(227, 227, 227);
+        this.driverDataGrid.Style.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
-        // Configure action buttons
-        ConfigureActionButton(this.addDriverButton, "Add Driver", 20, 15, 0, System.Drawing.Color.FromArgb(76, 175, 80));
-        ConfigureActionButton(this.editDriverButton, "Edit Driver", 140, 15, 1, System.Drawing.Color.FromArgb(255, 152, 0));
-        ConfigureActionButton(this.deleteDriverButton, "Delete Driver", 260, 15, 2, System.Drawing.Color.FromArgb(244, 67, 54));
-        ConfigureActionButton(this.viewLicenseButton, "View License", 380, 15, 3, System.Drawing.Color.FromArgb(156, 39, 176));
-        ConfigureActionButton(this.refreshButton, "Refresh", 500, 15, 4, System.Drawing.Color.FromArgb(33, 150, 243));
-        ConfigureActionButton(this.closeButton, "Close", 980, 15, 5, System.Drawing.Color.FromArgb(158, 158, 158));
+        // Configure action buttons with Office2016 colors
+        ConfigureActionButton(this.addDriverButton, "Add Driver", 20, 15, 0, Color.FromArgb(76, 175, 80));
+        ConfigureActionButton(this.editDriverButton, "Edit Driver", 140, 15, 1, Color.FromArgb(255, 152, 0));
+        ConfigureActionButton(this.deleteDriverButton, "Delete Driver", 260, 15, 2, Color.FromArgb(244, 67, 54));
+        ConfigureActionButton(this.viewLicenseButton, "View License", 380, 15, 3, Color.FromArgb(156, 39, 176));
+        ConfigureActionButton(this.refreshButton, "Refresh", 500, 15, 4, Color.FromArgb(33, 150, 243));
+        ConfigureActionButton(this.closeButton, "Close", 980, 15, 5, Color.FromArgb(158, 158, 158));
 
         // Initially disable edit/delete/view buttons until selection is made
         this.editDriverButton.Enabled = false;
@@ -201,24 +199,38 @@ partial class DriverManagementForm
         this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
 
         // Complete data grid initialization
-        ((System.ComponentModel.ISupportInitialize)(this.driverDataGrid)).EndInit();
+        this.driverDataGrid.EndInit();
 
         // Resume layout
         this.ResumeLayout(false);
     }
 
-    private void ConfigureActionButton(SfButton button, string title, int x, int y, int tabIndex, System.Drawing.Color color)
+    private void ConfigureActionButton(SfButton button, string title, int x, int y, int tabIndex, Color color)
     {
         button.AccessibleName = title;
         button.BackColor = color;
-        button.ForeColor = System.Drawing.Color.White;
-        button.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-        button.Location = new System.Drawing.Point(x, y);
+        button.ForeColor = Color.White;
+        button.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        button.Location = new Point(x, y);
         button.Name = title.Replace(" ", "").ToLower() + "Button";
-        button.Size = new System.Drawing.Size(100, 30);
+        button.Size = new Size(100, 30);
         button.TabIndex = tabIndex;
         button.Text = title;
         button.UseVisualStyleBackColor = false;
+
+        // Add hover effects for better user experience
+        button.MouseEnter += (s, e) =>
+        {
+            if (button.Enabled)
+                button.BackColor = Color.FromArgb(Math.Min(255, color.R + 20),
+                                                Math.Min(255, color.G + 20),
+                                                Math.Min(255, color.B + 20));
+        };
+        button.MouseLeave += (s, e) =>
+        {
+            if (button.Enabled)
+                button.BackColor = color;
+        };
     }
 
     #endregion

@@ -16,30 +16,30 @@ public partial class ActivityEditForm : SfForm
     private readonly ILogger _logger;
     private Activity? _activity;
 
-    // Controls
-    private Label labelTitle = null!;
-    private Label labelActivityDate = null!;
-    private DateTimePicker datePickerActivityDate = null!;
-    private Label labelActivityType = null!;
-    private ComboBox comboBoxActivityType = null!;
-    private Label labelVehicle = null!;
-    private ComboBox comboBoxVehicle = null!;
-    private Label labelRoute = null!;
-    private ComboBox comboBoxRoute = null!;
-    private Label labelDriver = null!;
-    private ComboBox comboBoxDriver = null!;
-    private Label labelStartTime = null!;
-    private DateTimePicker timePickerStart = null!;
-    private Label labelEndTime = null!;
-    private DateTimePicker timePickerEnd = null!;
-    private Label labelStudentsCount = null!;
-    private NumericUpDown numericStudentsCount = null!;
-    private Label labelStartOdometer = null!;
-    private NumericUpDown numericStartOdometer = null!;
-    private Label labelEndOdometer = null!;
-    private NumericUpDown numericEndOdometer = null!;
-    private Label labelNotes = null!;
-    private TextBox textBoxNotes = null!;
+    // Controls - Using Syncfusion Components
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelTitle = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelActivityDate = null!;
+    private Syncfusion.Windows.Forms.Tools.DateTimePickerAdv datePickerActivityDate = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelActivityType = null!;
+    private Syncfusion.Windows.Forms.Tools.ComboBoxAdv comboBoxActivityType = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelVehicle = null!;
+    private Syncfusion.Windows.Forms.Tools.ComboBoxAdv comboBoxVehicle = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelRoute = null!;
+    private Syncfusion.Windows.Forms.Tools.ComboBoxAdv comboBoxRoute = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelDriver = null!;
+    private Syncfusion.Windows.Forms.Tools.ComboBoxAdv comboBoxDriver = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelStartTime = null!;
+    private Syncfusion.Windows.Forms.Tools.DateTimePickerAdv timePickerStart = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelEndTime = null!;
+    private Syncfusion.Windows.Forms.Tools.DateTimePickerAdv timePickerEnd = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelStudentsCount = null!;
+    private Syncfusion.Windows.Forms.Tools.IntegerTextBox numericStudentsCount = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelStartOdometer = null!;
+    private Syncfusion.Windows.Forms.Tools.IntegerTextBox numericStartOdometer = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelEndOdometer = null!;
+    private Syncfusion.Windows.Forms.Tools.IntegerTextBox numericEndOdometer = null!;
+    private Syncfusion.Windows.Forms.Tools.AutoLabel labelNotes = null!;
+    private Syncfusion.Windows.Forms.Tools.TextBoxExt textBoxNotes = null!;
     private SfButton sfButtonSave = null!;
     private SfButton sfButtonCancel = null!;
 
@@ -86,241 +86,261 @@ public partial class ActivityEditForm : SfForm
         const int spacing = 35;
 
         // Title
-        labelTitle = new Label
+        labelTitle = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = _activity == null ? "Add New Activity" : "Edit Activity",
             Font = new Font("Segoe UI", 14F, FontStyle.Bold),
             ForeColor = Color.FromArgb(46, 204, 113),
             Location = new Point(leftMargin, yPos),
-            Size = new Size(400, 25)
+            Size = new Size(400, 25),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelTitle);
         yPos += 40;
 
         // Activity Date
-        labelActivityDate = new Label
+        labelActivityDate = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Activity Date:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelActivityDate);
 
-        datePickerActivityDate = new DateTimePicker
+        datePickerActivityDate = new Syncfusion.Windows.Forms.Tools.DateTimePickerAdv
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
             Format = DateTimePickerFormat.Short,
-            Value = DateTime.Today
+            Value = DateTime.Today,
+            Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful
         };
         Controls.Add(datePickerActivityDate);
         yPos += spacing;
 
         // Activity Type
-        labelActivityType = new Label
+        labelActivityType = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Activity Type:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelActivityType);
 
-        comboBoxActivityType = new ComboBox
+        comboBoxActivityType = new Syncfusion.Windows.Forms.Tools.ComboBoxAdv
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
-            DropDownStyle = ComboBoxStyle.DropDownList
+            DropDownStyle = ComboBoxStyle.DropDownList,
+            Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful
         };
         comboBoxActivityType.Items.AddRange(new[] { "Morning", "Afternoon", "Field Trip" });
         Controls.Add(comboBoxActivityType);
         yPos += spacing;
 
         // Vehicle
-        labelVehicle = new Label
+        labelVehicle = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Vehicle:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelVehicle);
 
-        comboBoxVehicle = new ComboBox
+        comboBoxVehicle = new Syncfusion.Windows.Forms.Tools.ComboBoxAdv
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
             DropDownStyle = ComboBoxStyle.DropDownList,
             DisplayMember = "BusNumber",
-            ValueMember = "BusId"
+            ValueMember = "BusId",
+            Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful
         };
         Controls.Add(comboBoxVehicle);
         yPos += spacing;
 
         // Route
-        labelRoute = new Label
+        labelRoute = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Route:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelRoute);
 
-        comboBoxRoute = new ComboBox
+        comboBoxRoute = new Syncfusion.Windows.Forms.Tools.ComboBoxAdv
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
             DropDownStyle = ComboBoxStyle.DropDownList,
             DisplayMember = "RouteName",
-            ValueMember = "RouteId"
+            ValueMember = "RouteId",
+            Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful
         };
         Controls.Add(comboBoxRoute);
         yPos += spacing;
 
         // Driver
-        labelDriver = new Label
+        labelDriver = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Driver:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelDriver);
 
-        comboBoxDriver = new ComboBox
+        comboBoxDriver = new Syncfusion.Windows.Forms.Tools.ComboBoxAdv
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
             DropDownStyle = ComboBoxStyle.DropDownList,
             DisplayMember = "DriverName",
-            ValueMember = "DriverId"
+            ValueMember = "DriverId",
+            Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful
         };
         Controls.Add(comboBoxDriver);
         yPos += spacing;
 
         // Start Time
-        labelStartTime = new Label
+        labelStartTime = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Start Time:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelStartTime);
 
-        timePickerStart = new DateTimePicker
+        timePickerStart = new Syncfusion.Windows.Forms.Tools.DateTimePickerAdv
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
             Format = DateTimePickerFormat.Time,
             ShowUpDown = true,
-            Value = DateTime.Today.AddHours(7)
+            Value = DateTime.Today.AddHours(7),
+            Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful
         };
         Controls.Add(timePickerStart);
         yPos += spacing;
 
         // End Time
-        labelEndTime = new Label
+        labelEndTime = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "End Time:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelEndTime);
 
-        timePickerEnd = new DateTimePicker
+        timePickerEnd = new Syncfusion.Windows.Forms.Tools.DateTimePickerAdv
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
             Format = DateTimePickerFormat.Time,
             ShowUpDown = true,
-            Value = DateTime.Today.AddHours(8)
+            Value = DateTime.Today.AddHours(8),
+            Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful
         };
         Controls.Add(timePickerEnd);
         yPos += spacing;
 
         // Students Count
-        labelStudentsCount = new Label
+        labelStudentsCount = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Students Count:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelStudentsCount);
 
-        numericStudentsCount = new NumericUpDown
+        numericStudentsCount = new Syncfusion.Windows.Forms.Tools.IntegerTextBox
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
-            Minimum = 0,
-            Maximum = 99,
-            Value = 0
+            MinValue = 0,
+            MaxValue = 99,
+            IntegerValue = 0
         };
         Controls.Add(numericStudentsCount);
         yPos += spacing;
 
         // Start Odometer
-        labelStartOdometer = new Label
+        labelStartOdometer = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Start Odometer:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelStartOdometer);
 
-        numericStartOdometer = new NumericUpDown
+        numericStartOdometer = new Syncfusion.Windows.Forms.Tools.IntegerTextBox
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
-            Minimum = 0,
-            Maximum = 999999,
-            DecimalPlaces = 0
+            MinValue = 0,
+            MaxValue = 999999,
+            IntegerValue = 0
         };
         Controls.Add(numericStartOdometer);
         yPos += spacing;
 
         // End Odometer
-        labelEndOdometer = new Label
+        labelEndOdometer = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "End Odometer:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelEndOdometer);
 
-        numericEndOdometer = new NumericUpDown
+        numericEndOdometer = new Syncfusion.Windows.Forms.Tools.IntegerTextBox
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth, 23),
-            Minimum = 0,
-            Maximum = 999999,
-            DecimalPlaces = 0
+            MinValue = 0,
+            MaxValue = 999999,
+            IntegerValue = 0
         };
         Controls.Add(numericEndOdometer);
         yPos += spacing;
 
         // Notes
-        labelNotes = new Label
+        labelNotes = new Syncfusion.Windows.Forms.Tools.AutoLabel
         {
             Text = "Notes:",
             Location = new Point(leftMargin, yPos + 3),
             Size = new Size(labelWidth, 20),
-            Font = new Font("Segoe UI", 9F)
+            Font = new Font("Segoe UI", 9F),
+            BackColor = Color.Transparent
         };
         Controls.Add(labelNotes);
 
-        textBoxNotes = new TextBox
+        textBoxNotes = new Syncfusion.Windows.Forms.Tools.TextBoxExt
         {
             Location = new Point(leftMargin + labelWidth + 10, yPos),
             Size = new Size(controlWidth + 150, 80),
             Multiline = true,
-            ScrollBars = ScrollBars.Vertical
+            ScrollBars = ScrollBars.Vertical,
+            BorderStyle = BorderStyle.FixedSingle
         };
         Controls.Add(textBoxNotes);
         yPos += 100;
@@ -399,9 +419,9 @@ public partial class ActivityEditForm : SfForm
             if (_activity.EndTime.HasValue)
                 timePickerEnd.Value = DateTime.Today.Add(_activity.EndTime.Value);
 
-            numericStudentsCount.Value = _activity.StudentsCount ?? 0;
-            numericStartOdometer.Value = _activity.StartOdometer ?? 0;
-            numericEndOdometer.Value = _activity.EndOdometer ?? 0;
+            numericStudentsCount.IntegerValue = _activity.StudentsCount ?? 0;
+            numericStartOdometer.IntegerValue = _activity.StartOdometer ?? 0;
+            numericEndOdometer.IntegerValue = _activity.EndOdometer ?? 0;
             textBoxNotes.Text = _activity.Notes ?? string.Empty;
 
             _logger.LogInformation("Activity data loaded for editing");
@@ -430,9 +450,9 @@ public partial class ActivityEditForm : SfForm
             activity.DriverId = (int)(comboBoxDriver.SelectedValue ?? 0);
             activity.StartTime = timePickerStart.Value.TimeOfDay;
             activity.EndTime = timePickerEnd.Value.TimeOfDay;
-            activity.StudentsCount = (int)numericStudentsCount.Value;
-            activity.StartOdometer = (int)numericStartOdometer.Value;
-            activity.EndOdometer = (int)numericEndOdometer.Value;
+            activity.StudentsCount = (int)numericStudentsCount.IntegerValue;
+            activity.StartOdometer = (int)numericStartOdometer.IntegerValue;
+            activity.EndOdometer = (int)numericEndOdometer.IntegerValue;
             activity.Notes = textBoxNotes.Text.Trim();
 
             if (_activity == null)
@@ -507,7 +527,7 @@ public partial class ActivityEditForm : SfForm
             return false;
         }
 
-        if (numericEndOdometer.Value <= numericStartOdometer.Value)
+        if (numericEndOdometer.IntegerValue <= numericStartOdometer.IntegerValue)
         {
             MessageBox.Show("End odometer must be greater than start odometer.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);

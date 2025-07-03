@@ -1,6 +1,9 @@
 using Syncfusion.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
 using Syncfusion.WinForms.Controls;
+using Syncfusion.WinForms.DataGrid;
+using Syncfusion.WinForms.DataGrid.Enums;
+using Syncfusion.WinForms.DataGrid.Events;
 using Microsoft.Extensions.Logging;
 using Bus_Buddy.Services;
 using Bus_Buddy.Models;
@@ -34,6 +37,17 @@ public partial class RouteManagementForm : MetroForm
 
     private void InitializeRouteManagement()
     {
+        // Apply Syncfusion theme integration
+        try
+        {
+            // Set Office2016 visual style using SkinManager
+            Syncfusion.Windows.Forms.SkinManager.SetVisualStyle(this, Syncfusion.Windows.Forms.VisualTheme.Office2016Colorful);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not apply Office2016 theme, using default styling");
+        }
+
         // Set Syncfusion MetroForm styles
         this.MetroColor = System.Drawing.Color.FromArgb(255, 87, 34);
         this.CaptionBarColor = System.Drawing.Color.FromArgb(255, 87, 34);
@@ -47,10 +61,38 @@ public partial class RouteManagementForm : MetroForm
         // Configure data grid columns
         ConfigureDataGridColumns();
 
+        // Setup SfDataGrid event handlers
+        routeDataGrid.SelectionChanged += RouteDataGrid_SelectionChanged;
+        routeDataGrid.CellDoubleClick += RouteDataGrid_CellDoubleClick;
+        routeDataGrid.QueryRowStyle += RouteDataGrid_QueryRowStyle;
+
         _logger.LogInformation("Route Management form initialized successfully");
 
-        // Load route data
-        LoadRouteDataAsync();
+        // Load route data asynchronously with proper UI thread marshaling
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await LoadRouteDataAsync();
+
+                // Update UI on main thread
+                this.Invoke(() =>
+                {
+                    statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during initial data load");
+
+                // Update UI on main thread for error state
+                this.Invoke(() =>
+                {
+                    statusLabel.Text = "Failed to load initial data";
+                    statusLabel.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
+                });
+            }
+        });
     }
 
     private void ConfigureDataGridColumns()
@@ -59,74 +101,88 @@ public partial class RouteManagementForm : MetroForm
         routeDataGrid.AutoGenerateColumns = false;
         routeDataGrid.Columns.Clear();
 
-        // Add custom columns
-        routeDataGrid.Columns.Add(new DataGridViewTextBoxColumn
+        // Apply Office2016 styling to the grid
+        routeDataGrid.Style.HeaderStyle.BackColor = System.Drawing.Color.FromArgb(255, 87, 34);
+        routeDataGrid.Style.HeaderStyle.TextColor = System.Drawing.Color.White;
+        routeDataGrid.Style.HeaderStyle.Font.Bold = true;
+        routeDataGrid.Style.BorderColor = System.Drawing.Color.FromArgb(227, 227, 227);
+        routeDataGrid.Style.SelectionStyle.BackColor = System.Drawing.Color.FromArgb(255, 87, 34, 50);
+        routeDataGrid.Style.SelectionStyle.TextColor = System.Drawing.Color.Black;
+
+        // Add custom columns using Syncfusion GridTextColumn
+        routeDataGrid.Columns.Add(new GridTextColumn()
         {
-            Name = "RouteId",
+            MappingName = "RouteId",
             HeaderText = "Route ID",
-            DataPropertyName = "RouteId",
             Width = 80,
-            ReadOnly = true
+            AllowEditing = false
         });
 
-        routeDataGrid.Columns.Add(new DataGridViewTextBoxColumn
+        routeDataGrid.Columns.Add(new GridTextColumn()
         {
-            Name = "RouteName",
+            MappingName = "RouteName",
             HeaderText = "Route Name",
-            DataPropertyName = "RouteName",
-            Width = 200
+            Width = 200,
+            AllowSorting = true
         });
 
-        routeDataGrid.Columns.Add(new DataGridViewTextBoxColumn
+        routeDataGrid.Columns.Add(new GridTextColumn()
         {
-            Name = "Description",
+            MappingName = "Description",
             HeaderText = "Description",
-            DataPropertyName = "Description",
-            Width = 300
+            Width = 300,
+            AllowSorting = true
         });
 
-        routeDataGrid.Columns.Add(new DataGridViewTextBoxColumn
+        routeDataGrid.Columns.Add(new GridTextColumn()
         {
-            Name = "AMBus",
+            MappingName = "AMVehicle.BusNumber",
             HeaderText = "AM Bus",
-            DataPropertyName = "AMVehicle.BusNumber",
-            Width = 100
+            Width = 100,
+            AllowSorting = true
         });
 
-        routeDataGrid.Columns.Add(new DataGridViewTextBoxColumn
+        routeDataGrid.Columns.Add(new GridTextColumn()
         {
-            Name = "PMBus",
+            MappingName = "PMVehicle.BusNumber",
             HeaderText = "PM Bus",
-            DataPropertyName = "PMVehicle.BusNumber",
-            Width = 100
+            Width = 100,
+            AllowSorting = true
         });
 
-        routeDataGrid.Columns.Add(new DataGridViewTextBoxColumn
+        routeDataGrid.Columns.Add(new GridTextColumn()
         {
-            Name = "AMDriver",
+            MappingName = "AMDriver.DriverName",
             HeaderText = "AM Driver",
-            DataPropertyName = "AMDriver.DriverName",
-            Width = 150
+            Width = 150,
+            AllowSorting = true
         });
 
-        routeDataGrid.Columns.Add(new DataGridViewTextBoxColumn
+        routeDataGrid.Columns.Add(new GridTextColumn()
         {
-            Name = "PMDriver",
+            MappingName = "PMDriver.DriverName",
             HeaderText = "PM Driver",
-            DataPropertyName = "PMDriver.DriverName",
-            Width = 150
+            Width = 150,
+            AllowSorting = true
         });
 
-        routeDataGrid.Columns.Add(new DataGridViewCheckBoxColumn
+        routeDataGrid.Columns.Add(new GridCheckBoxColumn()
         {
-            Name = "IsActive",
+            MappingName = "IsActive",
             HeaderText = "Active",
-            DataPropertyName = "IsActive",
-            Width = 60
+            Width = 60,
+            AllowSorting = true
         });
+
+        // Enable advanced grid features
+        routeDataGrid.AllowSorting = true;
+        routeDataGrid.AllowFiltering = false; // Disable built-in filtering for custom implementation
+        routeDataGrid.AllowResizingColumns = true;
+        routeDataGrid.ShowRowHeader = false;
+        routeDataGrid.AutoSizeColumnsMode = AutoSizeColumnsMode.None;
     }
 
-    private async void LoadRouteDataAsync()
+    private async Task LoadRouteDataAsync()
     {
         try
         {
@@ -135,50 +191,84 @@ public partial class RouteManagementForm : MetroForm
             // Load routes from service
             _routes = await _busService.GetAllRouteEntitiesAsync();
 
-            // Update the data grid
-            routeDataGrid.DataSource = _routes;
+            // Update UI on main thread
+            if (this.InvokeRequired)
+            {
+                this.Invoke(() => UpdateGridAndStatus());
+            }
+            else
+            {
+                UpdateGridAndStatus();
+            }
 
             _logger.LogInformation("Loaded {RouteCount} routes", _routes.Count);
-
-            // Update status
-            statusLabel.Text = $"Loaded {_routes.Count} routes";
-
-            // Highlight inactive routes
-            HighlightInactiveRoutes();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading route data");
-            MessageBox.Show($"Error loading route data: {ex.Message}", "Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            statusLabel.Text = "Error loading data";
+
+            // Handle UI updates on main thread
+            if (this.InvokeRequired)
+            {
+                this.Invoke(() => HandleLoadError(ex));
+            }
+            else
+            {
+                HandleLoadError(ex);
+            }
         }
     }
 
-    private void HighlightInactiveRoutes()
+    private void UpdateGridAndStatus()
     {
-        try
+        // Update the data grid
+        routeDataGrid.DataSource = _routes;
+
+        // Update status with success styling
+        statusLabel.Text = $"Loaded {_routes.Count} routes";
+        statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
+
+        // Count inactive routes for status
+        var inactiveCount = _routes.Count(r => !r.IsActive);
+        if (inactiveCount > 0)
         {
-            var inactiveCount = 0;
-
-            foreach (DataGridViewRow row in routeDataGrid.Rows)
-            {
-                if (row.DataBoundItem is Route route && !route.IsActive)
-                {
-                    row.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(250, 250, 250);
-                    row.DefaultCellStyle.ForeColor = System.Drawing.Color.Gray;
-                    inactiveCount++;
-                }
-            }
-
-            if (inactiveCount > 0)
-            {
-                statusLabel.Text += $" - {inactiveCount} inactive route(s)";
-            }
+            statusLabel.Text += $" - {inactiveCount} inactive route(s)";
+            statusLabel.ForeColor = System.Drawing.Color.FromArgb(255, 152, 0); // Orange for warnings
         }
-        catch (Exception ex)
+    }
+
+    private void HandleLoadError(Exception ex)
+    {
+        Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+            $"Error loading route data: {ex.Message}", "Data Load Error",
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+        statusLabel.Text = "Error loading data";
+        statusLabel.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
+    }
+
+    private void RouteDataGrid_QueryRowStyle(object sender, QueryRowStyleEventArgs e)
+    {
+        if (e.RowData is Route route)
         {
-            _logger.LogWarning(ex, "Error highlighting inactive routes");
+            // Apply styling based on route status
+            if (!route.IsActive)
+            {
+                // Inactive routes - subtle gray styling
+                e.Style.BackColor = Color.FromArgb(248, 248, 248);
+                e.Style.TextColor = Color.FromArgb(128, 128, 128);
+            }
+            else if (!route.AMVehicleId.HasValue || !route.PMVehicleId.HasValue)
+            {
+                // Routes missing vehicle assignments - light orange warning
+                e.Style.BackColor = Color.FromArgb(255, 245, 230);
+                e.Style.TextColor = Color.FromArgb(184, 134, 11);
+            }
+            else if (!route.AMDriverId.HasValue || !route.PMDriverId.HasValue)
+            {
+                // Routes missing driver assignments - light yellow warning
+                e.Style.BackColor = Color.FromArgb(254, 252, 232);
+                e.Style.TextColor = Color.FromArgb(161, 98, 7);
+            }
         }
     }
 
@@ -190,13 +280,15 @@ public partial class RouteManagementForm : MetroForm
         {
             _logger.LogInformation("Add Route button clicked");
 
-            MessageBox.Show("Add Route functionality will be implemented here.\n\nThis will open a form to create a new bus route including:\n• Route planning\n• Stop assignments\n• Bus and driver assignments",
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                "Add Route functionality will be implemented here.\n\nThis will open a form to create a new bus route including:\n• Route planning\n• Stop assignments\n• Bus and driver assignments",
                 "Add Route", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in Add Route");
-            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -206,24 +298,24 @@ public partial class RouteManagementForm : MetroForm
         {
             _logger.LogInformation("Edit Route button clicked");
 
-            if (routeDataGrid.SelectedRows.Count > 0)
+            if (routeDataGrid.CurrentItem != null && routeDataGrid.CurrentItem is Route selectedRoute)
             {
-                var selectedRowIndex = routeDataGrid.SelectedRows[0].Index;
-                var selectedRoute = _routes[selectedRowIndex];
-
-                MessageBox.Show($"Edit Route functionality will be implemented here.\n\nSelected Route: {selectedRoute.RouteName}\nDescription: {selectedRoute.Description}",
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    $"Edit Route functionality will be implemented here.\n\nSelected Route: {selectedRoute.RouteName}\nDescription: {selectedRoute.Description}",
                     "Edit Route", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("Please select a route to edit.", "No Selection",
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    "Please select a route to edit.", "No Selection",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in Edit Route");
-            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -233,29 +325,31 @@ public partial class RouteManagementForm : MetroForm
         {
             _logger.LogInformation("Delete Route button clicked");
 
-            if (routeDataGrid.SelectedRows.Count > 0)
+            if (routeDataGrid.CurrentItem != null && routeDataGrid.CurrentItem is Route selectedRoute)
             {
-                var selectedRowIndex = routeDataGrid.SelectedRows[0].Index;
-                var selectedRoute = _routes[selectedRowIndex];
-                var result = MessageBox.Show($"Are you sure you want to delete route '{selectedRoute.RouteName}'?\n\nThis action cannot be undone.",
+                var result = Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    $"Are you sure you want to delete route '{selectedRoute.RouteName}'?\n\nThis action cannot be undone.",
                     "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
 
                 if (result == DialogResult.Yes)
                 {
-                    MessageBox.Show($"Delete Route functionality will be implemented here.\n\nRoute '{selectedRoute.RouteName}' would be deleted.",
+                    Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                        $"Delete Route functionality will be implemented here.\n\nRoute '{selectedRoute.RouteName}' would be deleted.",
                         "Delete Route", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             else
             {
-                MessageBox.Show("Please select a route to delete.", "No Selection",
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    "Please select a route to delete.", "No Selection",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in Delete Route");
-            MessageBox.Show($"Error deleting route: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Error deleting route: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -265,11 +359,8 @@ public partial class RouteManagementForm : MetroForm
         {
             _logger.LogInformation("View Stops button clicked");
 
-            if (routeDataGrid.SelectedRows.Count > 0)
+            if (routeDataGrid.CurrentItem != null && routeDataGrid.CurrentItem is Route selectedRoute)
             {
-                var selectedRowIndex = routeDataGrid.SelectedRows[0].Index;
-                var selectedRoute = _routes[selectedRowIndex];
-
                 // Show route stops information
                 var stopsInfo = $"Route Stops for '{selectedRoute.RouteName}'\n\n" +
                     $"Route ID: {selectedRoute.RouteId}\n" +
@@ -281,18 +372,21 @@ public partial class RouteManagementForm : MetroForm
                     "• Student assignments\n" +
                     "• Special instructions";
 
-                MessageBox.Show(stopsInfo, "Route Stops", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    stopsInfo, "Route Stops", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                MessageBox.Show("Please select a route to view stops.", "No Selection",
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    "Please select a route to view stops.", "No Selection",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error viewing route stops");
-            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -301,13 +395,31 @@ public partial class RouteManagementForm : MetroForm
         try
         {
             _logger.LogInformation("Refresh button clicked");
-            statusLabel.ForeColor = System.Drawing.Color.Gray;
-            await Task.Run(() => LoadRouteDataAsync());
+
+            // Visual feedback during refresh
+            refreshButton.Enabled = false;
+            refreshButton.Text = "Refreshing...";
+            statusLabel.Text = "Refreshing route data...";
+            statusLabel.ForeColor = System.Drawing.Color.FromArgb(52, 152, 219);
+
+            // Perform refresh operation
+            await LoadRouteDataAsync();
+
+            statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error refreshing data");
-            MessageBox.Show($"Error refreshing data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Error refreshing data: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            statusLabel.Text = "Refresh failed";
+            statusLabel.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
+        }
+        finally
+        {
+            refreshButton.Enabled = true;
+            refreshButton.Text = "Refresh";
         }
     }
 
@@ -321,25 +433,26 @@ public partial class RouteManagementForm : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error closing form");
-            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
     #endregion
 
-    private void RouteDataGrid_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+    private void RouteDataGrid_CellDoubleClick(object sender, CellClickEventArgs e)
     {
-        if (e.RowIndex >= 0)
+        // Double-click to edit route if there's a current item selected
+        if (routeDataGrid.CurrentItem != null)
         {
-            // Double-click to edit route
             EditRouteButton_Click(sender, EventArgs.Empty);
         }
     }
 
-    private void RouteDataGrid_SelectionChanged(object sender, EventArgs e)
+    private void RouteDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         // Enable/disable buttons based on selection
-        var hasSelection = routeDataGrid.SelectedRows.Count > 0;
+        var hasSelection = routeDataGrid.CurrentItem != null;
         editRouteButton.Enabled = hasSelection;
         deleteRouteButton.Enabled = hasSelection;
         viewStopsButton.Enabled = hasSelection;

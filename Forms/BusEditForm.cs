@@ -5,7 +5,10 @@ using Microsoft.Extensions.Logging;
 using Bus_Buddy.Services;
 using Bus_Buddy.Models;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Bus_Buddy.Forms;
@@ -34,6 +37,7 @@ public partial class BusEditForm : MetroForm
         _logger.LogInformation("Initializing Bus Edit form in {Mode} mode", _isEditMode ? "Edit" : "Add");
 
         InitializeComponent();
+        InitializeSyncfusionTheme();
         InitializeBusEditForm();
 
         if (_isEditMode && _currentBus != null)
@@ -42,22 +46,40 @@ public partial class BusEditForm : MetroForm
         }
     }
 
+    private void InitializeSyncfusionTheme()
+    {
+        try
+        {
+            // Apply Office2016Colorful theme consistently
+            Syncfusion.Windows.Forms.SkinManager.SetVisualStyle(this,
+                Syncfusion.Windows.Forms.VisualTheme.Office2016Colorful);
+
+            // Enhanced MetroForm styling with Office2016 colors
+            this.MetroColor = Color.FromArgb(52, 152, 219);
+            this.CaptionBarColor = Color.FromArgb(52, 152, 219);
+            this.CaptionForeColor = Color.White;
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+
+            _logger.LogInformation("Applied Office2016Colorful theme successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not apply theme, using default");
+        }
+    }
+
     private void InitializeBusEditForm()
     {
-        // Set Syncfusion MetroForm styles
-        this.MetroColor = System.Drawing.Color.FromArgb(63, 81, 181);
-        this.CaptionBarColor = System.Drawing.Color.FromArgb(63, 81, 181);
-        this.CaptionForeColor = System.Drawing.Color.White;
+        // Enhanced MetroForm styles with Office2016 colors
         this.Text = _isEditMode ? "Edit Bus" : "Add New Bus";
 
         // Enable high DPI scaling for this form
-        this.AutoScaleMode = AutoScaleMode.Dpi;
-        this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+        this.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
 
-        // Initialize form controls
+        // Initialize form controls with enhanced styling
         InitializeFormControls();
 
-        _logger.LogInformation("Bus Edit form initialized successfully");
+        _logger.LogInformation("Bus Edit form initialized successfully with Office2016 theme");
     }
 
     private void InitializeFormControls()
@@ -68,27 +90,33 @@ public partial class BusEditForm : MetroForm
         insuranceExpiryDatePicker.Value = DateTime.Now.AddYears(1);
 
         // Set up numeric controls
-        yearNumeric.Minimum = 1900;
-        yearNumeric.Maximum = DateTime.Now.Year + 1;
-        yearNumeric.Value = DateTime.Now.Year;
+        yearNumeric.MinValue = 1900;
+        yearNumeric.MaxValue = DateTime.Now.Year + 1;
+        yearNumeric.IntegerValue = DateTime.Now.Year;
 
-        seatingCapacityNumeric.Minimum = 1;
-        seatingCapacityNumeric.Maximum = 90;
-        seatingCapacityNumeric.Value = 66;
+        seatingCapacityNumeric.MinValue = 1;
+        seatingCapacityNumeric.MaxValue = 90;
+        seatingCapacityNumeric.IntegerValue = 66;
 
-        odometerNumeric.Minimum = 0;
-        odometerNumeric.Maximum = 999999;
+        odometerNumeric.MinValue = 0;
+        odometerNumeric.MaxValue = 999999;
 
-        purchasePriceNumeric.Minimum = 0;
-        purchasePriceNumeric.Maximum = 500000;
-        purchasePriceNumeric.DecimalPlaces = 2;
+        purchasePriceNumeric.MinValue = 0;
+        purchasePriceNumeric.MaxValue = 500000;
 
-        // Set up combo boxes
+        // Set up combo boxes with enhanced styling
         statusComboBox.Items.AddRange(new[] { "Active", "Maintenance", "Retired", "Out of Service" });
         statusComboBox.SelectedIndex = 0;
+        statusComboBox.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
 
         makeComboBox.Items.AddRange(new[] { "Blue Bird", "Thomas Built Buses", "IC Bus", "Collins Bus", "Micro Bird", "Other" });
         makeComboBox.SelectedIndex = 0;
+        makeComboBox.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
+
+        // Apply Office2016 styling to date pickers
+        purchaseDatePicker.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
+        lastInspectionDatePicker.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
+        insuranceExpiryDatePicker.Style = Syncfusion.Windows.Forms.VisualStyle.Office2016Colorful;
 
         // Set tab order
         SetTabOrder();
@@ -122,10 +150,10 @@ public partial class BusEditForm : MetroForm
             _logger.LogInformation("Loading bus data for editing: {BusNumber}", bus.BusNumber);
 
             busNumberTextBox.Text = bus.BusNumber;
-            yearNumeric.Value = bus.Year;
+            yearNumeric.IntegerValue = bus.Year;
             makeComboBox.Text = bus.Make;
             modelTextBox.Text = bus.Model;
-            seatingCapacityNumeric.Value = bus.SeatingCapacity;
+            seatingCapacityNumeric.IntegerValue = bus.SeatingCapacity;
             vinTextBox.Text = bus.VINNumber;
             licenseNumberTextBox.Text = bus.LicenseNumber;
 
@@ -133,7 +161,7 @@ public partial class BusEditForm : MetroForm
                 lastInspectionDatePicker.Value = bus.DateLastInspection.Value;
 
             if (bus.CurrentOdometer.HasValue)
-                odometerNumeric.Value = bus.CurrentOdometer.Value;
+                odometerNumeric.IntegerValue = bus.CurrentOdometer.Value;
 
             statusComboBox.Text = bus.Status;
 
@@ -141,7 +169,7 @@ public partial class BusEditForm : MetroForm
                 purchaseDatePicker.Value = bus.PurchaseDate.Value;
 
             if (bus.PurchasePrice.HasValue)
-                purchasePriceNumeric.Value = bus.PurchasePrice.Value;
+                purchasePriceNumeric.DecimalValue = bus.PurchasePrice.Value;
 
             insurancePolicyTextBox.Text = bus.InsurancePolicyNumber ?? string.Empty;
 
@@ -151,8 +179,11 @@ public partial class BusEditForm : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading bus data");
-            MessageBox.Show($"Error loading bus data: {ex.Message}", "Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Error loading bus data: {ex.Message}",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
     }
 
@@ -179,10 +210,10 @@ public partial class BusEditForm : MetroForm
             errors.Add("License Number is required");
 
         // Business logic validation
-        if (yearNumeric.Value > DateTime.Now.Year + 1)
+        if (yearNumeric.IntegerValue > DateTime.Now.Year + 1)
             errors.Add("Year cannot be in the future");
 
-        if (seatingCapacityNumeric.Value < 1)
+        if (seatingCapacityNumeric.IntegerValue < 1)
             errors.Add("Seating capacity must be at least 1");
 
         if (lastInspectionDatePicker.Value > DateTime.Now)
@@ -190,8 +221,11 @@ public partial class BusEditForm : MetroForm
 
         if (errors.Count > 0)
         {
-            MessageBox.Show($"Please correct the following errors:\n\n{string.Join("\n", errors)}",
-                "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Please correct the following errors:\n\n{string.Join("\n", errors)}",
+                "Validation Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
             return false;
         }
 
@@ -203,17 +237,17 @@ public partial class BusEditForm : MetroForm
         var bus = _currentBus ?? new Bus();
 
         bus.BusNumber = busNumberTextBox.Text.Trim();
-        bus.Year = (int)yearNumeric.Value;
+        bus.Year = (int)yearNumeric.IntegerValue;
         bus.Make = makeComboBox.Text.Trim();
         bus.Model = modelTextBox.Text.Trim();
-        bus.SeatingCapacity = (int)seatingCapacityNumeric.Value;
+        bus.SeatingCapacity = (int)seatingCapacityNumeric.IntegerValue;
         bus.VINNumber = vinTextBox.Text.Trim().ToUpper();
         bus.LicenseNumber = licenseNumberTextBox.Text.Trim();
         bus.DateLastInspection = lastInspectionDatePicker.Value;
-        bus.CurrentOdometer = (int?)odometerNumeric.Value;
+        bus.CurrentOdometer = (int?)odometerNumeric.IntegerValue;
         bus.Status = statusComboBox.Text;
         bus.PurchaseDate = purchaseDatePicker.Value;
-        bus.PurchasePrice = purchasePriceNumeric.Value;
+        bus.PurchasePrice = purchasePriceNumeric.DecimalValue;
         bus.InsurancePolicyNumber = string.IsNullOrWhiteSpace(insurancePolicyTextBox.Text) ?
             null : insurancePolicyTextBox.Text.Trim();
         bus.InsuranceExpiryDate = insuranceExpiryDatePicker.Value;
@@ -232,8 +266,8 @@ public partial class BusEditForm : MetroForm
 
             _logger.LogInformation("Attempting to save bus data");
 
-            saveButton.Enabled = false;
-            saveButton.Text = "Saving...";
+            // Show saving state with visual feedback
+            ShowSavingState();
 
             var bus = CreateBusFromForm();
 
@@ -255,29 +289,64 @@ public partial class BusEditForm : MetroForm
                 EditedBus = bus;
                 IsDataSaved = true;
 
-                MessageBox.Show($"Bus {bus.BusNumber} has been {(_isEditMode ? "updated" : "added")} successfully.",
-                    "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    $"Bus {bus.BusNumber} has been {(_isEditMode ? "updated" : "added")} successfully.",
+                    "Success",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
 
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
             else
             {
-                MessageBox.Show("Failed to save bus data. Please try again.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    "Failed to save bus data. Please try again.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error saving bus data");
-            MessageBox.Show($"Error saving bus data: {ex.Message}", "Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            if (this.InvokeRequired)
+            {
+                this.Invoke(() => HandleSaveError(ex));
+            }
+            else
+            {
+                HandleSaveError(ex);
+            }
         }
         finally
         {
-            saveButton.Enabled = true;
-            saveButton.Text = "Save";
+            RestoreSaveButtonState();
         }
+    }
+
+    private void ShowSavingState()
+    {
+        saveButton.Enabled = false;
+        saveButton.Text = "Saving...";
+        saveButton.BackColor = Color.FromArgb(158, 158, 158);
+    }
+
+    private void RestoreSaveButtonState()
+    {
+        saveButton.Enabled = true;
+        saveButton.Text = "Save";
+        saveButton.BackColor = Color.FromArgb(76, 175, 80);
+    }
+
+    private void HandleSaveError(Exception ex)
+    {
+        Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+            $"Error saving bus data: {ex.Message}",
+            "Error",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Error);
     }
 
     private void CancelButton_Click(object sender, EventArgs e)
@@ -288,8 +357,11 @@ public partial class BusEditForm : MetroForm
 
             if (HasUnsavedChanges())
             {
-                var result = MessageBox.Show("You have unsaved changes. Are you sure you want to cancel?",
-                    "Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var result = Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    "You have unsaved changes. Are you sure you want to cancel?",
+                    "Unsaved Changes",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
 
                 if (result == DialogResult.No)
                     return;
@@ -301,7 +373,11 @@ public partial class BusEditForm : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in cancel operation");
-            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                $"Error: {ex.Message}",
+                "Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
         }
     }
 
@@ -322,10 +398,10 @@ public partial class BusEditForm : MetroForm
 
         // For existing buses, compare with original data
         return busNumberTextBox.Text != _currentBus.BusNumber ||
-               yearNumeric.Value != _currentBus.Year ||
+               yearNumeric.IntegerValue != _currentBus.Year ||
                makeComboBox.Text != _currentBus.Make ||
                modelTextBox.Text != _currentBus.Model ||
-               seatingCapacityNumeric.Value != _currentBus.SeatingCapacity ||
+               seatingCapacityNumeric.IntegerValue != _currentBus.SeatingCapacity ||
                vinTextBox.Text != _currentBus.VINNumber ||
                licenseNumberTextBox.Text != _currentBus.LicenseNumber ||
                statusComboBox.Text != _currentBus.Status;
@@ -335,8 +411,11 @@ public partial class BusEditForm : MetroForm
     {
         if (this.DialogResult == DialogResult.None && HasUnsavedChanges())
         {
-            var result = MessageBox.Show("You have unsaved changes. Are you sure you want to close?",
-                "Unsaved Changes", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            var result = Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                "You have unsaved changes. Are you sure you want to close?",
+                "Unsaved Changes",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
 
             if (result == DialogResult.No)
             {

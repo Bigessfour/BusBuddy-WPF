@@ -81,6 +81,45 @@ namespace Bus_Buddy.Services
             return await _context.Drivers.ToListAsync();
         }
 
+        public async Task<Driver?> GetDriverEntityByIdAsync(int driverId)
+        {
+            _logger.LogInformation("Retrieving driver entity with ID: {DriverId}", driverId);
+            return await _context.Drivers
+                .Include(d => d.AMRoutes)
+                .Include(d => d.PMRoutes)
+                .Include(d => d.Activities)
+                .FirstOrDefaultAsync(d => d.DriverId == driverId);
+        }
+
+        public async Task<Driver> AddDriverEntityAsync(Driver driver)
+        {
+            _logger.LogInformation("Adding new driver entity: {DriverName}", driver.DriverName);
+            _context.Drivers.Add(driver);
+            await _context.SaveChangesAsync();
+            return driver;
+        }
+
+        public async Task<bool> UpdateDriverEntityAsync(Driver driver)
+        {
+            _logger.LogInformation("Updating driver entity with ID: {DriverId}", driver.DriverId);
+            _context.Drivers.Update(driver);
+            var result = await _context.SaveChangesAsync();
+            return result > 0;
+        }
+
+        public async Task<bool> DeleteDriverEntityAsync(int driverId)
+        {
+            _logger.LogInformation("Deleting driver entity with ID: {DriverId}", driverId);
+            var driver = await _context.Drivers.FindAsync(driverId);
+            if (driver != null)
+            {
+                _context.Drivers.Remove(driver);
+                var result = await _context.SaveChangesAsync();
+                return result > 0;
+            }
+            return false;
+        }
+
         public async Task<List<Route>> GetAllRouteEntitiesAsync()
         {
             _logger.LogInformation("Retrieving all route entities from database");

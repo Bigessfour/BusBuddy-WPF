@@ -1,11 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Bus_Buddy.Models;
+using Bus_Buddy.Models.Base;
+using System.Text.Json;
+using System.Linq.Expressions;
 
 namespace Bus_Buddy.Data;
 
 /// <summary>
-/// Entity Framework DbContext for BusBuddy application
-/// Manages database connection and entity configurations
+/// Enhanced Entity Framework DbContext for BusBuddy application
+/// Supports agile schema evolution with audit fields, soft deletes, and JSON columns
+/// Optimized for Syncfusion Windows Forms with comprehensive indexing and performance features
 /// </summary>
 public class BusBuddyDbContext : DbContext
 {
@@ -21,81 +25,195 @@ public class BusBuddyDbContext : DbContext
     public DbSet<Fuel> FuelRecords { get; set; }
     public DbSet<Maintenance> MaintenanceRecords { get; set; }
     public DbSet<Student> Students { get; set; }
+    public DbSet<Schedule> Schedules { get; set; }
+    public DbSet<RouteStop> RouteStops { get; set; }
+    public DbSet<SchoolCalendar> SchoolCalendar { get; set; }
+    public DbSet<ActivitySchedule> ActivitySchedule { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // Configure Bus (Vehicle) entity
+        // Configure global query filters for soft deletes
+        ConfigureGlobalQueryFilters(modelBuilder);
+
+        // Configure Bus (Vehicle) entity with enhanced audit and indexing
         modelBuilder.Entity<Bus>(entity =>
         {
             entity.ToTable("Vehicles");
             entity.HasKey(e => e.VehicleId);
+
+            // Properties with validation and constraints
             entity.Property(e => e.BusNumber).IsRequired().HasMaxLength(20);
             entity.Property(e => e.VINNumber).IsRequired().HasMaxLength(17);
             entity.Property(e => e.LicenseNumber).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.Make).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Model).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(20).HasDefaultValue("Active");
+            entity.Property(e => e.FleetType).HasMaxLength(20);
+            entity.Property(e => e.FuelType).HasMaxLength(20);
+            entity.Property(e => e.Department).HasMaxLength(50);
+            entity.Property(e => e.GPSDeviceId).HasMaxLength(100);
+
+            // Decimal properties with precision
             entity.Property(e => e.PurchasePrice).HasColumnType("decimal(10,2)");
-            entity.HasIndex(e => e.BusNumber).IsUnique();
-            entity.HasIndex(e => e.VINNumber).IsUnique();
+            entity.Property(e => e.FuelCapacity).HasColumnType("decimal(8,2)");
+            entity.Property(e => e.MilesPerGallon).HasColumnType("decimal(6,2)");
+
+            // Text properties
+            entity.Property(e => e.InsurancePolicyNumber).HasMaxLength(100);
+            entity.Property(e => e.SpecialEquipment).HasMaxLength(1000);
+            entity.Property(e => e.Notes).HasMaxLength(1000);
+
+            // Audit fields
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+
+            // Unique constraints
+            entity.HasIndex(e => e.BusNumber).IsUnique().HasDatabaseName("IX_Vehicles_BusNumber");
+            entity.HasIndex(e => e.VINNumber).IsUnique().HasDatabaseName("IX_Vehicles_VINNumber");
+            entity.HasIndex(e => e.LicenseNumber).IsUnique().HasDatabaseName("IX_Vehicles_LicenseNumber");
+
+            // Performance indexes
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Vehicles_Status");
+            entity.HasIndex(e => e.DateLastInspection).HasDatabaseName("IX_Vehicles_DateLastInspection");
+            entity.HasIndex(e => e.InsuranceExpiryDate).HasDatabaseName("IX_Vehicles_InsuranceExpiryDate");
+            entity.HasIndex(e => e.FleetType).HasDatabaseName("IX_Vehicles_FleetType");
+            entity.HasIndex(e => new { e.Make, e.Model, e.Year }).HasDatabaseName("IX_Vehicles_MakeModelYear");
         });
 
-        // Configure Driver entity
+        // Configure Driver entity with enhanced features
         modelBuilder.Entity<Driver>(entity =>
         {
             entity.ToTable("Drivers");
             entity.HasKey(e => e.DriverId);
+
+            // Properties
             entity.Property(e => e.DriverName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.DriverPhone).HasMaxLength(20);
+            entity.Property(e => e.DriverEmail).HasMaxLength(100);
+            entity.Property(e => e.DriversLicenceType).HasMaxLength(20);
+            entity.Property(e => e.Address).HasMaxLength(200);
+            entity.Property(e => e.City).HasMaxLength(50);
+            entity.Property(e => e.State).HasMaxLength(20);
+            entity.Property(e => e.Zip).HasMaxLength(10);
+            entity.Property(e => e.EmergencyContactName).HasMaxLength(100);
+            entity.Property(e => e.EmergencyContactPhone).HasMaxLength(20);
+            entity.Property(e => e.Notes).HasMaxLength(1000);
+
+            // Audit fields
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+
+            // Indexes
+            entity.HasIndex(e => e.DriverEmail).HasDatabaseName("IX_Drivers_Email");
+            entity.HasIndex(e => e.DriverPhone).HasDatabaseName("IX_Drivers_Phone");
+            entity.HasIndex(e => e.DriversLicenceType).HasDatabaseName("IX_Drivers_LicenseType");
+            entity.HasIndex(e => e.LicenseExpiryDate).HasDatabaseName("IX_Drivers_LicenseExpiration");
+            entity.HasIndex(e => e.TrainingComplete).HasDatabaseName("IX_Drivers_TrainingComplete");
         });
 
-        // Configure Route entity with multiple relationships
+        // Configure Route entity with enhanced relationships and indexing
         modelBuilder.Entity<Route>(entity =>
         {
             entity.ToTable("Routes");
             entity.HasKey(e => e.RouteId);
 
+            // Properties
+            entity.Property(e => e.RouteName).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(500);
+
+            // Decimal properties
+            entity.Property(e => e.AMBeginMiles).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.AMEndMiles).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.PMBeginMiles).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.PMEndMiles).HasColumnType("decimal(10,2)");
+
             // Configure AM relationships
             entity.HasOne(r => r.AMVehicle)
-                  .WithMany(v => v.Routes)
+                  .WithMany(v => v.AMRoutes)
                   .HasForeignKey(r => r.AMVehicleId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Routes_AMVehicle");
 
             entity.HasOne(r => r.AMDriver)
                   .WithMany(d => d.AMRoutes)
                   .HasForeignKey(r => r.AMDriverId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Routes_AMDriver");
 
             // Configure PM relationships
             entity.HasOne(r => r.PMVehicle)
-                  .WithMany()
+                  .WithMany(v => v.PMRoutes)
                   .HasForeignKey(r => r.PMVehicleId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Routes_PMVehicle");
 
             entity.HasOne(r => r.PMDriver)
                   .WithMany(d => d.PMRoutes)
                   .HasForeignKey(r => r.PMDriverId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Routes_PMDriver");
+
+            // Indexes for performance
+            entity.HasIndex(e => e.Date).HasDatabaseName("IX_Routes_Date");
+            entity.HasIndex(e => e.RouteName).HasDatabaseName("IX_Routes_RouteName");
+            entity.HasIndex(e => new { e.Date, e.RouteName }).IsUnique().HasDatabaseName("IX_Routes_DateRouteName");
+            entity.HasIndex(e => e.AMVehicleId).HasDatabaseName("IX_Routes_AMVehicleId");
+            entity.HasIndex(e => e.PMVehicleId).HasDatabaseName("IX_Routes_PMVehicleId");
+            entity.HasIndex(e => e.AMDriverId).HasDatabaseName("IX_Routes_AMDriverId");
+            entity.HasIndex(e => e.PMDriverId).HasDatabaseName("IX_Routes_PMDriverId");
         });
 
-        // Configure Activity entity
+        // Configure Activity entity with comprehensive indexing
         modelBuilder.Entity<Activity>(entity =>
         {
-            entity.ToTable("Activity");
+            entity.ToTable("Activities");
             entity.HasKey(e => e.ActivityId);
 
-            entity.HasOne(a => a.Vehicle)
-                  .WithMany(v => v.Activities)
-                  .HasForeignKey(a => a.VehicleId)
-                  .OnDelete(DeleteBehavior.Restrict);
+            // Properties
+            entity.Property(e => e.ActivityType).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Destination).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.RequestedBy).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Status).HasMaxLength(20).HasDefaultValue("Scheduled");
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.ActivityCategory).HasMaxLength(100);
+            entity.Property(e => e.ApprovedBy).HasMaxLength(100);
 
-            entity.HasOne(a => a.Route)
-                  .WithMany()
-                  .HasForeignKey(a => a.RouteId)
-                  .OnDelete(DeleteBehavior.Restrict);
+            // Decimal properties
+            entity.Property(e => e.EstimatedCost).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.ActualCost).HasColumnType("decimal(10,2)");
+
+            // Audit fields
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+
+            // Relationships
+            entity.HasOne(a => a.AssignedVehicle)
+                  .WithMany(v => v.Activities)
+                  .HasForeignKey(a => a.AssignedVehicleId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Activities_Vehicle");
 
             entity.HasOne(a => a.Driver)
                   .WithMany(d => d.Activities)
                   .HasForeignKey(a => a.DriverId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Activities_Driver");
+
+            // Indexes for scheduling and performance
+            entity.HasIndex(e => e.Date).HasDatabaseName("IX_Activities_Date");
+            entity.HasIndex(e => e.ActivityType).HasDatabaseName("IX_Activities_ActivityType");
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Activities_Status");
+            entity.HasIndex(e => e.AssignedVehicleId).HasDatabaseName("IX_Activities_VehicleId");
+            entity.HasIndex(e => e.DriverId).HasDatabaseName("IX_Activities_DriverId");
+            entity.HasIndex(e => new { e.Date, e.LeaveTime, e.EventTime }).HasDatabaseName("IX_Activities_DateTimeRange");
+            entity.HasIndex(e => new { e.AssignedVehicleId, e.Date, e.LeaveTime }).HasDatabaseName("IX_Activities_VehicleSchedule");
+            entity.HasIndex(e => new { e.DriverId, e.Date, e.LeaveTime }).HasDatabaseName("IX_Activities_DriverSchedule");
+            entity.HasIndex(e => e.ApprovalRequired).HasDatabaseName("IX_Activities_ApprovalRequired");
         });
 
         // Configure Fuel entity
@@ -103,15 +221,30 @@ public class BusBuddyDbContext : DbContext
         {
             entity.ToTable("Fuel");
             entity.HasKey(e => e.FuelId);
+
+            // Properties
+            entity.Property(e => e.FuelLocation).HasMaxLength(100);
+            entity.Property(e => e.FuelType).HasMaxLength(20).HasDefaultValue("Gasoline");
+            entity.Property(e => e.Notes).HasMaxLength(500);
+
+            // Decimal properties with precision
             entity.Property(e => e.Gallons).HasColumnType("decimal(8,3)");
             entity.Property(e => e.PricePerGallon).HasColumnType("decimal(8,3)");
             entity.Property(e => e.TotalCost).HasColumnType("decimal(10,2)");
-            entity.Property(e => e.MilesPerGallon).HasColumnType("decimal(5,2)");
 
+            // Relationships
             entity.HasOne(f => f.Vehicle)
                   .WithMany(v => v.FuelRecords)
-                  .HasForeignKey(f => f.VehicleId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .HasForeignKey(f => f.VehicleFueledId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Fuel_Vehicle");
+
+            // Indexes
+            entity.HasIndex(e => e.FuelDate).HasDatabaseName("IX_Fuel_FuelDate");
+            entity.HasIndex(e => e.VehicleFueledId).HasDatabaseName("IX_Fuel_VehicleId");
+            entity.HasIndex(e => new { e.VehicleFueledId, e.FuelDate }).HasDatabaseName("IX_Fuel_VehicleDate");
+            entity.HasIndex(e => e.FuelLocation).HasDatabaseName("IX_Fuel_Location");
+            entity.HasIndex(e => e.FuelType).HasDatabaseName("IX_Fuel_Type");
         });
 
         // Configure Maintenance entity
@@ -119,12 +252,35 @@ public class BusBuddyDbContext : DbContext
         {
             entity.ToTable("Maintenance");
             entity.HasKey(e => e.MaintenanceId);
-            entity.Property(e => e.Cost).HasColumnType("decimal(10,2)");
 
+            // Properties
+            entity.Property(e => e.MaintenanceCompleted).HasMaxLength(100);
+            entity.Property(e => e.Vendor).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.Notes).HasMaxLength(1000);
+            entity.Property(e => e.Priority).HasMaxLength(20).HasDefaultValue("Normal");
+
+            // Decimal properties
+            entity.Property(e => e.RepairCost).HasColumnType("decimal(10,2)");
+
+            // Audit fields
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+
+            // Relationships
             entity.HasOne(m => m.Vehicle)
                   .WithMany(v => v.MaintenanceRecords)
                   .HasForeignKey(m => m.VehicleId)
-                  .OnDelete(DeleteBehavior.Restrict);
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Maintenance_Vehicle");
+
+            // Indexes
+            entity.HasIndex(e => e.Date).HasDatabaseName("IX_Maintenance_Date");
+            entity.HasIndex(e => e.VehicleId).HasDatabaseName("IX_Maintenance_VehicleId");
+            entity.HasIndex(e => e.MaintenanceCompleted).HasDatabaseName("IX_Maintenance_Type");
+            entity.HasIndex(e => new { e.VehicleId, e.Date }).HasDatabaseName("IX_Maintenance_VehicleDate");
+            entity.HasIndex(e => e.Priority).HasDatabaseName("IX_Maintenance_Priority");
         });
 
         // Configure Student entity
@@ -132,11 +288,161 @@ public class BusBuddyDbContext : DbContext
         {
             entity.ToTable("Students");
             entity.HasKey(e => e.StudentId);
+
+            // Properties
             entity.Property(e => e.StudentName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Grade).HasMaxLength(20);
+            entity.Property(e => e.MedicalNotes).HasMaxLength(1000);
+            entity.Property(e => e.TransportationNotes).HasMaxLength(1000);
+            entity.Property(e => e.EmergencyPhone).HasMaxLength(20);
+            entity.Property(e => e.School).HasMaxLength(100);
+            entity.Property(e => e.ParentGuardian).HasMaxLength(100);
+            entity.Property(e => e.HomeAddress).HasMaxLength(200);
+            entity.Property(e => e.City).HasMaxLength(50);
+            entity.Property(e => e.State).HasMaxLength(2);
+            entity.Property(e => e.Zip).HasMaxLength(10);
+
+            // Audit fields
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+
+            // Indexes
+            entity.HasIndex(e => e.StudentName).HasDatabaseName("IX_Students_Name");
+            entity.HasIndex(e => e.Grade).HasDatabaseName("IX_Students_Grade");
+            entity.HasIndex(e => e.School).HasDatabaseName("IX_Students_School");
+            entity.HasIndex(e => e.Active).HasDatabaseName("IX_Students_Active");
         });
 
-        // Seed some initial data
+        // Configure Schedule entity
+        modelBuilder.Entity<Schedule>(entity =>
+        {
+            entity.ToTable("Schedules");
+            entity.HasKey(e => e.ScheduleId);
+
+            // Relationships
+            entity.HasOne(s => s.Bus)
+                  .WithMany()
+                  .HasForeignKey(s => s.BusId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Schedules_Bus");
+
+            entity.HasOne(s => s.Route)
+                  .WithMany()
+                  .HasForeignKey(s => s.RouteId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Schedules_Route");
+
+            entity.HasOne(s => s.Driver)
+                  .WithMany()
+                  .HasForeignKey(s => s.DriverId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Schedules_Driver");
+
+            // Indexes
+            entity.HasIndex(e => e.ScheduleDate).HasDatabaseName("IX_Schedules_Date");
+            entity.HasIndex(e => e.BusId).HasDatabaseName("IX_Schedules_BusId");
+            entity.HasIndex(e => e.DriverId).HasDatabaseName("IX_Schedules_DriverId");
+            entity.HasIndex(e => e.RouteId).HasDatabaseName("IX_Schedules_RouteId");
+        });
+
+        // Configure RouteStop entity
+        modelBuilder.Entity<RouteStop>(entity =>
+        {
+            entity.ToTable("RouteStops");
+            entity.HasKey(e => e.RouteStopId);
+
+            // Properties
+            entity.Property(e => e.StopName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.StopAddress).HasMaxLength(200);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+
+            // Relationships
+            entity.HasOne(rs => rs.Route)
+                  .WithMany()
+                  .HasForeignKey(rs => rs.RouteId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_RouteStops_Route");
+
+            // Indexes
+            entity.HasIndex(e => e.RouteId).HasDatabaseName("IX_RouteStops_RouteId");
+            entity.HasIndex(e => new { e.RouteId, e.StopOrder }).HasDatabaseName("IX_RouteStops_RouteOrder");
+        });
+
+        // Configure SchoolCalendar entity
+        modelBuilder.Entity<SchoolCalendar>(entity =>
+        {
+            entity.ToTable("SchoolCalendar");
+            entity.HasKey(e => e.CalendarId);
+
+            // Properties
+            entity.Property(e => e.EventType).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.EventName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.SchoolYear).IsRequired().HasMaxLength(10);
+            entity.Property(e => e.Description).HasMaxLength(200);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+
+            // Indexes
+            entity.HasIndex(e => e.Date).HasDatabaseName("IX_SchoolCalendar_Date");
+            entity.HasIndex(e => e.EventType).HasDatabaseName("IX_SchoolCalendar_EventType");
+            entity.HasIndex(e => e.SchoolYear).HasDatabaseName("IX_SchoolCalendar_SchoolYear");
+            entity.HasIndex(e => e.RoutesRequired).HasDatabaseName("IX_SchoolCalendar_RoutesRequired");
+        });
+
+        // Configure ActivitySchedule entity
+        modelBuilder.Entity<ActivitySchedule>(entity =>
+        {
+            entity.ToTable("ActivitySchedule");
+            entity.HasKey(e => e.ActivityScheduleId);
+
+            // Properties
+            entity.Property(e => e.TripType).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.ScheduledDestination).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+
+            // Relationships
+            entity.HasOne(ash => ash.ScheduledVehicle)
+                  .WithMany(v => v.ScheduledActivities)
+                  .HasForeignKey(ash => ash.ScheduledVehicleId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_ActivitySchedule_Vehicle");
+
+            entity.HasOne(ash => ash.ScheduledDriver)
+                  .WithMany(d => d.ScheduledActivities)
+                  .HasForeignKey(ash => ash.ScheduledDriverId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_ActivitySchedule_Driver");
+
+            // Indexes
+            entity.HasIndex(e => e.ScheduledDate).HasDatabaseName("IX_ActivitySchedule_Date");
+            entity.HasIndex(e => e.TripType).HasDatabaseName("IX_ActivitySchedule_TripType");
+            entity.HasIndex(e => e.ScheduledVehicleId).HasDatabaseName("IX_ActivitySchedule_VehicleId");
+            entity.HasIndex(e => e.ScheduledDriverId).HasDatabaseName("IX_ActivitySchedule_DriverId");
+        });
+
+        // Seed initial data
         SeedData(modelBuilder);
+    }
+
+    /// <summary>
+    /// Configure global query filters for soft deletes
+    /// </summary>
+    private void ConfigureGlobalQueryFilters(ModelBuilder modelBuilder)
+    {
+        // Apply soft delete filter to all entities that inherit from BaseEntity
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+            {
+                var parameter = Expression.Parameter(entityType.ClrType);
+                var propertyMethodInfo = typeof(EF).GetMethod("Property")?.MakeGenericMethod(typeof(bool));
+                var isDeletedProperty = Expression.Call(propertyMethodInfo!, parameter, Expression.Constant("IsDeleted"));
+                var compareExpression = Expression.MakeBinary(ExpressionType.Equal, isDeletedProperty, Expression.Constant(false));
+                var lambda = Expression.Lambda(compareExpression, parameter);
+
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+            }
+        }
     }
 
     private void SeedData(ModelBuilder modelBuilder)

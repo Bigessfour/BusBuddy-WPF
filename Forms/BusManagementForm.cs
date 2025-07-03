@@ -1,6 +1,7 @@
 using Syncfusion.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
 using Syncfusion.WinForms.Controls;
+using Syncfusion.WinForms.DataGrid;
 using Microsoft.Extensions.Logging;
 using Bus_Buddy.Services;
 using Bus_Buddy.Models;
@@ -34,6 +35,17 @@ public partial class BusManagementForm : MetroForm
 
     private void InitializeBusManagement()
     {
+        // Apply Syncfusion theme integration
+        try
+        {
+            // Set Office2016 visual style using SkinManager
+            Syncfusion.Windows.Forms.SkinManager.SetVisualStyle(this, Syncfusion.Windows.Forms.VisualTheme.Office2016Colorful);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not apply Office2016 theme to Bus Management Form, using default styling");
+        }
+
         // Set Syncfusion MetroForm styles
         this.MetroColor = System.Drawing.Color.FromArgb(63, 81, 181);
         this.CaptionBarColor = System.Drawing.Color.FromArgb(63, 81, 181);
@@ -44,13 +56,64 @@ public partial class BusManagementForm : MetroForm
         this.AutoScaleMode = AutoScaleMode.Dpi;
         this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
 
+        // Configure data grid if it exists
+        ConfigureDataGrid();
+
         _logger.LogInformation("Bus Management form initialized successfully");
 
-        // Load bus data
-        LoadBusDataAsync();
+        // Load bus data asynchronously with proper UI thread marshaling
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await LoadBusDataAsync();
+
+                // Update UI on main thread
+                this.Invoke(() =>
+                {
+                    if (statusLabel != null)
+                    {
+                        statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during initial bus data load");
+
+                // Update UI on main thread for error state
+                this.Invoke(() =>
+                {
+                    if (statusLabel != null)
+                    {
+                        statusLabel.Text = "Failed to load initial data";
+                        statusLabel.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
+                    }
+                });
+            }
+        });
     }
 
-    private async void LoadBusDataAsync()
+    private void ConfigureDataGrid()
+    {
+        if (busDataGrid != null)
+        {
+            // Apply Office2016 styling to the grid
+            busDataGrid.Style.HeaderStyle.BackColor = System.Drawing.Color.FromArgb(63, 81, 181);
+            busDataGrid.Style.HeaderStyle.TextColor = System.Drawing.Color.White;
+            busDataGrid.Style.HeaderStyle.Font.Bold = true;
+            busDataGrid.Style.BorderColor = System.Drawing.Color.FromArgb(227, 227, 227);
+            busDataGrid.Style.SelectionStyle.BackColor = System.Drawing.Color.FromArgb(63, 81, 181, 50);
+            busDataGrid.Style.SelectionStyle.TextColor = System.Drawing.Color.Black;
+
+            // Enable advanced grid features
+            busDataGrid.AllowSorting = true;
+            busDataGrid.AllowResizingColumns = true;
+            busDataGrid.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.None;
+        }
+    }
+
+    private async Task LoadBusDataAsync()
     {
         try
         {
@@ -59,20 +122,68 @@ public partial class BusManagementForm : MetroForm
             // Load buses from service
             _buses = await _busService.GetAllBusesAsync();
 
-            // Update the data grid
-            busDataGrid.DataSource = _buses;
+            // Update UI on main thread
+            if (this.InvokeRequired)
+            {
+                this.Invoke(() => UpdateBusGridAndStatus());
+            }
+            else
+            {
+                UpdateBusGridAndStatus();
+            }
 
             _logger.LogInformation("Loaded {BusCount} buses", _buses.Count);
-
-            // Update status
-            statusLabel.Text = $"Loaded {_buses.Count} buses";
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading bus data");
-            MessageBox.Show($"Error loading bus data: {ex.Message}", "Error",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            // Handle UI updates on main thread
+            if (this.InvokeRequired)
+            {
+                this.Invoke(() => HandleBusLoadError(ex));
+            }
+            else
+            {
+                HandleBusLoadError(ex);
+            }
+        }
+    }
+
+    private void UpdateBusGridAndStatus()
+    {
+        // Update the data grid
+        if (busDataGrid != null)
+        {
+            busDataGrid.DataSource = _buses;
+        }
+
+        // Update status with success styling
+        if (statusLabel != null)
+        {
+            statusLabel.Text = $"Loaded {_buses.Count} buses";
+            statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
+
+            // Count buses needing attention for status
+            var maintenanceNeeded = _buses.Count(b => b.Status.Contains("Maintenance") || b.Status.Contains("Out of Service"));
+            if (maintenanceNeeded > 0)
+            {
+                statusLabel.Text += $" - {maintenanceNeeded} bus(es) need attention";
+                statusLabel.ForeColor = System.Drawing.Color.FromArgb(255, 152, 0); // Orange for warnings
+            }
+        }
+    }
+
+    private void HandleBusLoadError(Exception ex)
+    {
+        Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+            $"Error loading bus data: {ex.Message}", "Data Load Error",
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+        if (statusLabel != null)
+        {
             statusLabel.Text = "Error loading data";
+            statusLabel.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
         }
     }
 
@@ -90,15 +201,39 @@ public partial class BusManagementForm : MetroForm
 
             if (result == DialogResult.OK && busEditForm.IsDataSaved)
             {
-                // Refresh the data grid
-                LoadBusDataAsync();
-                statusLabel.Text = $"Bus {busEditForm.EditedBus?.BusNumber} added successfully";
+                // Refresh the data grid asynchronously
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await LoadBusDataAsync();
+                        this.Invoke(() =>
+                        {
+                            if (statusLabel != null)
+                            {
+                                statusLabel.Text = $"Bus {busEditForm.EditedBus?.BusNumber} added successfully";
+                                statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error refreshing after bus add");
+                        this.Invoke(() =>
+                        {
+                            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                                $"Bus added but refresh failed: {ex.Message}", "Refresh Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        });
+                    }
+                });
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in Add Bus");
-            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this, $"Error: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -108,44 +243,78 @@ public partial class BusManagementForm : MetroForm
         {
             _logger.LogInformation("Edit Bus button clicked");
 
-            if (busDataGrid.SelectedRows.Count > 0)
+            if (busDataGrid.SelectedItem != null)
             {
-                var selectedRowIndex = busDataGrid.SelectedRows[0].Index;
-                var selectedBusInfo = _buses[selectedRowIndex];
+                var selectedBusInfo = busDataGrid.SelectedItem as BusInfo;
 
-                // Get the full Bus entity from the service
-                var busEntity = await _busService.GetBusEntityByIdAsync(selectedBusInfo.BusId);
-
-                if (busEntity != null)
+                if (selectedBusInfo != null)
                 {
-                    // Create BusEditForm with dependency injection
-                    var logger = ServiceContainer.GetService<ILogger<BusEditForm>>();
-                    var busEditForm = new BusEditForm(logger, _busService, busEntity);
-                    var result = busEditForm.ShowDialog(this);
-
-                    if (result == DialogResult.OK && busEditForm.IsDataSaved)
+                    // Visual feedback during operation
+                    if (editBusButton != null)
                     {
-                        // Refresh the data grid
-                        LoadBusDataAsync();
-                        statusLabel.Text = $"Bus {busEditForm.EditedBus?.BusNumber} updated successfully";
+                        editBusButton.Enabled = false;
+                        editBusButton.Text = "Loading...";
                     }
-                }
-                else
-                {
-                    MessageBox.Show("Could not load bus details for editing.", "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    try
+                    {
+                        // Get the full Bus entity from the service
+                        var busEntity = await _busService.GetBusEntityByIdAsync(selectedBusInfo.BusId);
+
+                        if (busEntity != null)
+                        {
+                            // Create BusEditForm with dependency injection
+                            var logger = ServiceContainer.GetService<ILogger<BusEditForm>>();
+                            var busEditForm = new BusEditForm(logger, _busService, busEntity);
+                            var result = busEditForm.ShowDialog(this);
+
+                            if (result == DialogResult.OK && busEditForm.IsDataSaved)
+                            {
+                                // Refresh the data grid
+                                await LoadBusDataAsync();
+                                if (statusLabel != null)
+                                {
+                                    statusLabel.Text = $"Bus {busEditForm.EditedBus?.BusNumber} updated successfully";
+                                    statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                                "Could not load bus details for editing.", "Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    finally
+                    {
+                        if (editBusButton != null)
+                        {
+                            editBusButton.Enabled = true;
+                            editBusButton.Text = "Edit Bus";
+                        }
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please select a bus to edit.", "No Selection",
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    "Please select a bus to edit.", "No Selection",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in Edit Bus");
-            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this, $"Error: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            // Restore button state
+            if (editBusButton != null)
+            {
+                editBusButton.Enabled = true;
+                editBusButton.Text = "Edit Bus";
+            }
         }
     }
 
@@ -155,51 +324,80 @@ public partial class BusManagementForm : MetroForm
         {
             _logger.LogInformation("Delete Bus button clicked");
 
-            if (busDataGrid.SelectedRows.Count > 0)
+            if (busDataGrid.SelectedItem != null)
             {
-                var selectedRowIndex = busDataGrid.SelectedRows[0].Index;
-                var selectedBus = _buses[selectedRowIndex];
-                var result = MessageBox.Show($"Are you sure you want to delete bus {selectedBus.BusNumber}?\n\nThis action cannot be undone.",
-                    "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+                var selectedBus = busDataGrid.SelectedItem as BusInfo;
 
-                if (result == DialogResult.Yes)
+                if (selectedBus != null)
                 {
-                    deleteBusButton.Enabled = false;
-                    deleteBusButton.Text = "Deleting...";
+                    var result = Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                        $"Are you sure you want to delete bus {selectedBus.BusNumber}?\n\nThis action cannot be undone.",
+                        "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
 
-                    bool success = await _busService.DeleteBusEntityAsync(selectedBus.BusId);
-
-                    if (success)
+                    if (result == DialogResult.Yes)
                     {
-                        MessageBox.Show($"Bus {selectedBus.BusNumber} has been deleted successfully.",
-                            "Delete Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        // Visual feedback during operation
+                        if (deleteBusButton != null)
+                        {
+                            deleteBusButton.Enabled = false;
+                            deleteBusButton.Text = "Deleting...";
+                        }
 
-                        // Refresh the data grid
-                        LoadBusDataAsync();
-                        statusLabel.Text = $"Bus {selectedBus.BusNumber} deleted successfully";
-                    }
-                    else
-                    {
-                        MessageBox.Show($"Failed to delete bus {selectedBus.BusNumber}. Please try again.",
-                            "Delete Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        try
+                        {
+                            bool success = await _busService.DeleteBusEntityAsync(selectedBus.BusId);
+
+                            if (success)
+                            {
+                                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                                    $"Bus {selectedBus.BusNumber} has been deleted successfully.",
+                                    "Delete Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                // Refresh the data grid
+                                await LoadBusDataAsync();
+                                if (statusLabel != null)
+                                {
+                                    statusLabel.Text = $"Bus {selectedBus.BusNumber} deleted successfully";
+                                    statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
+                                }
+                            }
+                            else
+                            {
+                                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                                    $"Failed to delete bus {selectedBus.BusNumber}. Please try again.",
+                                    "Delete Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                        finally
+                        {
+                            if (deleteBusButton != null)
+                            {
+                                deleteBusButton.Enabled = true;
+                                deleteBusButton.Text = "Delete Bus";
+                            }
+                        }
                     }
                 }
             }
             else
             {
-                MessageBox.Show("Please select a bus to delete.", "No Selection",
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    "Please select a bus to delete.", "No Selection",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error in Delete Bus");
-            MessageBox.Show($"Error deleting bus: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-        finally
-        {
-            deleteBusButton.Enabled = true;
-            deleteBusButton.Text = "Delete Bus";
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this, $"Error deleting bus: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            // Restore button state
+            if (deleteBusButton != null)
+            {
+                deleteBusButton.Enabled = true;
+                deleteBusButton.Text = "Delete Bus";
+            }
         }
     }
 
@@ -207,13 +405,47 @@ public partial class BusManagementForm : MetroForm
     {
         try
         {
-            _logger.LogInformation("Refresh button clicked");
-            await Task.Run(() => LoadBusDataAsync());
+            _logger.LogInformation("Refresh button clicked for Bus Management");
+
+            // Visual feedback during refresh
+            if (refreshButton != null)
+            {
+                refreshButton.Enabled = false;
+                refreshButton.Text = "Refreshing...";
+            }
+
+            if (statusLabel != null)
+            {
+                statusLabel.Text = "Refreshing bus data...";
+                statusLabel.ForeColor = System.Drawing.Color.FromArgb(52, 152, 219);
+            }
+
+            await LoadBusDataAsync();
+
+            if (statusLabel != null)
+            {
+                statusLabel.ForeColor = System.Drawing.Color.FromArgb(46, 204, 113);
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error refreshing data");
-            MessageBox.Show($"Error refreshing data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _logger.LogError(ex, "Error refreshing bus data");
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this, $"Error refreshing data: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+            if (statusLabel != null)
+            {
+                statusLabel.Text = "Refresh failed";
+                statusLabel.ForeColor = System.Drawing.Color.FromArgb(231, 76, 60);
+            }
+        }
+        finally
+        {
+            if (refreshButton != null)
+            {
+                refreshButton.Enabled = true;
+                refreshButton.Text = "Refresh";
+            }
         }
     }
 
@@ -227,7 +459,8 @@ public partial class BusManagementForm : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error closing form");
-            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this, $"Error: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 

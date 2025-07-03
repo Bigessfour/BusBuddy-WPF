@@ -13,8 +13,8 @@ using System.Windows.Forms;
 // Option 3: Schedule namespace
 // using Syncfusion.Schedule.WinForms;
 
-// Option 4: UI namespace
-using Syncfusion.UI.WinForms.Scheduler;
+// Option 4: UI namespace - COMMENTED OUT DUE TO COMPILATION ERROR
+// using Syncfusion.UI.WinForms.Scheduler;
 
 namespace Bus_Buddy
 {

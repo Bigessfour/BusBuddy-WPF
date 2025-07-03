@@ -1,6 +1,7 @@
 using Syncfusion.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
 using Syncfusion.WinForms.Controls;
+using Syncfusion.WinForms.DataGrid;
 using System.Windows.Forms;
 
 namespace Bus_Buddy.Forms;
@@ -20,8 +21,8 @@ partial class RouteManagementForm
     private AutoLabel titleLabel;
     private AutoLabel statusLabel;
 
-    // Data grid for displaying routes
-    private DataGridView routeDataGrid;
+    // Data grid for displaying routes - Using Syncfusion SfDataGrid
+    private SfDataGrid routeDataGrid;
 
     // Action buttons
     private SfButton addRouteButton;
@@ -65,9 +66,9 @@ partial class RouteManagementForm
         this.titleLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
         this.statusLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
 
-        // Initialize data grid
-        this.routeDataGrid = new System.Windows.Forms.DataGridView();
-        ((System.ComponentModel.ISupportInitialize)(this.routeDataGrid)).BeginInit();
+        // Initialize data grid - Using Syncfusion SfDataGrid
+        this.routeDataGrid = new Syncfusion.WinForms.DataGrid.SfDataGrid();
+        this.routeDataGrid.BeginInit();
 
         // Initialize buttons
         this.addRouteButton = new Syncfusion.WinForms.Controls.SfButton();
@@ -132,25 +133,22 @@ partial class RouteManagementForm
         this.statusLabel.TabIndex = 1;
         this.statusLabel.Text = "Loading...";
 
-        // Route Data Grid
-        this.routeDataGrid.AllowUserToAddRows = false;
-        this.routeDataGrid.AllowUserToDeleteRows = false;
-        this.routeDataGrid.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-        this.routeDataGrid.BackgroundColor = System.Drawing.Color.White;
-        this.routeDataGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-        this.routeDataGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        this.routeDataGrid.ColumnHeadersHeight = 30;
+        // Route Data Grid - Syncfusion SfDataGrid Configuration
+        this.routeDataGrid.AllowEditing = false;
+        this.routeDataGrid.AllowDeleting = false;
+        this.routeDataGrid.AutoSizeColumnsMode = Syncfusion.WinForms.DataGrid.Enums.AutoSizeColumnsMode.Fill;
+        this.routeDataGrid.BackColor = System.Drawing.Color.White;
+        this.routeDataGrid.HeaderRowHeight = 30;
         this.routeDataGrid.Dock = System.Windows.Forms.DockStyle.Fill;
         this.routeDataGrid.Location = new System.Drawing.Point(20, 40);
-        this.routeDataGrid.MultiSelect = false;
         this.routeDataGrid.Name = "routeDataGrid";
-        this.routeDataGrid.ReadOnly = true;
-        this.routeDataGrid.RowHeadersVisible = false;
-        this.routeDataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+        this.routeDataGrid.ShowRowHeader = false;
+        this.routeDataGrid.SelectionMode = Syncfusion.WinForms.DataGrid.Enums.GridSelectionMode.Single;
+        this.routeDataGrid.SelectionUnit = Syncfusion.WinForms.DataGrid.Enums.SelectionUnit.Row;
         this.routeDataGrid.Size = new System.Drawing.Size(1160, 520);
         this.routeDataGrid.TabIndex = 0;
-        this.routeDataGrid.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.RouteDataGrid_CellDoubleClick);
-        this.routeDataGrid.SelectionChanged += new System.EventHandler(this.RouteDataGrid_SelectionChanged);
+        this.routeDataGrid.Style.BorderColor = System.Drawing.Color.FromArgb(227, 227, 227);
+        this.routeDataGrid.Style.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
         // Configure action buttons
         ConfigureActionButton(this.addRouteButton, "Add Route", 20, 15, 0, System.Drawing.Color.FromArgb(76, 175, 80));
@@ -201,7 +199,7 @@ partial class RouteManagementForm
         this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
 
         // Complete data grid initialization
-        ((System.ComponentModel.ISupportInitialize)(this.routeDataGrid)).EndInit();
+        this.routeDataGrid.EndInit();
 
         // Resume layout
         this.ResumeLayout(false);

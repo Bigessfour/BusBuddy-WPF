@@ -23,6 +23,10 @@ namespace Bus_Buddy.Services
         Task<bool> UpdateBusEntityAsync(Bus bus);
         Task<bool> DeleteBusEntityAsync(int busId);
         Task<List<Driver>> GetAllDriversAsync();
+        Task<Driver?> GetDriverEntityByIdAsync(int driverId);
+        Task<Driver> AddDriverEntityAsync(Driver driver);
+        Task<bool> UpdateDriverEntityAsync(Driver driver);
+        Task<bool> DeleteDriverEntityAsync(int driverId);
         Task<List<Route>> GetAllRouteEntitiesAsync();
     }
 
