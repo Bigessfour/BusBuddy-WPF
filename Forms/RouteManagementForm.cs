@@ -274,15 +274,32 @@ public partial class RouteManagementForm : MetroForm
 
     #region Button Event Handlers
 
-    private void AddRouteButton_Click(object sender, EventArgs e)
+    private async void AddRouteButton_Click(object sender, EventArgs e)
     {
         try
         {
             _logger.LogInformation("Add Route button clicked");
 
-            Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
-                "Add Route functionality will be implemented here.\n\nThis will open a form to create a new bus route including:\n• Route planning\n• Stop assignments\n• Bus and driver assignments",
-                "Add Route", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Get services from ServiceContainer
+            var logger = ServiceContainer.GetService<ILogger<RouteEditForm>>();
+            var busService = ServiceContainer.GetService<IBusService>();
+
+            if (logger == null || busService == null)
+            {
+                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                    "Required services not available", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            using var addForm = new RouteEditForm(logger, busService);
+
+            if (addForm.ShowDialog() == DialogResult.OK && addForm.IsDataSaved)
+            {
+                // Refresh the grid to show the new route
+                await LoadRouteDataAsync();
+                _logger.LogInformation("New route added successfully");
+            }
         }
         catch (Exception ex)
         {
@@ -292,7 +309,7 @@ public partial class RouteManagementForm : MetroForm
         }
     }
 
-    private void EditRouteButton_Click(object sender, EventArgs e)
+    private async void EditRouteButton_Click(object sender, EventArgs e)
     {
         try
         {
@@ -300,9 +317,26 @@ public partial class RouteManagementForm : MetroForm
 
             if (routeDataGrid.CurrentItem != null && routeDataGrid.CurrentItem is Route selectedRoute)
             {
-                Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
-                    $"Edit Route functionality will be implemented here.\n\nSelected Route: {selectedRoute.RouteName}\nDescription: {selectedRoute.Description}",
-                    "Edit Route", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // Get services from ServiceContainer
+                var logger = ServiceContainer.GetService<ILogger<RouteEditForm>>();
+                var busService = ServiceContainer.GetService<IBusService>();
+
+                if (logger == null || busService == null)
+                {
+                    Syncfusion.Windows.Forms.MessageBoxAdv.Show(this,
+                        "Required services not available", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                using var editForm = new RouteEditForm(logger, busService, selectedRoute);
+
+                if (editForm.ShowDialog() == DialogResult.OK && editForm.IsDataSaved)
+                {
+                    // Refresh the grid to show updated route data
+                    await LoadRouteDataAsync();
+                    _logger.LogInformation("Route {RouteId} updated successfully", selectedRoute.RouteId);
+                }
             }
             else
             {

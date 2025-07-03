@@ -3,6 +3,7 @@ using Syncfusion.WinForms.DataGrid;
 using Microsoft.Extensions.Logging;
 using Bus_Buddy.Models;
 using Bus_Buddy.Services;
+using Bus_Buddy.Utilities;
 using System.ComponentModel;
 
 namespace Bus_Buddy.Forms;
@@ -385,8 +386,14 @@ public partial class FuelManagementForm : SfForm
         {
             _logger.LogInformation("Opening Fuel Edit Form for new record");
 
-            // For now, show a placeholder message since we don't have the FuelEditForm yet
-            ShowInfo("Fuel Edit Form will be implemented here.\n\nThis will allow you to:\n• Add new fuel records\n• Specify vehicle, date, and location\n• Enter gallons and pricing information\n• Add notes and fuel type");
+            var fuelEditLogger = ServiceContainer.GetService<ILogger<FuelEditForm>>();
+            using var fuelEditForm = new FuelEditForm(fuelEditLogger, _fuelService, _busService);
+            if (fuelEditForm.ShowDialog() == DialogResult.OK && fuelEditForm.IsDataSaved)
+            {
+                // Refresh the grid data
+                _ = LoadFuelDataAsync();
+                _logger.LogInformation("Fuel record added successfully");
+            }
         }
         catch (Exception ex)
         {
@@ -407,8 +414,14 @@ public partial class FuelManagementForm : SfForm
 
             _logger.LogInformation("Opening Fuel Edit Form for record {FuelId}", _selectedRecord.FuelId);
 
-            // For now, show a placeholder message
-            ShowInfo($"Fuel Edit Form will be implemented here.\n\nEditing record: {_selectedRecord.Vehicle?.BusNumber}\nDate: {_selectedRecord.FuelDate:MM/dd/yyyy}\nAmount: {_selectedRecord.Gallons:N2} gallons");
+            var fuelEditLogger = ServiceContainer.GetService<ILogger<FuelEditForm>>();
+            using var fuelEditForm = new FuelEditForm(fuelEditLogger, _fuelService, _busService, _selectedRecord);
+            if (fuelEditForm.ShowDialog() == DialogResult.OK && fuelEditForm.IsDataSaved)
+            {
+                // Refresh the grid data
+                _ = LoadFuelDataAsync();
+                _logger.LogInformation("Fuel record updated successfully");
+            }
         }
         catch (Exception ex)
         {

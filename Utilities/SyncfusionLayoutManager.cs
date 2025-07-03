@@ -45,8 +45,9 @@ namespace Bus_Buddy.Utilities
         /// <summary>
         /// Configure SfDataGrid with optimal settings for Bus Buddy application
         /// Based on Syncfusion documentation for column sizing and alignment
+        /// Enhanced with visual optimization features
         /// </summary>
-        public static void ConfigureSfDataGrid(SfDataGrid dataGrid, bool enableFullScreen = true)
+        public static void ConfigureSfDataGrid(SfDataGrid dataGrid, bool enableFullScreen = true, bool enableVisualEnhancements = true)
         {
             // Basic grid configuration
             dataGrid.AllowEditing = false;
@@ -71,8 +72,17 @@ namespace Bus_Buddy.Utilities
             dataGrid.HeaderRowHeight = 35;
             dataGrid.RowHeight = 30;
 
-            // Apply styling
-            ApplyGridStyling(dataGrid);
+            // Apply styling (enhanced or standard)
+            if (enableVisualEnhancements)
+            {
+                // Apply enhanced visual styling using the VisualEnhancementManager
+                VisualEnhancementManager.ApplyEnhancedGridVisuals(dataGrid);
+            }
+            else
+            {
+                // Apply standard styling
+                ApplyGridStyling(dataGrid);
+            }
 
             // Enable full screen optimization if requested
             if (enableFullScreen)
@@ -137,7 +147,7 @@ namespace Bus_Buddy.Utilities
         /// Configure specific column alignment and formatting
         /// </summary>
         public static void ConfigureColumnAlignment(SfDataGrid dataGrid, string columnName,
-            HorizontalAlignment alignment, string format = null, int? width = null)
+            HorizontalAlignment alignment, string? format = null, int? width = null)
         {
             if (dataGrid.Columns[columnName] != null)
             {

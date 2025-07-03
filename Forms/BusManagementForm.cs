@@ -36,10 +36,13 @@ public partial class BusManagementForm : MetroForm
 
     private void InitializeBusManagement()
     {
+        // Apply enhanced visual theme system
+        VisualEnhancementManager.ApplyEnhancedTheme(this);
+
         // Configure form for full screen using layout manager
         SyncfusionLayoutManager.ConfigureFormForFullScreen(this);
 
-        // Apply Syncfusion theme integration
+        // Apply Syncfusion theme integration with enhanced visuals
         try
         {
             // Set Office2016 visual style using SkinManager
@@ -47,20 +50,24 @@ public partial class BusManagementForm : MetroForm
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Could not apply Office2016 theme to Bus Management Form, using default styling");
+            _logger.LogWarning(ex, "Could not apply Office2016 theme to Bus Management Form, using enhanced fallback styling");
         }
 
-        // Set Syncfusion MetroForm styles
-        this.MetroColor = System.Drawing.Color.FromArgb(63, 81, 181);
-        this.CaptionBarColor = System.Drawing.Color.FromArgb(63, 81, 181);
+        // Set enhanced MetroForm styles
+        this.MetroColor = System.Drawing.Color.FromArgb(46, 125, 185);
+        this.CaptionBarColor = System.Drawing.Color.FromArgb(46, 125, 185);
         this.CaptionForeColor = System.Drawing.Color.White;
         this.Text = "Bus Management - Fleet Vehicles";
 
-        // Configure the data grid with enhanced layout manager
+        // Configure the data grid with enhanced visual system
         SyncfusionLayoutManager.ConfigureBusManagementGrid(busDataGrid);
+        VisualEnhancementManager.ApplyEnhancedGridVisuals(busDataGrid);
         ConfigureDataGrid();
 
-        _logger.LogInformation("Bus Management form initialized successfully");
+        // Enable high-quality font rendering
+        VisualEnhancementManager.EnableHighQualityFontRendering(this);
+
+        _logger.LogInformation("Bus Management form initialized with enhanced visuals");
 
         // Load bus data asynchronously with proper UI thread marshaling
         _ = Task.Run(async () =>

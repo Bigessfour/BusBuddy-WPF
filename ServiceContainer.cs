@@ -73,6 +73,10 @@ namespace Bus_Buddy
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IScheduleService, ScheduleService>();
             services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<IFuelService, FuelService>();
+            services.AddScoped<IMaintenanceService, MaintenanceService>();
+            services.AddScoped<ITicketService, TicketService>();
+            // TODO: Add IRouteService when RouteService is implemented
             services.AddScoped<BusBuddyScheduleDataProvider>();
 
             // Forms (as transient so they can be created multiple times if needed)
@@ -86,6 +90,12 @@ namespace Bus_Buddy
             services.AddTransient<Bus_Buddy.Forms.ActivityEditForm>();
             services.AddTransient<Bus_Buddy.Forms.StudentManagementForm>();
             services.AddTransient<Bus_Buddy.Forms.StudentEditForm>();
+            services.AddTransient<Bus_Buddy.Forms.MaintenanceManagementForm>();
+            services.AddTransient<Bus_Buddy.Forms.FuelManagementForm>();
+            services.AddTransient<Bus_Buddy.Forms.TicketManagementForm>();
+            services.AddTransient<Bus_Buddy.Forms.TicketEditForm>();
+            services.AddTransient<Bus_Buddy.Forms.VisualEnhancementShowcaseForm>();
+            services.AddTransient<Bus_Buddy.Forms.PassengerManagementForm>();
         }
 
         public static T GetService<T>() where T : notnull

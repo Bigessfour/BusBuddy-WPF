@@ -3,6 +3,7 @@ using Syncfusion.WinForms.DataGrid;
 using Microsoft.Extensions.Logging;
 using Bus_Buddy.Models;
 using Bus_Buddy.Services;
+using Bus_Buddy.Utilities;
 using System.ComponentModel;
 
 namespace Bus_Buddy.Forms;
@@ -352,8 +353,14 @@ public partial class MaintenanceManagementForm : SfForm
         {
             _logger.LogInformation("Opening Maintenance Edit Form for new record");
 
-            // For now, show a placeholder message since we don't have the MaintenanceEditForm yet
-            ShowInfo("Maintenance Edit Form will be implemented here.\n\nThis will allow you to:\n• Add new maintenance records\n• Specify vehicle, date, and maintenance type\n• Enter vendor and cost information\n• Set priority levels");
+            var maintenanceEditLogger = ServiceContainer.GetService<ILogger<MaintenanceEditForm>>();
+            using var maintenanceEditForm = new MaintenanceEditForm(maintenanceEditLogger, _maintenanceService, _busService);
+            if (maintenanceEditForm.ShowDialog() == DialogResult.OK && maintenanceEditForm.IsDataSaved)
+            {
+                // Refresh the grid data
+                _ = LoadMaintenanceDataAsync();
+                _logger.LogInformation("Maintenance record added successfully");
+            }
         }
         catch (Exception ex)
         {
@@ -374,8 +381,14 @@ public partial class MaintenanceManagementForm : SfForm
 
             _logger.LogInformation("Opening Maintenance Edit Form for record {MaintenanceId}", _selectedRecord.MaintenanceId);
 
-            // For now, show a placeholder message
-            ShowInfo($"Maintenance Edit Form will be implemented here.\n\nEditing record: {_selectedRecord.MaintenanceCompleted}\nVehicle: {_selectedRecord.Vehicle?.BusNumber}\nDate: {_selectedRecord.Date:MM/dd/yyyy}");
+            var maintenanceEditLogger = ServiceContainer.GetService<ILogger<MaintenanceEditForm>>();
+            using var maintenanceEditForm = new MaintenanceEditForm(maintenanceEditLogger, _maintenanceService, _busService, _selectedRecord);
+            if (maintenanceEditForm.ShowDialog() == DialogResult.OK && maintenanceEditForm.IsDataSaved)
+            {
+                // Refresh the grid data
+                _ = LoadMaintenanceDataAsync();
+                _logger.LogInformation("Maintenance record updated successfully");
+            }
         }
         catch (Exception ex)
         {

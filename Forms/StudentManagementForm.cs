@@ -1,5 +1,6 @@
 using Bus_Buddy.Models;
 using Bus_Buddy.Services;
+using Bus_Buddy.Utilities;
 using Microsoft.Extensions.Logging;
 using Syncfusion.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
@@ -83,10 +84,10 @@ public partial class StudentManagementForm : MetroForm
     {
         try
         {
-            // Apply Syncfusion theme integration
-            Syncfusion.Windows.Forms.SkinManager.SetVisualStyle(this, Syncfusion.Windows.Forms.VisualTheme.Office2016Colorful);
+            // Apply enhanced visual theme system
+            VisualEnhancementManager.ApplyEnhancedTheme(this);
 
-            // Configure MetroForm properties
+            // Configure MetroForm properties with enhanced colors
             this.MetroColor = System.Drawing.Color.FromArgb(52, 152, 219);
             this.CaptionBarColor = System.Drawing.Color.FromArgb(52, 152, 219);
             this.CaptionForeColor = System.Drawing.Color.White;
@@ -95,11 +96,14 @@ public partial class StudentManagementForm : MetroForm
             this.AutoScaleMode = AutoScaleMode.Dpi;
             this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
 
-            _logger.LogInformation("Syncfusion theme applied successfully to Student Management Form");
+            // Enable high-quality font rendering
+            VisualEnhancementManager.EnableHighQualityFontRendering(this);
+
+            _logger.LogInformation("Enhanced visual theme applied successfully to Student Management Form");
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Could not apply Office2016 theme to Student Management Form, using default styling");
+            _logger.LogWarning(ex, "Could not apply enhanced theme to Student Management Form, using default styling");
         }
     }
     #endregion
@@ -236,9 +240,7 @@ public partial class StudentManagementForm : MetroForm
             Location = new Point(20, 15),
             AccessibleName = "Add Student"
         };
-        btnAddStudent.Style.BackColor = Color.FromArgb(46, 204, 113);
-        btnAddStudent.Style.ForeColor = Color.White;
-        btnAddStudent.Style.HoverBackColor = Color.FromArgb(40, 180, 99);
+        VisualEnhancementManager.ApplyEnhancedButtonStyling(btnAddStudent, Color.FromArgb(46, 204, 113));
         btnAddStudent.Click += BtnAddStudent_Click;
 
         // Edit Student Button  
@@ -249,9 +251,7 @@ public partial class StudentManagementForm : MetroForm
             Location = new Point(170, 15),
             AccessibleName = "Edit Student"
         };
-        btnEditStudent.Style.BackColor = Color.FromArgb(241, 196, 15);
-        btnEditStudent.Style.ForeColor = Color.White;
-        btnEditStudent.Style.HoverBackColor = Color.FromArgb(212, 172, 13);
+        VisualEnhancementManager.ApplyEnhancedButtonStyling(btnEditStudent, Color.FromArgb(241, 196, 15));
         btnEditStudent.Click += BtnEditStudent_Click;
 
         // View Details Button
@@ -262,9 +262,7 @@ public partial class StudentManagementForm : MetroForm
             Location = new Point(320, 15),
             AccessibleName = "View Details"
         };
-        btnViewDetails.Style.BackColor = Color.FromArgb(52, 152, 219);
-        btnViewDetails.Style.ForeColor = Color.White;
-        btnViewDetails.Style.HoverBackColor = Color.FromArgb(46, 134, 193);
+        VisualEnhancementManager.ApplyEnhancedButtonStyling(btnViewDetails, Color.FromArgb(52, 152, 219));
         btnViewDetails.Click += BtnViewDetails_Click;
 
         // Delete Student Button
@@ -275,9 +273,7 @@ public partial class StudentManagementForm : MetroForm
             Location = new Point(470, 15),
             AccessibleName = "Delete Student"
         };
-        btnDeleteStudent.Style.BackColor = Color.FromArgb(231, 76, 60);
-        btnDeleteStudent.Style.ForeColor = Color.White;
-        btnDeleteStudent.Style.HoverBackColor = Color.FromArgb(203, 67, 53);
+        VisualEnhancementManager.ApplyEnhancedButtonStyling(btnDeleteStudent, Color.FromArgb(231, 76, 60));
         btnDeleteStudent.Click += BtnDeleteStudent_Click;
 
         // Refresh Button
@@ -288,9 +284,7 @@ public partial class StudentManagementForm : MetroForm
             Location = new Point(600, 15),
             AccessibleName = "Refresh Data"
         };
-        btnRefresh.Style.BackColor = Color.FromArgb(155, 89, 182);
-        btnRefresh.Style.ForeColor = Color.White;
-        btnRefresh.Style.HoverBackColor = Color.FromArgb(142, 68, 173);
+        VisualEnhancementManager.ApplyEnhancedButtonStyling(btnRefresh, Color.FromArgb(155, 89, 182));
         btnRefresh.Click += BtnRefresh_Click;
 
         panelControls.Controls.AddRange(new Control[]
@@ -418,13 +412,8 @@ public partial class StudentManagementForm : MetroForm
                 SelectionMode = GridSelectionMode.Single
             };
 
-            // Apply Office2016 styling to the grid
-            studentDataGrid.Style.HeaderStyle.BackColor = System.Drawing.Color.FromArgb(52, 152, 219);
-            studentDataGrid.Style.HeaderStyle.TextColor = System.Drawing.Color.White;
-            studentDataGrid.Style.HeaderStyle.Font.Bold = true;
-            studentDataGrid.Style.BorderColor = System.Drawing.Color.FromArgb(227, 227, 227);
-            studentDataGrid.Style.SelectionStyle.BackColor = System.Drawing.Color.FromArgb(52, 152, 219, 50);
-            studentDataGrid.Style.SelectionStyle.TextColor = System.Drawing.Color.Black;
+            // Apply Office2016 styling to the grid with enhanced visuals
+            VisualEnhancementManager.ApplyEnhancedGridVisuals(studentDataGrid);
 
             // Configure grid features
             studentDataGrid.AutoSizeColumnsMode = AutoSizeColumnsMode.None;

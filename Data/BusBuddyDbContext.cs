@@ -29,6 +29,7 @@ public class BusBuddyDbContext : DbContext
     public DbSet<RouteStop> RouteStops { get; set; }
     public DbSet<SchoolCalendar> SchoolCalendar { get; set; }
     public DbSet<ActivitySchedule> ActivitySchedule { get; set; }
+    public DbSet<Ticket> Tickets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -418,6 +419,58 @@ public class BusBuddyDbContext : DbContext
             entity.HasIndex(e => e.TripType).HasDatabaseName("IX_ActivitySchedule_TripType");
             entity.HasIndex(e => e.ScheduledVehicleId).HasDatabaseName("IX_ActivitySchedule_VehicleId");
             entity.HasIndex(e => e.ScheduledDriverId).HasDatabaseName("IX_ActivitySchedule_DriverId");
+        });
+
+        // Configure Ticket entity
+        modelBuilder.Entity<Ticket>(entity =>
+        {
+            entity.ToTable("Tickets");
+            entity.HasKey(e => e.TicketId);
+
+            // Properties
+            entity.Property(e => e.TicketType).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.Status).IsRequired().HasMaxLength(20).HasDefaultValue("Valid");
+            entity.Property(e => e.PaymentMethod).IsRequired().HasMaxLength(30);
+            entity.Property(e => e.QRCode).HasMaxLength(50);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.Property(e => e.UsedByDriver).HasMaxLength(100);
+
+            // Decimal properties
+            entity.Property(e => e.Price).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.RefundAmount).HasColumnType("decimal(10,2)");
+
+            // Date properties
+            entity.Property(e => e.TravelDate).HasColumnType("date");
+            entity.Property(e => e.IssuedDate).HasDefaultValueSql("GETUTCDATE()");
+
+            // Audit fields
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+            entity.Property(e => e.CreatedDate).HasDefaultValueSql("GETUTCDATE()");
+
+            // Relationships
+            entity.HasOne(t => t.Student)
+                  .WithMany()
+                  .HasForeignKey(t => t.StudentId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Tickets_Student");
+
+            entity.HasOne(t => t.Route)
+                  .WithMany()
+                  .HasForeignKey(t => t.RouteId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Tickets_Route");
+
+            // Indexes for performance
+            entity.HasIndex(e => e.StudentId).HasDatabaseName("IX_Tickets_StudentId");
+            entity.HasIndex(e => e.RouteId).HasDatabaseName("IX_Tickets_RouteId");
+            entity.HasIndex(e => e.TravelDate).HasDatabaseName("IX_Tickets_TravelDate");
+            entity.HasIndex(e => e.IssuedDate).HasDatabaseName("IX_Tickets_IssuedDate");
+            entity.HasIndex(e => e.Status).HasDatabaseName("IX_Tickets_Status");
+            entity.HasIndex(e => e.TicketType).HasDatabaseName("IX_Tickets_TicketType");
+            entity.HasIndex(e => e.QRCode).IsUnique().HasDatabaseName("IX_Tickets_QRCode");
+            entity.HasIndex(e => new { e.StudentId, e.RouteId, e.TravelDate }).HasDatabaseName("IX_Tickets_StudentRouteDate");
+            entity.HasIndex(e => new { e.TravelDate, e.Status }).HasDatabaseName("IX_Tickets_TravelDateStatus");
         });
 
         // Seed initial data
