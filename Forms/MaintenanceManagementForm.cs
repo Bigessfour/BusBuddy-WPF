@@ -600,22 +600,13 @@ Created By: {_selectedRecord.CreatedBy ?? "System"}
     {
         if (InvokeRequired)
         {
-            Invoke(() => toolStripStatusLabel.Text = message);
+            Invoke(() => statusLabel.Text = message);
         }
         else
         {
-            toolStripStatusLabel.Text = message;
+            statusLabel.Text = message;
         }
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _selectedRecord = null;
-            components?.Dispose();
-        }
-        base.Dispose(disposing);
-    }
     #endregion
 }

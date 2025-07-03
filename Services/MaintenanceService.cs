@@ -88,7 +88,7 @@ public class MaintenanceService : IMaintenanceService
     public async Task<decimal> GetMaintenanceCostTotalAsync(int vehicleId, DateTime? startDate = null, DateTime? endDate = null)
     {
         var query = _context.MaintenanceRecords
-            .Where(m => m.VehicleId == vehicleId && m.RepairCost.HasValue);
+            .Where(m => m.VehicleId == vehicleId && m.RepairCost > 0);
 
         if (startDate.HasValue)
             query = query.Where(m => m.Date >= startDate.Value);
@@ -96,6 +96,6 @@ public class MaintenanceService : IMaintenanceService
         if (endDate.HasValue)
             query = query.Where(m => m.Date <= endDate.Value);
 
-        return await query.SumAsync(m => m.RepairCost ?? 0);
+        return await query.SumAsync(m => m.RepairCost);
     }
 }

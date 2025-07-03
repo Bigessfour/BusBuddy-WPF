@@ -25,7 +25,7 @@ namespace Bus_Buddy.Services
 
         public T GetValue<T>(string key)
         {
-            return _configuration.GetValue<T>(key);
+            return _configuration.GetValue<T>(key) ?? default(T)!;
         }
 
         public string GetSyncfusionLicenseKey()

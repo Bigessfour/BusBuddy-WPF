@@ -1,6 +1,8 @@
 using Bus_Buddy.Models;
 using Bus_Buddy.Services;
+using Bus_Buddy.Utilities;
 using Microsoft.Extensions.Logging;
+using Syncfusion.Windows.Forms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,9 +22,8 @@ namespace Bus_Buddy.Forms
     {
         private readonly ILogger<TicketManagementForm> _logger;
         private readonly IServiceProvider _serviceProvider;
-        private BindingList<TicketViewModel> _tickets;
-        private BindingList<Route> _routes;
-        private List<Route> _allRoutes;
+        private BindingList<TicketViewModel> _tickets = new();
+        private List<Route> _allRoutes = new();
         private bool _isLoading = false;
 
         public TicketManagementForm(ILogger<TicketManagementForm> logger, IServiceProvider serviceProvider)
@@ -31,6 +32,13 @@ namespace Bus_Buddy.Forms
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
             InitializeComponent();
+
+            // Configure form for full screen and enhanced layout
+            SyncfusionLayoutManager.ConfigureFormForFullScreen(this);
+
+            // Configure the data grid with enhanced layout manager  
+            SyncfusionLayoutManager.ConfigureTicketManagementGrid(dataGridTickets);
+
             InitializeDataGrid();
             InitializeFilters();
             LoadDataAsync();
@@ -43,58 +51,73 @@ namespace Bus_Buddy.Forms
                 _tickets = new BindingList<TicketViewModel>();
                 dataGridTickets.DataSource = _tickets;
 
-                // Configure columns
-                dataGridTickets.Columns["Id"].HeaderText = "Ticket ID";
-                dataGridTickets.Columns["Id"].Width = 80;
-
-                dataGridTickets.Columns["StudentName"].HeaderText = "Student Name";
-                dataGridTickets.Columns["StudentName"].Width = 150;
-
-                dataGridTickets.Columns["RouteName"].HeaderText = "Route";
-                dataGridTickets.Columns["RouteName"].Width = 120;
-
-                dataGridTickets.Columns["TravelDate"].HeaderText = "Travel Date";
-                dataGridTickets.Columns["TravelDate"].Width = 100;
-                dataGridTickets.Columns["TravelDate"].Format = "MM/dd/yyyy";
-
-                dataGridTickets.Columns["IssuedDate"].HeaderText = "Issued Date";
-                dataGridTickets.Columns["IssuedDate"].Width = 100;
-                dataGridTickets.Columns["IssuedDate"].Format = "MM/dd/yyyy HH:mm";
-
-                dataGridTickets.Columns["TicketType"].HeaderText = "Ticket Type";
-                dataGridTickets.Columns["TicketType"].Width = 100;
-
-                dataGridTickets.Columns["Price"].HeaderText = "Price";
-                dataGridTickets.Columns["Price"].Width = 80;
-                dataGridTickets.Columns["Price"].Format = "C2";
-
-                dataGridTickets.Columns["Status"].HeaderText = "Status";
-                dataGridTickets.Columns["Status"].Width = 80;
-
-                dataGridTickets.Columns["PaymentMethod"].HeaderText = "Payment";
-                dataGridTickets.Columns["PaymentMethod"].Width = 100;
-
-                dataGridTickets.Columns["QRCode"].HeaderText = "QR Code";
-                dataGridTickets.Columns["QRCode"].Width = 100;
-
-                // Style configuration
-                dataGridTickets.Style.BorderColor = Color.FromArgb(227, 227, 227);
-                dataGridTickets.Style.CheckBoxStyle.CheckedBackColor = Color.FromArgb(142, 68, 173);
-                dataGridTickets.Style.HeaderStyle.BackColor = Color.FromArgb(248, 249, 250);
-                dataGridTickets.Style.HeaderStyle.TextColor = Color.FromArgb(68, 68, 68);
-                dataGridTickets.Style.HeaderStyle.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-                dataGridTickets.Style.CellStyle.Font = new Font("Segoe UI", 9F);
-                dataGridTickets.Style.CellStyle.TextColor = Color.FromArgb(68, 68, 68);
-                dataGridTickets.Style.SelectionStyle.BackColor = Color.FromArgb(142, 68, 173, 30);
-                dataGridTickets.Style.SelectionStyle.TextColor = Color.FromArgb(68, 68, 68);
+                // Wait for data source to be set, then configure columns with enhanced alignment
+                dataGridTickets.DataSourceChanged += (sender, e) =>
+                {
+                    ConfigureTicketGridColumns();
+                };
 
                 _logger.LogInformation("Ticket management data grid initialized successfully");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error initializing ticket management data grid");
-                MessageBox.Show($"Error initializing data grid: {ex.Message}", "Error",
+                MessageBoxAdv.Show($"Error initializing data grid: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ConfigureTicketGridColumns()
+        {
+            try
+            {
+                // Configure column headers and alignment using the layout manager
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "Id",
+                    System.Windows.Forms.HorizontalAlignment.Center, null, 80);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "StudentName",
+                    System.Windows.Forms.HorizontalAlignment.Left, null, 150);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "RouteName",
+                    System.Windows.Forms.HorizontalAlignment.Left, null, 120);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "TravelDate",
+                    System.Windows.Forms.HorizontalAlignment.Center, "MM/dd/yyyy", 100);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "IssuedDate",
+                    System.Windows.Forms.HorizontalAlignment.Center, "MM/dd/yyyy HH:mm", 130);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "TicketType",
+                    System.Windows.Forms.HorizontalAlignment.Center, null, 100);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "Price",
+                    System.Windows.Forms.HorizontalAlignment.Right, "C2", 80);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "Status",
+                    System.Windows.Forms.HorizontalAlignment.Center, null, 80);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "PaymentMethod",
+                    System.Windows.Forms.HorizontalAlignment.Center, null, 100);
+                SyncfusionLayoutManager.ConfigureColumnAlignment(dataGridTickets, "QRCode",
+                    System.Windows.Forms.HorizontalAlignment.Center, null, 100);
+
+                // Set custom header texts
+                if (dataGridTickets.Columns["Id"] != null)
+                    dataGridTickets.Columns["Id"].HeaderText = "Ticket ID";
+                if (dataGridTickets.Columns["StudentName"] != null)
+                    dataGridTickets.Columns["StudentName"].HeaderText = "Student Name";
+                if (dataGridTickets.Columns["RouteName"] != null)
+                    dataGridTickets.Columns["RouteName"].HeaderText = "Route";
+                if (dataGridTickets.Columns["TravelDate"] != null)
+                    dataGridTickets.Columns["TravelDate"].HeaderText = "Travel Date";
+                if (dataGridTickets.Columns["IssuedDate"] != null)
+                    dataGridTickets.Columns["IssuedDate"].HeaderText = "Issued Date";
+                if (dataGridTickets.Columns["TicketType"] != null)
+                    dataGridTickets.Columns["TicketType"].HeaderText = "Ticket Type";
+                if (dataGridTickets.Columns["Price"] != null)
+                    dataGridTickets.Columns["Price"].HeaderText = "Price";
+                if (dataGridTickets.Columns["Status"] != null)
+                    dataGridTickets.Columns["Status"].HeaderText = "Status";
+                if (dataGridTickets.Columns["PaymentMethod"] != null)
+                    dataGridTickets.Columns["PaymentMethod"].HeaderText = "Payment";
+                if (dataGridTickets.Columns["QRCode"] != null)
+                    dataGridTickets.Columns["QRCode"].HeaderText = "QR Code";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error configuring ticket grid columns");
             }
         }
 
@@ -118,7 +141,7 @@ namespace Bus_Buddy.Forms
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error initializing filters");
-                MessageBox.Show($"Error initializing filters: {ex.Message}", "Error",
+                MessageBoxAdv.Show($"Error initializing filters: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -130,19 +153,19 @@ namespace Bus_Buddy.Forms
             try
             {
                 _isLoading = true;
-                toolStripStatusLabel.Text = "Loading tickets...";
+                statusLabel.Text = "Loading tickets...";
 
                 await LoadRoutesAsync();
-                await LoadTicketsAsync();
+                LoadTickets();
 
-                toolStripStatusLabel.Text = $"Loaded {_tickets.Count} tickets";
+                statusLabel.Text = $"Loaded {_tickets.Count} tickets";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading ticket management data");
-                MessageBox.Show($"Error loading data: {ex.Message}", "Error",
+                MessageBoxAdv.Show($"Error loading data: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-                toolStripStatusLabel.Text = "Error loading data";
+                statusLabel.Text = "Error loading data";
             }
             finally
             {
@@ -164,7 +187,7 @@ namespace Bus_Buddy.Forms
 
                 foreach (var route in _allRoutes)
                 {
-                    cmbRouteFilter.Items.Add($"{route.RouteNumber} - {route.RouteName}");
+                    cmbRouteFilter.Items.Add($"{route.RouteId} - {route.RouteName}");
                 }
 
                 cmbRouteFilter.SelectedIndex = 0;
@@ -178,7 +201,7 @@ namespace Bus_Buddy.Forms
             }
         }
 
-        private async Task LoadTicketsAsync()
+        private void LoadTickets()
         {
             try
             {
@@ -212,7 +235,7 @@ namespace Bus_Buddy.Forms
 
             for (int i = 1; i <= 50; i++)
             {
-                var route = _allRoutes?.FirstOrDefault() ?? new Route { RouteNumber = "001", RouteName = "Main Route" };
+                var route = _allRoutes?.FirstOrDefault() ?? new Route { RouteId = 1, RouteName = "Main Route" };
                 var travelDate = DateTime.Today.AddDays(random.Next(-30, 30));
                 var ticketType = ticketTypes[random.Next(ticketTypes.Length)];
                 var status = statuses[random.Next(statuses.Length)];
@@ -221,7 +244,7 @@ namespace Bus_Buddy.Forms
                 {
                     Id = i,
                     StudentName = $"Student {i:000}",
-                    RouteName = $"{route.RouteNumber} - {route.RouteName}",
+                    RouteName = $"{route.RouteId} - {route.RouteName}",
                     TravelDate = travelDate,
                     IssuedDate = DateTime.Now.AddDays(-random.Next(0, 30)).AddHours(-random.Next(0, 24)),
                     TicketType = ticketType,
@@ -301,12 +324,12 @@ namespace Bus_Buddy.Forms
                 var newList = new BindingList<TicketViewModel>(filteredTickets.ToList());
                 dataGridTickets.DataSource = newList;
 
-                toolStripStatusLabel.Text = $"Showing {newList.Count} of {_tickets.Count} tickets";
+                statusLabel.Text = $"Showing {newList.Count} of {_tickets.Count} tickets";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error applying filters");
-                MessageBox.Show($"Error applying filters: {ex.Message}", "Error",
+                MessageBoxAdv.Show($"Error applying filters: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -315,14 +338,14 @@ namespace Bus_Buddy.Forms
         {
             try
             {
-                MessageBox.Show("Ticket Sale Form will be implemented here.", "Coming Soon",
+                MessageBoxAdv.Show("Ticket Sale Form will be implemented here.", "Coming Soon",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 _logger.LogInformation("Add ticket button clicked");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in add ticket");
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxAdv.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -332,20 +355,20 @@ namespace Bus_Buddy.Forms
             {
                 if (dataGridTickets.SelectedItem is TicketViewModel selectedTicket)
                 {
-                    MessageBox.Show($"Edit Ticket Form for Ticket ID: {selectedTicket.Id} will be implemented here.",
+                    MessageBoxAdv.Show($"Edit Ticket Form for Ticket ID: {selectedTicket.Id} will be implemented here.",
                         "Coming Soon", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     _logger.LogInformation($"Edit ticket button clicked for ticket {selectedTicket.Id}");
                 }
                 else
                 {
-                    MessageBox.Show("Please select a ticket to edit.", "No Selection",
+                    MessageBoxAdv.Show("Please select a ticket to edit.", "No Selection",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in edit ticket");
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxAdv.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -355,7 +378,7 @@ namespace Bus_Buddy.Forms
             {
                 if (dataGridTickets.SelectedItem is TicketViewModel selectedTicket)
                 {
-                    var result = MessageBox.Show($"Are you sure you want to cancel ticket {selectedTicket.Id}?",
+                    var result = MessageBoxAdv.Show($"Are you sure you want to cancel ticket {selectedTicket.Id}?",
                         "Confirm Cancellation", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                     if (result == DialogResult.Yes)
@@ -364,20 +387,20 @@ namespace Bus_Buddy.Forms
                         dataGridTickets.Refresh();
                         UpdateSummaryLabels();
                         _logger.LogInformation($"Ticket {selectedTicket.Id} cancelled");
-                        MessageBox.Show("Ticket cancelled successfully.", "Success",
+                        MessageBoxAdv.Show("Ticket cancelled successfully.", "Success",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Please select a ticket to cancel.", "No Selection",
+                    MessageBoxAdv.Show("Please select a ticket to cancel.", "No Selection",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error cancelling ticket");
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxAdv.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -391,7 +414,7 @@ namespace Bus_Buddy.Forms
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error refreshing ticket data");
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxAdv.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -413,19 +436,19 @@ namespace Bus_Buddy.Forms
                                 $"Payment: {selectedTicket.PaymentMethod}\n" +
                                 $"QR Code: {selectedTicket.QRCode}";
 
-                    MessageBox.Show(details, "Ticket Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBoxAdv.Show(details, "Ticket Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     _logger.LogInformation($"Viewed details for ticket {selectedTicket.Id}");
                 }
                 else
                 {
-                    MessageBox.Show("Please select a ticket to view details.", "No Selection",
+                    MessageBoxAdv.Show("Please select a ticket to view details.", "No Selection",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error viewing ticket details");
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxAdv.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -435,20 +458,20 @@ namespace Bus_Buddy.Forms
             {
                 if (dataGridTickets.SelectedItem is TicketViewModel selectedTicket)
                 {
-                    MessageBox.Show($"Print functionality for Ticket {selectedTicket.Id} will be implemented here.",
+                    MessageBoxAdv.Show($"Print functionality for Ticket {selectedTicket.Id} will be implemented here.",
                         "Coming Soon", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     _logger.LogInformation($"Print ticket button clicked for ticket {selectedTicket.Id}");
                 }
                 else
                 {
-                    MessageBox.Show("Please select a ticket to print.", "No Selection",
+                    MessageBoxAdv.Show("Please select a ticket to print.", "No Selection",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error printing ticket");
-                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxAdv.Show($"Error: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

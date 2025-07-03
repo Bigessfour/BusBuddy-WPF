@@ -2,6 +2,7 @@ using Bus_Buddy.Models;
 using Bus_Buddy.Services;
 using Microsoft.Extensions.Logging;
 using Syncfusion.WinForms.Controls;
+using Syncfusion.Windows.Forms;
 using System.ComponentModel;
 
 namespace Bus_Buddy.Forms;
@@ -390,7 +391,7 @@ public partial class ActivityEditForm : SfForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading combo box data");
-            MessageBox.Show($"Error loading data: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error loading data: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -429,7 +430,7 @@ public partial class ActivityEditForm : SfForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading activity data");
-            MessageBox.Show($"Error loading activity data: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error loading activity data: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -458,13 +459,13 @@ public partial class ActivityEditForm : SfForm
             if (_activity == null)
             {
                 await _activityService.CreateActivityAsync(activity);
-                MessageBox.Show("Activity created successfully!", "Success",
+                MessageBoxAdv.Show("Activity created successfully!", "Success",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
                 await _activityService.UpdateActivityAsync(activity);
-                MessageBox.Show("Activity updated successfully!", "Success",
+                MessageBoxAdv.Show("Activity updated successfully!", "Success",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
@@ -474,7 +475,7 @@ public partial class ActivityEditForm : SfForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error saving activity");
-            MessageBox.Show($"Error saving activity: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error saving activity: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -489,7 +490,7 @@ public partial class ActivityEditForm : SfForm
     {
         if (string.IsNullOrEmpty(comboBoxActivityType.SelectedItem?.ToString()))
         {
-            MessageBox.Show("Please select an activity type.", "Validation Error",
+            MessageBoxAdv.Show("Please select an activity type.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             comboBoxActivityType.Focus();
             return false;
@@ -497,7 +498,7 @@ public partial class ActivityEditForm : SfForm
 
         if (comboBoxVehicle.SelectedValue == null)
         {
-            MessageBox.Show("Please select a vehicle.", "Validation Error",
+            MessageBoxAdv.Show("Please select a vehicle.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             comboBoxVehicle.Focus();
             return false;
@@ -505,7 +506,7 @@ public partial class ActivityEditForm : SfForm
 
         if (comboBoxRoute.SelectedValue == null)
         {
-            MessageBox.Show("Please select a route.", "Validation Error",
+            MessageBoxAdv.Show("Please select a route.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             comboBoxRoute.Focus();
             return false;
@@ -513,7 +514,7 @@ public partial class ActivityEditForm : SfForm
 
         if (comboBoxDriver.SelectedValue == null)
         {
-            MessageBox.Show("Please select a driver.", "Validation Error",
+            MessageBoxAdv.Show("Please select a driver.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             comboBoxDriver.Focus();
             return false;
@@ -521,7 +522,7 @@ public partial class ActivityEditForm : SfForm
 
         if (timePickerEnd.Value <= timePickerStart.Value)
         {
-            MessageBox.Show("End time must be after start time.", "Validation Error",
+            MessageBoxAdv.Show("End time must be after start time.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             timePickerEnd.Focus();
             return false;
@@ -529,7 +530,7 @@ public partial class ActivityEditForm : SfForm
 
         if (numericEndOdometer.IntegerValue <= numericStartOdometer.IntegerValue)
         {
-            MessageBox.Show("End odometer must be greater than start odometer.", "Validation Error",
+            MessageBoxAdv.Show("End odometer must be greater than start odometer.", "Validation Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Warning);
             numericEndOdometer.Focus();
             return false;

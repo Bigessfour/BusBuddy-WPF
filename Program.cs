@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Syncfusion.Windows.Forms;
 
 namespace Bus_Buddy;
 
@@ -40,7 +41,7 @@ static class Program
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"An error occurred while starting the application: {ex.Message}",
+            MessageBoxAdv.Show($"An error occurred while starting the application: {ex.Message}",
                 "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
         finally

@@ -254,7 +254,7 @@ public partial class FuelManagementForm : SfForm
             }
 
             ApplyFilters();
-            await UpdateSummaryLabelsAsync();
+            UpdateSummaryLabels();
 
             UpdateStatus($"Loaded {_fuelRecords.Count} fuel records");
             _logger.LogInformation("Loaded {Count} fuel records successfully", _fuelRecords.Count);
@@ -341,7 +341,7 @@ public partial class FuelManagementForm : SfForm
             }
 
             UpdateStatus($"Showing {_filteredRecords.Count} of {_fuelRecords.Count} fuel records");
-            _ = UpdateSummaryLabelsAsync(); // Update summary in background
+            UpdateSummaryLabels(); // Update summary
         }
         catch (Exception ex)
         {
@@ -350,7 +350,7 @@ public partial class FuelManagementForm : SfForm
         }
     }
 
-    private async Task UpdateSummaryLabelsAsync()
+    private void UpdateSummaryLabels()
     {
         try
         {
@@ -640,22 +640,13 @@ Notes: {_selectedRecord.Notes ?? "No notes"}
     {
         if (InvokeRequired)
         {
-            Invoke(() => toolStripStatusLabel.Text = message);
+            Invoke(() => statusLabel.Text = message);
         }
         else
         {
-            toolStripStatusLabel.Text = message;
+            statusLabel.Text = message;
         }
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _selectedRecord = null;
-            components?.Dispose();
-        }
-        base.Dispose(disposing);
-    }
     #endregion
 }

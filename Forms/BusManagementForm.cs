@@ -5,6 +5,7 @@ using Syncfusion.WinForms.DataGrid;
 using Microsoft.Extensions.Logging;
 using Bus_Buddy.Services;
 using Bus_Buddy.Models;
+using Bus_Buddy.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -35,6 +36,9 @@ public partial class BusManagementForm : MetroForm
 
     private void InitializeBusManagement()
     {
+        // Configure form for full screen using layout manager
+        SyncfusionLayoutManager.ConfigureFormForFullScreen(this);
+
         // Apply Syncfusion theme integration
         try
         {
@@ -52,11 +56,8 @@ public partial class BusManagementForm : MetroForm
         this.CaptionForeColor = System.Drawing.Color.White;
         this.Text = "Bus Management - Fleet Vehicles";
 
-        // Enable high DPI scaling for this form
-        this.AutoScaleMode = AutoScaleMode.Dpi;
-        this.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-
-        // Configure data grid if it exists
+        // Configure the data grid with enhanced layout manager
+        SyncfusionLayoutManager.ConfigureBusManagementGrid(busDataGrid);
         ConfigureDataGrid();
 
         _logger.LogInformation("Bus Management form initialized successfully");

@@ -63,7 +63,7 @@ public partial class Dashboard : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading dashboard data");
-            MessageBox.Show($"Error loading dashboard data: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error loading dashboard data: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -84,7 +84,7 @@ public partial class Dashboard : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Bus Management");
-            MessageBox.Show($"Error opening Bus Management: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Bus Management: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -102,7 +102,7 @@ public partial class Dashboard : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Driver Management");
-            MessageBox.Show($"Error opening Driver Management: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Driver Management: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -120,7 +120,7 @@ public partial class Dashboard : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Route Management");
-            MessageBox.Show($"Error opening Route Management: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Route Management: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -138,7 +138,7 @@ public partial class Dashboard : MetroForm
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Schedule Management");
-            MessageBox.Show($"Error opening Schedule Management: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Schedule Management: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -150,13 +150,13 @@ public partial class Dashboard : MetroForm
             _logger.LogInformation("Passenger Management button clicked");
 
             // TODO: Open Passenger Management form
-            MessageBox.Show("Passenger Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Passenger information\n• Boarding history\n• Passenger preferences",
+            MessageBoxAdv.Show("Passenger Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Passenger information\n• Boarding history\n• Passenger preferences",
                 "Passenger Management", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Passenger Management");
-            MessageBox.Show($"Error opening Passenger Management: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Passenger Management: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -168,13 +168,13 @@ public partial class Dashboard : MetroForm
             _logger.LogInformation("Student Management button clicked");
 
             // TODO: Open Student Management form
-            MessageBox.Show("Student Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Student information\n• School assignments\n• Transportation needs",
+            MessageBoxAdv.Show("Student Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Student information\n• School assignments\n• Transportation needs",
                 "Student Management", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Student Management");
-            MessageBox.Show($"Error opening Student Management: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Student Management: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -186,13 +186,13 @@ public partial class Dashboard : MetroForm
             _logger.LogInformation("Maintenance button clicked");
 
             // TODO: Open Maintenance Management form
-            MessageBox.Show("Maintenance Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Maintenance records\n• Service schedules\n• Repair history",
+            MessageBoxAdv.Show("Maintenance Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Maintenance records\n• Service schedules\n• Repair history",
                 "Maintenance Management", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Maintenance Management");
-            MessageBox.Show($"Error opening Maintenance Management: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Maintenance Management: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -204,13 +204,13 @@ public partial class Dashboard : MetroForm
             _logger.LogInformation("Fuel Tracking button clicked");
 
             // TODO: Open Fuel Tracking form
-            MessageBox.Show("Fuel Tracking functionality will be implemented here.\n\nThis will open a form to manage:\n• Fuel consumption\n• Fuel costs\n• Efficiency reports",
+            MessageBoxAdv.Show("Fuel Tracking functionality will be implemented here.\n\nThis will open a form to manage:\n• Fuel consumption\n• Fuel costs\n• Efficiency reports",
                 "Fuel Tracking", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Fuel Tracking");
-            MessageBox.Show($"Error opening Fuel Tracking: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Fuel Tracking: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -222,13 +222,13 @@ public partial class Dashboard : MetroForm
             _logger.LogInformation("Activity Log button clicked");
 
             // TODO: Open Activity Log form
-            MessageBox.Show("Activity Log functionality will be implemented here.\n\nThis will open a form to view:\n• System activities\n• User actions\n• Audit trails",
+            MessageBoxAdv.Show("Activity Log functionality will be implemented here.\n\nThis will open a form to view:\n• System activities\n• User actions\n• Audit trails",
                 "Activity Log", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Activity Log");
-            MessageBox.Show($"Error opening Activity Log: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Activity Log: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -240,13 +240,13 @@ public partial class Dashboard : MetroForm
             _logger.LogInformation("Ticket Management button clicked");
 
             // TODO: Open Ticket Management form
-            MessageBox.Show("Ticket Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Passenger tickets\n• Ticket sales\n• Fare collection",
+            MessageBoxAdv.Show("Ticket Management functionality will be implemented here.\n\nThis will open a form to manage:\n• Passenger tickets\n• Ticket sales\n• Fare collection",
                 "Ticket Management", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Ticket Management");
-            MessageBox.Show($"Error opening Ticket Management: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Error opening Ticket Management: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -261,13 +261,13 @@ public partial class Dashboard : MetroForm
             // Reload dashboard data
             await Task.Run(() => LoadDashboardDataAsync());
 
-            MessageBox.Show("Data refreshed successfully", "Refresh Complete",
+            MessageBoxAdv.Show("Data refreshed successfully", "Refresh Complete",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during refresh operation");
-            MessageBox.Show($"Refresh error: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Refresh error: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -279,13 +279,13 @@ public partial class Dashboard : MetroForm
             _logger.LogInformation("Reports button clicked");
 
             // TODO: Open Reports form or dialog
-            MessageBox.Show("Reports functionality will be implemented here.\n\nThis will provide:\n• Fleet reports\n• Financial reports\n• Performance analytics",
+            MessageBoxAdv.Show("Reports functionality will be implemented here.\n\nThis will provide:\n• Fleet reports\n• Financial reports\n• Performance analytics",
                 "Reports", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening Reports");
-            MessageBox.Show($"Reports error: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Reports error: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
@@ -297,13 +297,33 @@ public partial class Dashboard : MetroForm
             _logger.LogInformation("Settings button clicked");
 
             // TODO: Open settings dialog
-            MessageBox.Show("Settings functionality will be implemented here.\n\nThis will provide:\n• Application settings\n• Database configuration\n• User preferences",
+            MessageBoxAdv.Show("Settings functionality will be implemented here.\n\nThis will provide:\n• Application settings\n• Database configuration\n• User preferences",
                 "Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error opening settings");
-            MessageBox.Show($"Settings error: {ex.Message}", "Error",
+            MessageBoxAdv.Show($"Settings error: {ex.Message}", "Error",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    /// <summary>
+    /// Opens the Enhanced Grid Layout Demo form to showcase improved Syncfusion grid formatting
+    /// </summary>
+    private void OpenEnhancedGridDemo()
+    {
+        try
+        {
+            _logger.LogInformation("Opening Enhanced Grid Layout Demo");
+
+            var demoForm = new EnhancedGridDemoForm();
+            demoForm.Show(); // Use Show() instead of ShowDialog() to allow multiple instances
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error opening Enhanced Grid Demo");
+            MessageBoxAdv.Show($"Error opening Enhanced Grid Demo: {ex.Message}", "Error",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }

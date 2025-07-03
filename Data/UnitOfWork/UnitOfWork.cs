@@ -412,13 +412,13 @@ public class DriverRepository : Repository<Driver>, IDriverRepository
     public async Task<IEnumerable<Driver>> GetDriversWithExpiredLicensesAsync() => await GetAllAsync();
     public async Task<IEnumerable<Driver>> GetDriversRequiringMedicalExamAsync(int withinDays = 30) => await GetAllAsync();
     public async Task<IEnumerable<Driver>> GetDriversRequiringTrainingRenewalAsync(int withinDays = 30) => await GetAllAsync();
-    public async Task<bool> IsDriverAvailableAsync(int driverId, DateTime date, TimeSpan startTime, TimeSpan endTime) => true;
+    public async Task<bool> IsDriverAvailableAsync(int driverId, DateTime date, TimeSpan startTime, TimeSpan endTime) => await Task.FromResult(true);
     public async Task<IEnumerable<Driver>> GetDriversScheduledForDateAsync(DateTime date) => await GetAllAsync();
     public async Task<IEnumerable<Driver>> GetDriversWithNoScheduleAsync(DateTime date) => await GetAllAsync();
     public async Task<int> GetTotalDriverCountAsync() => await CountAsync();
     public async Task<int> GetActiveDriverCountAsync() => await CountAsync();
-    public async Task<Dictionary<string, int>> GetDriverCountByLicenseTypeAsync() => new();
-    public async Task<Dictionary<bool, int>> GetDriverCountByTrainingStatusAsync() => new();
+    public async Task<Dictionary<string, int>> GetDriverCountByLicenseTypeAsync() => await Task.FromResult(new Dictionary<string, int>());
+    public async Task<Dictionary<bool, int>> GetDriverCountByTrainingStatusAsync() => await Task.FromResult(new Dictionary<bool, int>());
     public async Task<IEnumerable<Driver>> GetDriversByPerformanceRatingAsync(decimal minRating) => await GetAllAsync();
     public async Task<IEnumerable<Driver>> GetDriversWithEmergencyContactsAsync() => await GetAllAsync();
     public async Task<IEnumerable<Driver>> GetDriversWithoutEmergencyContactsAsync() => await GetAllAsync();
@@ -447,17 +447,17 @@ public class RouteRepository : Repository<Route>, IRouteRepository
     public async Task<IEnumerable<Route>> GetRoutesByDriverAsync(int driverId, DateTime? date = null) => await FindAsync(r => r.AMDriverId == driverId || r.PMDriverId == driverId);
     public async Task<IEnumerable<Route>> GetRoutesWithoutVehicleAssignmentAsync(DateTime date) => await FindAsync(r => r.Date.Date == date.Date && (!r.AMVehicleId.HasValue || !r.PMVehicleId.HasValue));
     public async Task<IEnumerable<Route>> GetRoutesWithoutDriverAssignmentAsync(DateTime date) => await FindAsync(r => r.Date.Date == date.Date && (!r.AMDriverId.HasValue || !r.PMDriverId.HasValue));
-    public async Task<decimal> GetTotalMileageByDateAsync(DateTime date) => 0;
-    public async Task<decimal> GetTotalMileageByDateRangeAsync(DateTime startDate, DateTime endDate) => 0;
-    public async Task<decimal> GetAverageRidershipByRouteAsync(string routeName, DateTime? startDate = null, DateTime? endDate = null) => 0;
-    public async Task<Dictionary<string, decimal>> GetMileageByRouteNameAsync(DateTime startDate, DateTime endDate) => new();
-    public async Task<Dictionary<string, int>> GetRidershipByRouteNameAsync(DateTime startDate, DateTime endDate) => new();
-    public async Task<bool> ValidateRouteScheduleAsync(DateTime date) => true;
-    public async Task<IEnumerable<string>> GetRouteValidationErrorsAsync(DateTime date) => Enumerable.Empty<string>();
+    public async Task<decimal> GetTotalMileageByDateAsync(DateTime date) => await Task.FromResult(0m);
+    public async Task<decimal> GetTotalMileageByDateRangeAsync(DateTime startDate, DateTime endDate) => await Task.FromResult(0m);
+    public async Task<decimal> GetAverageRidershipByRouteAsync(string routeName, DateTime? startDate = null, DateTime? endDate = null) => await Task.FromResult(0m);
+    public async Task<Dictionary<string, decimal>> GetMileageByRouteNameAsync(DateTime startDate, DateTime endDate) => await Task.FromResult(new Dictionary<string, decimal>());
+    public async Task<Dictionary<string, int>> GetRidershipByRouteNameAsync(DateTime startDate, DateTime endDate) => await Task.FromResult(new Dictionary<string, int>());
+    public async Task<bool> ValidateRouteScheduleAsync(DateTime date) => await Task.FromResult(true);
+    public async Task<IEnumerable<string>> GetRouteValidationErrorsAsync(DateTime date) => await Task.FromResult(Enumerable.Empty<string>());
     public async Task<IEnumerable<Route>> GetRoutesWithMileageIssuesAsync(DateTime? startDate = null, DateTime? endDate = null) => await GetAllAsync();
     public async Task<IEnumerable<Route>> GetMostActiveRoutesAsync(DateTime startDate, DateTime endDate, int count = 10) => await GetAllAsync();
     public async Task<IEnumerable<Route>> GetLeastActiveRoutesAsync(DateTime startDate, DateTime endDate, int count = 10) => await GetAllAsync();
-    public async Task<Dictionary<DateTime, int>> GetDailyRouteCountAsync(DateTime startDate, DateTime endDate) => new();
+    public async Task<Dictionary<DateTime, int>> GetDailyRouteCountAsync(DateTime startDate, DateTime endDate) => await Task.FromResult(new Dictionary<DateTime, int>());
 
     // Synchronous methods
     public IEnumerable<Route> GetRoutesByDate(DateTime date) => Find(r => r.Date.Date == date.Date);
@@ -490,8 +490,8 @@ public class StudentRepository : Repository<Student>, IStudentRepository
     public async Task<Dictionary<string, int>> GetStudentCountByRouteAsync() => await Task.FromResult(new Dictionary<string, int>());
     public async Task<int> GetTotalStudentCountAsync() => await CountAsync();
     public async Task<int> GetActiveStudentCountAsync() => await CountAsync();
-    public async Task<Dictionary<string, int>> GetStudentCountByGradeAsync() => new();
-    public async Task<Dictionary<string, int>> GetStudentCountByTransportationTypeAsync() => new();
+    public async Task<Dictionary<string, int>> GetStudentCountByGradeAsync() => await Task.FromResult(new Dictionary<string, int>());
+    public async Task<Dictionary<string, int>> GetStudentCountByTransportationTypeAsync() => await Task.FromResult(new Dictionary<string, int>());
     public async Task<IEnumerable<Student>> GetStudentsByAgeRangeAsync(int minAge, int maxAge) => await GetAllAsync();
     public async Task<IEnumerable<Student>> GetStudentsByParentEmailAsync(string email) => await GetAllAsync();
     public async Task<IEnumerable<Student>> GetStudentsByParentPhoneAsync(string phone) => await GetAllAsync();
@@ -516,8 +516,8 @@ public class FuelRepository : Repository<Fuel>, IFuelRepository
 
     public async Task<IEnumerable<Fuel>> GetFuelRecordsByVehicleAsync(int vehicleId) => await FindAsync(f => f.VehicleFueledId == vehicleId);
     public async Task<IEnumerable<Fuel>> GetFuelRecordsByDateRangeAsync(DateTime startDate, DateTime endDate) => await FindAsync(f => f.FuelDate >= startDate && f.FuelDate <= endDate);
-    public async Task<decimal> GetTotalFuelCostAsync(DateTime startDate, DateTime endDate) => 0;
-    public async Task<decimal> GetAverageFuelEfficiencyAsync(int vehicleId, DateTime? startDate = null, DateTime? endDate = null) => 0;
+    public async Task<decimal> GetTotalFuelCostAsync(DateTime startDate, DateTime endDate) => await Task.FromResult(0m);
+    public async Task<decimal> GetAverageFuelEfficiencyAsync(int vehicleId, DateTime? startDate = null, DateTime? endDate = null) => await Task.FromResult(0m);
     public async Task<IEnumerable<Fuel>> GetRecentFuelRecordsAsync(int count = 10) => await GetAllAsync();
 
     public IEnumerable<Fuel> GetFuelRecordsByVehicle(int vehicleId) => Find(f => f.VehicleFueledId == vehicleId);
@@ -532,7 +532,7 @@ public class MaintenanceRepository : Repository<Maintenance>, IMaintenanceReposi
     public async Task<IEnumerable<Maintenance>> GetMaintenanceRecordsByVehicleAsync(int vehicleId) => await FindAsync(m => m.VehicleId == vehicleId);
     public async Task<IEnumerable<Maintenance>> GetMaintenanceRecordsByDateRangeAsync(DateTime startDate, DateTime endDate) => await FindAsync(m => m.Date >= startDate && m.Date <= endDate);
     public async Task<IEnumerable<Maintenance>> GetMaintenanceRecordsByTypeAsync(string maintenanceType) => await FindAsync(m => m.MaintenanceCompleted.Contains(maintenanceType));
-    public async Task<decimal> GetTotalMaintenanceCostAsync(DateTime startDate, DateTime endDate) => 0;
+    public async Task<decimal> GetTotalMaintenanceCostAsync(DateTime startDate, DateTime endDate) => await Task.FromResult(0m);
     public async Task<IEnumerable<Maintenance>> GetUpcomingMaintenanceAsync(int withinDays = 30) => await GetAllAsync();
     public async Task<IEnumerable<Maintenance>> GetOverdueMaintenanceAsync() => await GetAllAsync();
 
@@ -549,7 +549,7 @@ public class ScheduleRepository : Repository<Schedule>, IScheduleRepository
     public async Task<IEnumerable<Schedule>> GetSchedulesByRouteAsync(int routeId) => await FindAsync(s => s.RouteId == routeId);
     public async Task<IEnumerable<Schedule>> GetSchedulesByBusAsync(int busId) => await FindAsync(s => s.BusId == busId);
     public async Task<IEnumerable<Schedule>> GetSchedulesByDriverAsync(int driverId) => await FindAsync(s => s.DriverId == driverId);
-    public async Task<bool> HasConflictAsync(int busId, int driverId, DateTime startTime, DateTime endTime) => false;
+    public async Task<bool> HasConflictAsync(int busId, int driverId, DateTime startTime, DateTime endTime) => await Task.FromResult(false);
 
     public IEnumerable<Schedule> GetSchedulesByDate(DateTime date) => Find(s => s.ScheduleDate.Date == date.Date);
     public IEnumerable<Schedule> GetSchedulesByRoute(int routeId) => Find(s => s.RouteId == routeId);
@@ -582,7 +582,7 @@ public class ActivityScheduleRepository : Repository<ActivitySchedule>, IActivit
     public async Task<IEnumerable<ActivitySchedule>> GetSchedulesByTripTypeAsync(string tripType) => await FindAsync(a => a.TripType == tripType);
     public async Task<IEnumerable<ActivitySchedule>> GetSchedulesByVehicleAsync(int vehicleId) => await FindAsync(a => a.ScheduledVehicleId == vehicleId);
     public async Task<IEnumerable<ActivitySchedule>> GetSchedulesByDriverAsync(int driverId) => await FindAsync(a => a.ScheduledDriverId == driverId);
-    public async Task<bool> HasConflictAsync(int vehicleId, int driverId, DateTime date, TimeSpan startTime, TimeSpan endTime) => false;
+    public async Task<bool> HasConflictAsync(int vehicleId, int driverId, DateTime date, TimeSpan startTime, TimeSpan endTime) => await Task.FromResult(false);
 
     public IEnumerable<ActivitySchedule> GetSchedulesByDate(DateTime date) => Find(a => a.ScheduledDate.Date == date.Date);
     public IEnumerable<ActivitySchedule> GetSchedulesByTripType(string tripType) => Find(a => a.TripType == tripType);

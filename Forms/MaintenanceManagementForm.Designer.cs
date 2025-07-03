@@ -50,12 +50,10 @@ namespace Bus_Buddy.Forms
             this.labelDateFilter = new AutoLabel();
             this.panelGrid = new GradientPanel();
             this.dataGridMaintenance = new Syncfusion.WinForms.DataGrid.SfDataGrid();
-            this.statusStrip = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusLabel = new AutoLabel();
             this.panelHeader.SuspendLayout();
             this.panelControls.SuspendLayout();
             this.panelGrid.SuspendLayout();
-            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelHeader
@@ -184,7 +182,7 @@ namespace Bus_Buddy.Forms
             // 
             // cmbVehicleFilter
             // 
-            this.cmbVehicleFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+
             this.cmbVehicleFilter.Location = new System.Drawing.Point(340, 80);
             this.cmbVehicleFilter.Name = "cmbVehicleFilter";
             this.cmbVehicleFilter.Size = new System.Drawing.Size(150, 21);
@@ -203,7 +201,7 @@ namespace Bus_Buddy.Forms
             // 
             // cmbPriorityFilter
             // 
-            this.cmbPriorityFilter.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+
             this.cmbPriorityFilter.Location = new System.Drawing.Point(560, 80);
             this.cmbPriorityFilter.Name = "cmbPriorityFilter";
             this.cmbPriorityFilter.Size = new System.Drawing.Size(120, 21);
@@ -266,21 +264,20 @@ namespace Bus_Buddy.Forms
             this.dataGridMaintenance.Text = "sfDataGrid1";
             this.dataGridMaintenance.CellDoubleClick += new Syncfusion.WinForms.DataGrid.Events.CellClickEventHandler(this.DataGridMaintenance_CellDoubleClick);
             // 
-            // statusStrip
+            // statusLabel
             // 
-            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 598);
-            this.statusStrip.Name = "statusStrip";
-            this.statusStrip.Size = new System.Drawing.Size(1400, 22);
-            this.statusStrip.TabIndex = 3;
-            this.statusStrip.Text = "statusStrip1";
-            // 
-            // toolStripStatusLabel
-            // 
-            this.toolStripStatusLabel.Name = "toolStripStatusLabel";
-            this.toolStripStatusLabel.Size = new System.Drawing.Size(39, 17);
-            this.toolStripStatusLabel.Text = "Ready";
+            this.statusLabel.AutoSize = true;
+            this.statusLabel.BackColor = System.Drawing.Color.FromArgb(248, 249, 250);
+            this.statusLabel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.statusLabel.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.statusLabel.ForeColor = System.Drawing.Color.Gray;
+            this.statusLabel.Location = new System.Drawing.Point(0, 598);
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Padding = new System.Windows.Forms.Padding(10, 2, 10, 2);
+            this.statusLabel.Size = new System.Drawing.Size(1400, 22);
+            this.statusLabel.TabIndex = 3;
+            this.statusLabel.Text = "Ready";
+            this.statusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // MaintenanceManagementForm
             // 
@@ -288,7 +285,7 @@ namespace Bus_Buddy.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1400, 620);
             this.Controls.Add(this.panelGrid);
-            this.Controls.Add(this.statusStrip);
+            this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.panelControls);
             this.Controls.Add(this.panelHeader);
             this.MinimumSize = new System.Drawing.Size(1200, 600);
@@ -301,8 +298,6 @@ namespace Bus_Buddy.Forms
             this.panelControls.ResumeLayout(false);
             this.panelControls.PerformLayout();
             this.panelGrid.ResumeLayout(false);
-            this.statusStrip.ResumeLayout(false);
-            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -328,7 +323,6 @@ namespace Bus_Buddy.Forms
         private AutoLabel labelDateFilter;
         private GradientPanel panelGrid;
         private Syncfusion.WinForms.DataGrid.SfDataGrid dataGridMaintenance;
-        private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel;
+        private AutoLabel statusLabel;
     }
 }
