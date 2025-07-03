@@ -71,6 +71,7 @@ namespace Bus_Buddy
             // Business Services
             services.AddScoped<IBusService, BusService>();
             services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<IScheduleService, ScheduleService>();
             services.AddScoped<BusBuddyScheduleDataProvider>();
 
             // Forms (as transient so they can be created multiple times if needed)

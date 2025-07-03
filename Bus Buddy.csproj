@@ -71,9 +71,7 @@
     <Reference Include="Syncfusion.Themes.Office2019Colorful.WinForms">
       <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Themes.Office2019Colorful.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="Syncfusion.SfScheduler.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfScheduler.WinForms.dll</HintPath>
-    </Reference>
+
     <Reference Include="Syncfusion.SfComboBox.WinForms">
       <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfComboBox.WinForms.dll</HintPath>
     </Reference>
