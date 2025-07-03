@@ -9,8 +9,8 @@ using System.ComponentModel;
 namespace Bus_Buddy.Forms;
 
 /// <summary>
-/// Schedule Management Form - Scaffolded implementation using Syncfusion Schedule
-/// This is a step-by-step implementation that incrementally builds complexity
+/// Schedule Management Form - Enhanced implementation using local Syncfusion ScheduleControl
+/// Integrates with Activity management for comprehensive bus scheduling
 /// </summary>
 public partial class ScheduleManagementForm : SfForm
 {
@@ -18,9 +18,13 @@ public partial class ScheduleManagementForm : SfForm
     private readonly IActivityService _activityService;
     private readonly IBusService _busService;
     private readonly ILogger<ScheduleManagementForm> _logger;
+    private readonly BusBuddyScheduleDataProvider _scheduleDataProvider;
 
     // Data Collections
     private BindingList<Activity> _activities = null!;
+
+    // Currently selected appointment for operations
+    private BusBuddyScheduleAppointment? _selectedAppointment;
 
     // UI Components
     private Panel panelHeader = null!;
@@ -28,7 +32,7 @@ public partial class ScheduleManagementForm : SfForm
     private Panel panelSchedule = null!;
     private Label labelTitle = null!;
 
-    // Step 1: Basic Schedule Control
+    // Enhanced Schedule Control with proper data binding
     private ScheduleControl scheduleControl = null!;
 
     // Step 2: Control Buttons (to be added)
@@ -47,13 +51,15 @@ public partial class ScheduleManagementForm : SfForm
     public ScheduleManagementForm(
         IActivityService activityService,
         IBusService busService,
-        ILogger<ScheduleManagementForm> logger)
+        ILogger<ScheduleManagementForm> logger,
+        BusBuddyScheduleDataProvider scheduleDataProvider)
     {
         _activityService = activityService;
         _busService = busService;
         _logger = logger;
+        _scheduleDataProvider = scheduleDataProvider;
 
-        _logger.LogInformation("Initializing Schedule Management Form - Scaffolded Version");
+        _logger.LogInformation("Initializing Schedule Management Form with Syncfusion Schedule integration");
 
         InitializeDataCollections();
         InitializeComponent();
@@ -166,13 +172,14 @@ public partial class ScheduleManagementForm : SfForm
     {
         try
         {
-            _logger.LogInformation("Initializing Syncfusion Schedule Control");
+            _logger.LogInformation("Initializing Syncfusion Schedule Control with BusBuddyScheduleDataProvider");
 
             // Create the schedule control
             scheduleControl = new ScheduleControl
             {
                 Dock = DockStyle.Fill,
-                ScheduleType = ScheduleViewType.Month
+                ScheduleType = ScheduleViewType.Month,
+                DataSource = _scheduleDataProvider
             };
 
             // Configure basic properties
@@ -184,7 +191,7 @@ public partial class ScheduleManagementForm : SfForm
             // Add to container
             panelSchedule.Controls.Add(scheduleControl);
 
-            _logger.LogInformation("Schedule control initialized successfully");
+            _logger.LogInformation("Schedule control initialized successfully with data provider");
         }
         catch (Exception ex)
         {
@@ -195,17 +202,24 @@ public partial class ScheduleManagementForm : SfForm
 
     private void ConfigureScheduleProperties()
     {
-        // Basic schedule configuration
-        scheduleControl.Culture = System.Globalization.CultureInfo.CurrentCulture;
-
-        // Set basic appearance properties if available
         try
         {
-            // Try to set basic properties that might be available
-            if (scheduleControl.GetType().GetProperty("ShowNavigationPane") != null)
+            // Configure culture and appearance
+            scheduleControl.Culture = System.Globalization.CultureInfo.CurrentCulture;
+
+            // Enable navigation panel with calendar
+            scheduleControl.NavigationPanelFillWithCalendar = true;
+
+            // Configure appearance if available
+            if (scheduleControl.Appearance != null)
             {
-                scheduleControl.GetType().GetProperty("ShowNavigationPane")?.SetValue(scheduleControl, true);
+                // Set colors for prime time cells
+                scheduleControl.Appearance.PrimeTimeCellColor = Color.White;
+                scheduleControl.Appearance.NonPrimeTimeCellColor = Color.FromArgb(248, 249, 250);
+                scheduleControl.Appearance.CaptionBackColor = Color.FromArgb(46, 204, 113);
             }
+
+            _logger.LogDebug("Schedule properties configured");
         }
         catch (Exception ex)
         {
@@ -217,8 +231,23 @@ public partial class ScheduleManagementForm : SfForm
     {
         try
         {
-            // Basic event handlers for schedule interactions
+            // Event handlers for schedule interactions
             scheduleControl.MouseClick += ScheduleControl_MouseClick;
+
+            // Add appointment click handler if available
+            scheduleControl.ScheduleAppointmentClick += (sender, e) =>
+            {
+                try
+                {
+                    _logger.LogInformation("Appointment clicked: {Subject}", e.Item?.Subject);
+                    // Handle appointment selection for editing
+                    HandleAppointmentClick(e.Item);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error handling appointment click");
+                }
+            };
 
             _logger.LogInformation("Schedule event handlers configured");
         }
@@ -344,17 +373,13 @@ public partial class ScheduleManagementForm : SfForm
             var startDate = DateTime.Today.AddMonths(-1).AddDays(-DateTime.Today.Day + 1);
             var endDate = DateTime.Today.AddMonths(2);
 
-            var activities = await _activityService.GetActivitiesByDateRangeAsync(startDate, endDate);
+            // Use the data provider to load activities
+            await _scheduleDataProvider.LoadActivitiesAsync(startDate, endDate);
 
-            _activities.Clear();
-            foreach (var activity in activities)
-            {
-                _activities.Add(activity);
-                AddActivityToSchedule(activity);
-            }
-
+            // Refresh the schedule to show the new data
             scheduleControl.Refresh();
-            _logger.LogInformation("Loaded {Count} activities into schedule", _activities.Count);
+
+            _logger.LogInformation("Loaded activities into schedule");
         }
         catch (Exception ex)
         {
@@ -363,33 +388,48 @@ public partial class ScheduleManagementForm : SfForm
         }
     }
 
-    private void AddActivityToSchedule(Activity activity)
+    private async void HandleAppointmentClick(Syncfusion.Schedule.IScheduleAppointment? appointment)
     {
         try
         {
-            // For now, we'll add activities to a simple collection
-            // and display them in a basic way until we determine the correct API
-            _logger.LogInformation("Activity {ActivityId} would be displayed: {ActivityType} on {Date}",
-                activity.ActivityId, activity.ActivityType, activity.ActivityDate);
+            if (appointment is BusBuddyScheduleAppointment busAppointment)
+            {
+                // Track the selected appointment
+                _selectedAppointment = busAppointment;
 
-            // TODO: Implement proper appointment creation once we determine the correct API
-            // The schedule control needs to be properly configured with the right data source
+                _logger.LogInformation("Opening edit form for activity {ActivityId}", busAppointment.ActivityId);
+
+                // Load the full activity from the database
+                var activity = await _activityService.GetActivityByIdAsync(busAppointment.ActivityId);
+                if (activity != null)
+                {
+                    // Create ActivityEditForm with the selected activity
+                    var editForm = new ActivityEditForm(
+                        _activityService,
+                        _busService,
+                        ServiceContainer.GetService<ILogger<ActivityEditForm>>(),
+                        activity);
+
+                    if (editForm.ShowDialog(this) == DialogResult.OK)
+                    {
+                        // Refresh the schedule to show updated data
+                        await LoadInitialDataAsync();
+                        ShowSuccess("Activity updated successfully");
+                    }
+
+                    editForm.Dispose();
+                }
+                else
+                {
+                    ShowError("Activity not found in database");
+                }
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding activity {ActivityId} to schedule", activity.ActivityId);
+            _logger.LogError(ex, "Error handling appointment click");
+            ShowError($"Failed to open activity for editing: {ex.Message}");
         }
-    }
-
-    private Brush GetActivityTypeColor(string? activityType)
-    {
-        return activityType?.ToLower() switch
-        {
-            "morning" => Brushes.LightBlue,
-            "afternoon" => Brushes.LightGreen,
-            "field trip" => Brushes.LightYellow,
-            _ => Brushes.LightGray
-        };
     }
     #endregion
 
@@ -398,14 +438,23 @@ public partial class ScheduleManagementForm : SfForm
     {
         try
         {
-            _logger.LogInformation("Add activity requested");
-            // TODO: Open ActivityEditForm for new activity
-            ShowInfo("Add Activity functionality will be implemented in the next step");
+            _logger.LogInformation("Opening ActivityEditForm for new activity");
+
+            using var form = ServiceContainer.GetService<ActivityEditForm>();
+            if (form.ShowDialog(this) == DialogResult.OK)
+            {
+                // Refresh the schedule to show the new activity
+                _ = Task.Run(async () =>
+                {
+                    await LoadInitialDataAsync();
+                    Invoke(() => ShowSuccess("Activity added successfully"));
+                });
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in add activity");
-            ShowError($"Add activity failed: {ex.Message}");
+            _logger.LogError(ex, "Error opening add activity form");
+            ShowError($"Failed to open add activity form: {ex.Message}");
         }
     }
 
@@ -414,8 +463,9 @@ public partial class ScheduleManagementForm : SfForm
         try
         {
             _logger.LogInformation("Edit activity requested");
-            // TODO: Get selected appointment and open edit form
-            ShowInfo("Edit Activity functionality will be implemented in the next step");
+
+            // For now, show info until we implement selected appointment tracking
+            ShowInfo("Please click on an appointment in the schedule to edit it, or use the appointment click feature.");
         }
         catch (Exception ex)
         {
@@ -424,17 +474,38 @@ public partial class ScheduleManagementForm : SfForm
         }
     }
 
-    private void BtnDeleteActivity_Click(object? sender, EventArgs e)
+    private async void BtnDeleteActivity_Click(object? sender, EventArgs e)
     {
         try
         {
-            _logger.LogInformation("Delete activity requested");
-            // TODO: Delete selected appointment
-            ShowInfo("Delete Activity functionality will be implemented in the next step");
+            if (_selectedAppointment == null)
+            {
+                ShowInfo("Please click on an appointment in the schedule to select it for deletion.");
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Are you sure you want to delete the activity '{_selectedAppointment.Subject}'?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                _logger.LogInformation("Deleting activity {ActivityId}", _selectedAppointment.ActivityId);
+
+                await _activityService.DeleteActivityAsync(_selectedAppointment.ActivityId);
+
+                // Clear selection and refresh
+                _selectedAppointment = null;
+                await LoadInitialDataAsync();
+
+                ShowSuccess("Activity deleted successfully");
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in delete activity");
+            _logger.LogError(ex, "Error deleting activity");
             ShowError($"Delete activity failed: {ex.Message}");
         }
     }
@@ -482,8 +553,22 @@ public partial class ScheduleManagementForm : SfForm
     {
         try
         {
-            // TODO: Find correct property to navigate schedule date
-            // scheduleControl.CalendarDate = dtpNavigate.Value;
+            // Navigate the schedule to the selected date
+            // Note: Different Syncfusion versions may have different properties for navigation
+            // Try common navigation properties
+            if (HasProperty(scheduleControl, "CalendarDate"))
+            {
+                SetProperty(scheduleControl, "CalendarDate", dtpNavigate.Value);
+            }
+            else if (HasProperty(scheduleControl, "Date"))
+            {
+                SetProperty(scheduleControl, "Date", dtpNavigate.Value);
+            }
+            else if (HasProperty(scheduleControl, "CurrentDate"))
+            {
+                SetProperty(scheduleControl, "CurrentDate", dtpNavigate.Value);
+            }
+
             _logger.LogInformation("Schedule navigated to {Date}", dtpNavigate.Value);
         }
         catch (Exception ex)
@@ -524,6 +609,30 @@ public partial class ScheduleManagementForm : SfForm
     {
         _logger.LogInformation("Schedule Management Success: {Message}", message);
         MessageBox.Show(message, "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    }
+
+    private static bool HasProperty(object obj, string propertyName)
+    {
+        return obj.GetType().GetProperty(propertyName) != null;
+    }
+
+    private static void SetProperty(object obj, string propertyName, object value)
+    {
+        var property = obj.GetType().GetProperty(propertyName);
+        if (property != null && property.CanWrite)
+        {
+            property.SetValue(obj, value);
+        }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            // Clear selected appointment
+            _selectedAppointment = null;
+        }
+        base.Dispose(disposing);
     }
     #endregion
 }
