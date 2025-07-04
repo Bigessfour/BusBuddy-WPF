@@ -13,7 +13,7 @@ namespace BusBuddy.Tests.UnitTests.UI
     /// with the application data and handle common UI interactions properly.
     /// </summary>
     [TestFixture]
-    [Category("UITest")]
+    [NUnit.Framework.Category("UITest")]
     public class SyncfusionComponentTests : ConsolidatedTestBase
     {
         private IBusService _busService = null!;

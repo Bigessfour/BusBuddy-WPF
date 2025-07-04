@@ -17,9 +17,37 @@ jobs:
   workflow-history:
     name: Previous Workflow Results
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.showPreviousResults == 'true'
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.showPreviousResults == true
     
     steps:
+    - name: Check for Syncfusion License Key
+      run: |
+        if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
+          echo "::error::SYNCFUSION_LICENSE_KEY secret is not set. Please add it in your repository settings."
+          exit 1
+        fi
+      shell: bash
+    - name: Check for Syncfusion License Key
+      run: |
+        if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
+          echo "::error::SYNCFUSION_LICENSE_KEY secret is not set. Please add it in your repository settings."
+          exit 1
+        fi
+      shell: bash
+    - name: Check for Syncfusion License Key
+      run: |
+        if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
+          echo "::error::SYNCFUSION_LICENSE_KEY secret is not set. Please add it in your repository settings."
+          exit 1
+        fi
+      shell: bash
+    - name: Check for Syncfusion License Key
+      run: |
+        if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
+          echo "::error::SYNCFUSION_LICENSE_KEY secret is not set. Please add it in your repository settings."
+          exit 1
+        fi
+      shell: bash
     - name: Checkout code
       uses: actions/checkout@v4
       
