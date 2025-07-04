@@ -39,28 +39,28 @@
   <!-- Syncfusion References from Local Repository -->
   <ItemGroup>
     <Reference Include="Syncfusion.Licensing">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Licensing.dll</HintPath>
+      <HintPath>..\libs\Syncfusion\Syncfusion.Licensing.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.Core.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Core.WinForms.dll</HintPath>
+      <HintPath>..\libs\Syncfusion\Syncfusion.Core.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.SfDataGrid.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfDataGrid.WinForms.dll</HintPath>
+      <HintPath>..\libs\Syncfusion\Syncfusion.SfDataGrid.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.GridCommon.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.GridCommon.WinForms.dll</HintPath>
+      <HintPath>..\libs\Syncfusion\Syncfusion.GridCommon.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.Shared.Base">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Shared.Base.dll</HintPath>
+      <HintPath>..\libs\Syncfusion\Syncfusion.Shared.Base.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.Shared.Windows">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Shared.Windows.dll</HintPath>
+      <HintPath>..\libs\Syncfusion\Syncfusion.Shared.Windows.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.Tools.Windows">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Tools.Windows.dll</HintPath>
+      <HintPath>..\libs\Syncfusion\Syncfusion.Tools.Windows.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.Tools.Base">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Tools.Base.dll</HintPath>
+      <HintPath>..\libs\Syncfusion\Syncfusion.Tools.Base.dll</HintPath>
     </Reference>
   </ItemGroup>
 

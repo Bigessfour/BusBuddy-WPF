@@ -150,6 +150,15 @@ jobs:
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.sln') }}
         restore-keys: ${{ runner.os }}-nuget-
 
+    - name: Cache build output
+      uses: actions/cache@v4
+      with:
+        path: |
+          **/bin
+          **/obj
+        key: ${{ runner.os }}-build-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+        restore-keys: ${{ runner.os }}-build-
+
     - name: Restore dependencies
       run: dotnet restore "Bus Buddy.sln"
 
