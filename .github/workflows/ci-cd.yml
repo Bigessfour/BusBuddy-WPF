@@ -240,14 +240,29 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Create appsettings.json
+    - name: Create appsettings.test.json for integration tests
       run: |
         echo '{
+          "ConnectionStrings": {
+            "DefaultConnection": "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true;Encrypt=false",
+            "TestConnection": "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true;Encrypt=false"
+          },
+          "Logging": {
+            "LogLevel": {
+              "Default": "Information",
+              "Microsoft.AspNetCore": "Warning",
+              "Microsoft.EntityFrameworkCore": "Information"
+            }
+          },
+          "TestSettings": {
+            "UseInMemoryDatabase": false,
+            "UseSqlServerTestDatabase": true,
+            "SeedTestData": false,
+            "EnableDetailedLogging": true,
+            "RecreateTestDatabaseOnStartup": true
+          },
           "Syncfusion": {
             "LicenseKey": "${{ secrets.SYNCFUSION_LICENSE_KEY }}"
-          },
-          "ConnectionStrings": {
-            "TestConnection": "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true"
           }
         }' > BusBuddy.Tests/appsettings.test.json
       shell: bash
@@ -273,15 +288,28 @@ jobs:
     - name: Install EF Core tools
       run: dotnet tool install --global dotnet-ef
 
+    - name: Wait for SQL Server to be ready
+      run: |
+        for i in {1..30}; do
+          if sqlcmd -S localhost,1433 -U SA -P TestPassword123! -Q "SELECT 1" > /dev/null 2>&1; then
+            echo "SQL Server is ready!"
+            break
+          fi
+          echo "Waiting for SQL Server... ($i/30)"
+          sleep 2
+        done
+      shell: bash
+
     - name: Apply database migrations
-      run: dotnet ef database update --project "BusBuddy.Data" --startup-project "Bus Buddy"
+      run: dotnet ef database update --project "." --startup-project "."
       env:
-        ConnectionStrings__TestConnection: "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true"
+        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true;Encrypt=false"
 
     - name: Run integration tests
       run: dotnet test "Bus Buddy.sln" --no-build --configuration Release --filter "Category=Integration" --logger "trx;LogFileName=integration-results.trx" --results-directory TestResults
       env:
-        ConnectionStrings__TestConnection: "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true"
+        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true;Encrypt=false"
+        ConnectionStrings__TestConnection: "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true;Encrypt=false"
       id: integration-tests
 
     - name: Count integration test results

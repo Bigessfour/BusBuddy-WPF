@@ -367,6 +367,7 @@ public class MaintenanceServiceTests : TestBase
     }
 
     [Test]
+    [Category("Integration")] // Mark as integration test - requires real database for proper deletion behavior
     public async Task DeleteMaintenanceRecordAsync_ShouldReturnTrue_AndRemoveRecord_WhenRecordExists()
     {
         // Arrange

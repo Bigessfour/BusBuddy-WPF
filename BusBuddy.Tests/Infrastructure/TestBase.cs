@@ -72,10 +72,91 @@ namespace BusBuddy.Tests.Infrastructure
                 ConfigureSharedServices(services);
                 Configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
             }
-            if (Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
+
+            // Check if this is an integration test that requires real database
+            bool isIntegrationTest = IsIntegrationTest();
+            bool useInMemory = Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase") && !isIntegrationTest;
+
+            if (useInMemory)
             {
                 BusBuddyDbContext.SkipGlobalSeedData = true;
             }
+
+            // Rebuild DI container and all services for this test
+            SetupServices();
+            if (ServiceProvider == null)
+                throw new InvalidOperationException("ServiceProvider is not initialized.");
+            DialogCapture = ServiceProvider.GetRequiredService<DialogEventCapture>();
+
+            // Always generate a new unique database name for each test
+            _currentTestDbName = $"TestDb_{Guid.NewGuid()}_{DateTime.UtcNow.Ticks}";
+
+            // Create fresh DbContext with unique database for complete test isolation
+            if (useInMemory)
+            {
+                var options = new DbContextOptionsBuilder<BusBuddyDbContext>()
+                    .UseInMemoryDatabase(_currentTestDbName)
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors()
+                    .Options;
+
+                DbContext = new BusBuddyDbContext(options);
+                // Always ensure deleted and created for full isolation
+                DbContext.Database.EnsureDeleted();
+                DbContext.Database.EnsureCreated();
+            }
+            else
+            {
+                // For integration tests, use SQL Server
+                BusBuddyDbContext.SkipGlobalSeedData = false;
+                DbContext = ServiceProvider.GetRequiredService<BusBuddyDbContext>();
+                DbContext.Database.EnsureCreated();
+
+                // For SQL Server, apply migrations if needed
+                try
+                {
+                    DbContext.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    var logger = ServiceProvider?.GetService<ILogger<TestBase>>();
+                    logger?.LogWarning(ex, "Migration failed during test setup, but proceeding as EnsureCreated should have built the schema.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines if the current test is an integration test that requires a real database
+        /// </summary>
+        private bool IsIntegrationTest()
+        {
+            try
+            {
+                // Get the current test method using reflection
+                var stackTrace = new System.Diagnostics.StackTrace();
+                for (int i = 0; i < stackTrace.FrameCount; i++)
+                {
+                    var frame = stackTrace.GetFrame(i);
+                    var method = frame?.GetMethod();
+                    if (method != null)
+                    {
+                        // Check if the method has the Category("Integration") attribute
+                        var categoryAttributes = method.GetCustomAttributes(typeof(NUnit.Framework.CategoryAttribute), false);
+                        foreach (NUnit.Framework.CategoryAttribute attr in categoryAttributes)
+                        {
+                            if (attr.Name == "Integration")
+                                return true;
+                        }
+                    }
+                }
+                return false;
+            }
+            catch
+            {
+                // If we can't determine, default to false (use in-memory)
+                return false;
+            }
+        }
 
             // Rebuild DI container and all services for this test
             SetupServices();
