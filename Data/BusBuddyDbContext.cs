@@ -5,7 +5,6 @@ using System.Text.Json;
 using System.Linq.Expressions;
 
 namespace Bus_Buddy.Data;
-
 /// <summary>
 /// Enhanced Entity Framework DbContext for BusBuddy application
 /// Supports agile schema evolution with audit fields, soft deletes, and JSON columns
@@ -13,6 +12,20 @@ namespace Bus_Buddy.Data;
 /// </summary>
 public class BusBuddyDbContext : DbContext
 {
+    /// <summary>
+    /// Helper for test code: seed minimal data for a test scenario
+    /// </summary>
+    public static void SeedTestData(BusBuddyDbContext context, Action<BusBuddyDbContext> seedAction)
+    {
+        seedAction(context);
+        context.SaveChanges();
+    }
+
+    /// <summary>
+    /// Controls whether to skip global data seeding (for test isolation)
+    /// </summary>
+    public static bool SkipGlobalSeedData { get; set; } = false;
+
     private string _currentAuditUser = "System";
 
     public BusBuddyDbContext(DbContextOptions<BusBuddyDbContext> options) : base(options)
@@ -48,6 +61,8 @@ public class BusBuddyDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // DEBUG: Output the value of SkipGlobalSeedData to verify test isolation
+        System.Diagnostics.Debug.WriteLine($"[BusBuddyDbContext] SkipGlobalSeedData: {SkipGlobalSeedData}");
         base.OnModelCreating(modelBuilder);
 
         // Configure global query filters for soft deletes
@@ -495,8 +510,14 @@ public class BusBuddyDbContext : DbContext
             entity.HasIndex(e => new { e.TravelDate, e.Status }).HasDatabaseName("IX_Tickets_TravelDateStatus");
         });
 
-        // Seed initial data
-        SeedData(modelBuilder);
+        // Conditionally seed initial data
+        // Always skip global seed data if using in-memory provider (for test isolation)
+        var isInMemory = this.Database.ProviderName != null && this.Database.ProviderName.Contains("InMemory", StringComparison.OrdinalIgnoreCase);
+        if (!isInMemory && !SkipGlobalSeedData)
+        {
+            SeedData(modelBuilder);
+        }
+        // If SkipGlobalSeedData is true or using in-memory provider, do NOT call SeedData; ensures no global seed data for in-memory tests
     }
 
     /// <summary>

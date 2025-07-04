@@ -13,6 +13,7 @@ namespace BusBuddy.Tests.UnitTests.Services
     /// and the consolidated test base for consistent testing.
     /// </summary>
     [TestFixture]
+
     public class FuelServiceConsolidatedTests : ConsolidatedTestBase
     {
         private IFuelService _fuelService = null!;
@@ -22,9 +23,7 @@ namespace BusBuddy.Tests.UnitTests.Services
         [SetUp]
         public async Task SetUp()
         {
-            // Clear database for complete test isolation
-            await ClearDatabaseAsync();
-
+            SetupTestDatabase();
             _fuelService = GetService<IFuelService>();
 
             // Create test bus with proper data
@@ -32,7 +31,6 @@ namespace BusBuddy.Tests.UnitTests.Services
 
             DbContext.Vehicles.Add(_testBus);
             await DbContext.SaveChangesAsync();
-            ClearChangeTracker();
 
             // Create test fuel records
             _testFuelRecords = new List<Fuel>
@@ -63,6 +61,7 @@ namespace BusBuddy.Tests.UnitTests.Services
                 }
             };
         }
+
 
         #region GetAllFuelRecordsAsync Tests
 
@@ -294,7 +293,7 @@ namespace BusBuddy.Tests.UnitTests.Services
         [TearDown]
         public void TearDown()
         {
-            // Base class handles cleanup
+            TearDownTestDatabase();
         }
     }
 }

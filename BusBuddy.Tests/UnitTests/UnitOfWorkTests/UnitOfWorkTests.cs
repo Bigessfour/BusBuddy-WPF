@@ -23,16 +23,16 @@ public class UnitOfWorkTests : TestBase
     private UnitOfWork _unitOfWork = null!;
 
     [SetUp]
-    public async Task SetUp()
+    public void SetUp()
     {
         try
         {
-            await ClearDatabaseAsync(); // LESSON 2.2: Test Data Isolation
+            SetupTestDatabase(); // LESSON 2.2: Test Data Isolation
         }
         catch (ObjectDisposedException)
         {
             // Context was disposed, refresh it
-            await RefreshDbContextAsync();
+            SetupTestDatabase();
         }
 
         _unitOfWork = new UnitOfWork(DbContext);
@@ -42,6 +42,7 @@ public class UnitOfWorkTests : TestBase
     public void TearDown()
     {
         _unitOfWork?.Dispose();
+        TearDownTestDatabase();
     }
 
     #region Repository Factory Tests
@@ -202,7 +203,10 @@ public class UnitOfWorkTests : TestBase
         // Verify the transaction worked
         var savedStudent = await _unitOfWork.Students.GetByIdAsync(student.StudentId);
         savedStudent.Should().NotBeNull();
-        savedStudent.StudentName.Should().Be("Transaction Test Student");
+        if (savedStudent != null)
+        {
+            savedStudent.StudentName.Should().Be("Transaction Test Student");
+        }
     }
 
     [Test]

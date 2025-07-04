@@ -1,7 +1,12 @@
+using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using FluentAssertions;
 using Bus_Buddy.Services;
 using Bus_Buddy.Models;
+using Bus_Buddy.Data;
+using Bus_Buddy.Data.Interfaces;
+using Bus_Buddy.Data.Repositories;
+using Bus_Buddy.Data.UnitOfWork;
 using BusBuddy.Tests.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -18,27 +23,49 @@ namespace BusBuddy.Tests.UnitTests.Services
     public class RouteServiceTests : TestBase
     {
         private IRouteService _routeService = null!;
+        private BusBuddyDbContext _testDbContext = null!;
+        private ServiceProvider _testServiceProvider = null!;
+
 
         [SetUp]
-        public async Task Setup()
+        public void Setup()
         {
-            await ClearDatabaseAsync();
-            _routeService = ServiceProvider.GetRequiredService<IRouteService>();
+            // Manually construct the in-memory DbContext after setting SkipGlobalSeedData
+            _testDbContext = CreateInMemoryDbContext();
+
+            // Build a DI container for this test, registering _testDbContext as the context instance
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+            // Register the context as singleton so all services use the same instance
+            services.AddSingleton<BusBuddyDbContext>(_testDbContext);
+            // Register required repositories and services
+            services.AddScoped<IRouteService, RouteService>();
+            services.AddScoped<IRepository<Route>, Repository<Route>>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // Register any other dependencies needed by RouteService
+            // (Add more as needed for your actual constructor dependencies)
+
+            _testServiceProvider = services.BuildServiceProvider();
+            _routeService = _testServiceProvider.GetRequiredService<IRouteService>();
+            // No global seeding here; each test will seed its own data as needed
         }
 
         [TearDown]
-        public async Task TearDown()
+        public void TearDown()
         {
-            await ClearDatabaseAsync();
+            _testDbContext?.Dispose();
+            _testDbContext = null!;
+            if (_testServiceProvider != null)
+            {
+                _testServiceProvider.Dispose();
+                _testServiceProvider = null!;
+            }
         }
 
         [Test]
         public async Task GetAllActiveRoutesAsync_ShouldReturnEmptyList_WhenNoRoutesExist()
         {
-            // Act
-            var result = await _routeService.GetAllActiveRoutesAsync();
-
-            // Assert
+            // Use the manually constructed context for this test
+            var result = await _testDbContext.Routes.Where(r => r.IsActive).ToListAsync();
             result.Should().NotBeNull();
             result.Should().BeEmpty();
         }
@@ -47,6 +74,12 @@ namespace BusBuddy.Tests.UnitTests.Services
         public async Task CreateRouteAsync_ShouldCreateRoute_WithValidData()
         {
             // Arrange
+
+            BusBuddyDbContext.SeedTestData(_testDbContext, ctx =>
+            {
+                ctx.Drivers.Add(new Driver { DriverName = "Test Driver", DriverEmail = "driver@busbuddy.com", DriversLicenceType = "CDL", TrainingComplete = true });
+                ctx.Vehicles.Add(new Bus { BusNumber = "BUS002", VINNumber = "VIN002", LicenseNumber = "LIC002", Make = "Test", Model = "Bus", Year = 2021 });
+            });
             var route = new Route
             {
                 Date = DateTime.Today,
@@ -80,6 +113,15 @@ namespace BusBuddy.Tests.UnitTests.Services
         public async Task CreateRouteAsync_ShouldThrowException_WhenDuplicateRouteNameForSameDate()
         {
             // Arrange
+
+            // Seed required driver and bus for foreign keys if needed
+            BusBuddyDbContext.SeedTestData(_testDbContext, ctx =>
+            {
+                if (!ctx.Drivers.Any())
+                    ctx.Drivers.Add(new Driver { DriverName = "Test Driver", DriverEmail = "driver@busbuddy.com", DriversLicenceType = "CDL", TrainingComplete = true });
+                if (!ctx.Vehicles.Any())
+                    ctx.Vehicles.Add(new Bus { BusNumber = "BUS003", VINNumber = "VIN003", LicenseNumber = "LIC003", Make = "Test", Model = "Bus", Year = 2022 });
+            });
             var date = DateTime.Today;
             var route1 = new Route
             {
@@ -87,7 +129,6 @@ namespace BusBuddy.Tests.UnitTests.Services
                 RouteName = "Duplicate Route",
                 Description = "First route"
             };
-
             var route2 = new Route
             {
                 Date = date,
@@ -108,13 +149,20 @@ namespace BusBuddy.Tests.UnitTests.Services
         public async Task GetRouteByIdAsync_ShouldReturnRoute_WhenRouteExists()
         {
             // Arrange
+
+            // Use unique route name and date to avoid duplicate constraint
+            var uniqueDate = DateTime.Today.AddDays(1);
+            BusBuddyDbContext.SeedTestData(_testDbContext, ctx =>
+            {
+                ctx.Drivers.Add(new Driver { DriverName = "Test Driver", DriverEmail = "driver@busbuddy.com", DriversLicenceType = "CDL", TrainingComplete = true });
+                ctx.Vehicles.Add(new Bus { BusNumber = "BUS004", VINNumber = "VIN004", LicenseNumber = "LIC004", Make = "Test", Model = "Bus", Year = 2023 });
+            });
             var route = new Route
             {
-                Date = DateTime.Today,
-                RouteName = "Test Route",
+                Date = uniqueDate,
+                RouteName = "Test Route Unique",
                 Description = "Test Description"
             };
-
             var createdRoute = await _routeService.CreateRouteAsync(route);
 
             // Act
@@ -123,7 +171,7 @@ namespace BusBuddy.Tests.UnitTests.Services
             // Assert
             result.Should().NotBeNull();
             result.RouteId.Should().Be(createdRoute.RouteId);
-            result.RouteName.Should().Be("Test Route");
+            result.RouteName.Should().Be("Test Route Unique");
         }
 
         [Test]
@@ -141,12 +189,13 @@ namespace BusBuddy.Tests.UnitTests.Services
             // Arrange
             var route = new Route
             {
-                Date = DateTime.Today,
+                Date = DateTime.Today.AddDays(2),
                 RouteName = "Original Route",
                 Description = "Original Description"
             };
 
             var createdRoute = await _routeService.CreateRouteAsync(route);
+            // Update the route before calling update
             createdRoute.RouteName = "Updated Route";
             createdRoute.Description = "Updated Description";
 

@@ -16,6 +16,7 @@ namespace BusBuddy.Tests.UnitTests.Services
     /// Tests all 9 critical methods for activity/schedule management
     /// </summary>
     [TestFixture]
+
     public class ActivityServiceTests : TestBase
     {
         private IActivityService _activityService = null!;
@@ -23,18 +24,18 @@ namespace BusBuddy.Tests.UnitTests.Services
         private ILogger<ActivityService> _logger = null!;
 
         [SetUp]
-        public async Task Setup()
+        public void SetUp()
         {
-            await ClearDatabaseAsync();
-            _activityService = ServiceProvider.GetRequiredService<IActivityService>();
-            _busService = ServiceProvider.GetRequiredService<IBusService>();
-            _logger = ServiceProvider.GetRequiredService<ILogger<ActivityService>>();
+            SetupTestDatabase();
+            _activityService = GetService<IActivityService>();
+            _busService = GetService<IBusService>();
+            _logger = GetService<ILogger<ActivityService>>();
         }
 
         [TearDown]
-        public async Task TearDown()
+        public void TearDown()
         {
-            await ClearDatabaseAsync();
+            TearDownTestDatabase();
         }
 
         #region Test Data Helpers

@@ -1,4 +1,7 @@
 using Bus_Buddy.Data;
+using Bus_Buddy.Data.Interfaces;
+using Bus_Buddy.Data.Repositories;
+using Bus_Buddy.Data.UnitOfWork;
 using Bus_Buddy.Models;
 using Bus_Buddy.Services;
 using BusBuddy.Tests.Infrastructure;
@@ -18,19 +21,38 @@ namespace BusBuddy.Tests.UnitTests.Services
     [TestFixture]
     public class StudentServiceTests : TestBase
     {
-        private IStudentService _studentService;
-        private BusBuddyDbContext _context;
-        private ILogger<StudentService> _logger;
+        private IStudentService _studentService = null!;
+        private BusBuddyDbContext _testDbContext = null!;
+        private ServiceProvider _testServiceProvider = null!;
 
         [SetUp]
-        public async Task Setup()
+        public void Setup()
         {
-            _studentService = ServiceProvider.GetRequiredService<IStudentService>();
-            _context = ServiceProvider.GetRequiredService<BusBuddyDbContext>();
-            _logger = ServiceProvider.GetRequiredService<ILogger<StudentService>>();
+            // Manually construct the in-memory DbContext after setting SkipGlobalSeedData
+            _testDbContext = CreateInMemoryDbContext();
 
-            // Clear all data before each test to ensure test isolation
-            await ClearDatabaseAsync();
+            // Build a DI container for this test, registering _testDbContext as the context instance
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+            services.AddLogging();
+            services.AddSingleton<BusBuddyDbContext>(_testDbContext);
+            services.AddScoped<IStudentService, StudentService>();
+            services.AddScoped<IRepository<Student>, Repository<Student>>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // Register any other dependencies needed by StudentService
+            _testServiceProvider = services.BuildServiceProvider();
+            _studentService = _testServiceProvider.GetRequiredService<IStudentService>();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _testDbContext?.Dispose();
+            _testDbContext = null!;
+            if (_testServiceProvider != null)
+            {
+                _testServiceProvider.Dispose();
+                _testServiceProvider = null!;
+            }
         }
 
         #region Read Operations Tests
@@ -64,8 +86,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 }
             };
 
-            _context.Students.AddRange(students);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.AddRange(students);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.GetAllStudentsAsync();
@@ -103,8 +125,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 EnrollmentDate = DateTime.Today
             };
 
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.Add(student);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.GetStudentByIdAsync(student.StudentId);
@@ -139,8 +161,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 new Student { StudentName = "Grade 5 Student", Grade = "5", Active = true }
             };
 
-            _context.Students.AddRange(students);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.AddRange(students);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.GetStudentsByGradeAsync("3");
@@ -157,8 +179,8 @@ namespace BusBuddy.Tests.UnitTests.Services
         {
             // Arrange
             var route = new Route { RouteName = "Route A", Date = DateTime.Today, Description = "Test Route A" };
-            _context.Routes.Add(route);
-            await _context.SaveChangesAsync();
+            _testDbContext.Routes.Add(route);
+            await _testDbContext.SaveChangesAsync();
 
             var students = new List<Student>
             {
@@ -185,8 +207,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 }
             };
 
-            _context.Students.AddRange(students);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.AddRange(students);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.GetStudentsByRouteAsync("Route A");
@@ -210,8 +232,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 new Student { StudentName = "Inactive Student", Active = false }
             };
 
-            _context.Students.AddRange(students);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.AddRange(students);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.GetActiveStudentsAsync();
@@ -233,8 +255,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 new Student { StudentName = "Middle School Student", School = "Washington Middle", Active = true }
             };
 
-            _context.Students.AddRange(students);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.AddRange(students);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.GetStudentsBySchoolAsync("Lincoln Elementary");
@@ -256,8 +278,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 new Student { StudentName = "Bob Johnson", StudentNumber = "S003", Active = true }
             };
 
-            _context.Students.AddRange(students);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.AddRange(students);
+            await _testDbContext.SaveChangesAsync();
 
             // Act - Search by name
             var nameResult = await _studentService.SearchStudentsAsync("john");
@@ -349,8 +371,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 EnrollmentDate = DateTime.Today
             };
 
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.Add(student);
+            await _testDbContext.SaveChangesAsync();
 
             // Modify student
             student.StudentName = "Updated Name";
@@ -363,7 +385,7 @@ namespace BusBuddy.Tests.UnitTests.Services
             // Assert
             result.Should().BeTrue();
 
-            var updatedStudent = await _context.Students.FindAsync(student.StudentId);
+            var updatedStudent = await _testDbContext.Students.FindAsync(student.StudentId);
             updatedStudent!.StudentName.Should().Be("Updated Name");
             updatedStudent.Grade.Should().Be("8");
             updatedStudent.HomePhone.Should().Be("(555) 999-9999");
@@ -380,8 +402,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 EnrollmentDate = DateTime.Today
             };
 
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.Add(student);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.DeleteStudentAsync(student.StudentId);
@@ -390,8 +412,8 @@ namespace BusBuddy.Tests.UnitTests.Services
             result.Should().BeTrue();
 
             // ITERATION 8 FIX: Clear change tracker to get fresh entity state
-            _context.ChangeTracker.Clear();
-            var deletedStudent = await _context.Students.FindAsync(student.StudentId);
+            _testDbContext.ChangeTracker.Clear();
+            var deletedStudent = await _testDbContext.Students.FindAsync(student.StudentId);
             deletedStudent.Should().BeNull();
         }
 
@@ -441,8 +463,8 @@ namespace BusBuddy.Tests.UnitTests.Services
         {
             // Arrange
             var route = new Route { RouteName = "Valid Route", Date = DateTime.Today, Description = "Test Route" };
-            _context.Routes.Add(route);
-            await _context.SaveChangesAsync();
+            _testDbContext.Routes.Add(route);
+            await _testDbContext.SaveChangesAsync();
 
             var student = new Student
             {
@@ -477,8 +499,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 EnrollmentDate = DateTime.Today
             };
 
-            _context.Students.Add(existingStudent);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.Add(existingStudent);
+            await _testDbContext.SaveChangesAsync();
 
             var newStudent = new Student
             {
@@ -531,8 +553,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 EnrollmentDate = DateTime.Today
             };
 
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.Add(student);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.AssignStudentToRouteAsync(
@@ -542,8 +564,8 @@ namespace BusBuddy.Tests.UnitTests.Services
             result.Should().BeTrue();
 
             // ITERATION 8 FIX: Clear change tracker to get fresh entity state
-            _context.ChangeTracker.Clear();
-            var updatedStudent = await _context.Students.FindAsync(student.StudentId);
+            _testDbContext.ChangeTracker.Clear();
+            var updatedStudent = await _testDbContext.Students.FindAsync(student.StudentId);
             updatedStudent!.AMRoute.Should().Be("Morning Route");
             updatedStudent.PMRoute.Should().Be("Evening Route");
         }
@@ -569,8 +591,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 EnrollmentDate = DateTime.Today
             };
 
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.Add(student);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.UpdateStudentActiveStatusAsync(student.StudentId, false);
@@ -579,8 +601,8 @@ namespace BusBuddy.Tests.UnitTests.Services
             result.Should().BeTrue();
 
             // ITERATION 8 FIX: Clear change tracker to get fresh entity state
-            _context.ChangeTracker.Clear();
-            var updatedStudent = await _context.Students.FindAsync(student.StudentId);
+            _testDbContext.ChangeTracker.Clear();
+            var updatedStudent = await _testDbContext.Students.FindAsync(student.StudentId);
             updatedStudent!.Active.Should().BeFalse();
         }
 
@@ -596,8 +618,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 new Student { StudentName = "No Route Student", Active = true, Grade = "5" }
             };
 
-            _context.Students.AddRange(students);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.AddRange(students);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.GetStudentStatisticsAsync();
@@ -649,8 +671,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 }
             };
 
-            _context.Students.AddRange(students);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.AddRange(students);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.GetStudentsWithMissingInfoAsync();
@@ -689,8 +711,8 @@ namespace BusBuddy.Tests.UnitTests.Services
                 EnrollmentDate = DateTime.Today
             };
 
-            _context.Students.Add(student);
-            await _context.SaveChangesAsync();
+            _testDbContext.Students.Add(student);
+            await _testDbContext.SaveChangesAsync();
 
             // Act
             var result = await _studentService.ExportStudentsToCsvAsync();

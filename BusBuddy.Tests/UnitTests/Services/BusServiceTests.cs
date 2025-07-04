@@ -1,6 +1,10 @@
 using NUnit.Framework;
 using FluentAssertions;
 using Bus_Buddy.Services;
+using Bus_Buddy.Data;
+using Bus_Buddy.Data.Interfaces;
+using Bus_Buddy.Data.Repositories;
+using Bus_Buddy.Data.UnitOfWork;
 using Bus_Buddy.Models;
 using BusBuddy.Tests.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,18 +22,37 @@ namespace BusBuddy.Tests.UnitTests.Services
     public class BusServiceTests : TestBase
     {
         private IBusService _busService = null!;
+        private BusBuddyDbContext _testDbContext = null!;
+        private ServiceProvider _testServiceProvider = null!;
 
         [SetUp]
-        public async Task Setup()
+        public void Setup()
         {
-            await ClearDatabaseAsync();
-            _busService = ServiceProvider.GetRequiredService<IBusService>();
+            // Manually construct the in-memory DbContext after setting SkipGlobalSeedData
+            _testDbContext = CreateInMemoryDbContext();
+
+            // Build a DI container for this test, registering _testDbContext as the context instance
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection();
+            services.AddLogging();
+            services.AddSingleton<BusBuddyDbContext>(_testDbContext);
+            services.AddScoped<IBusService, BusService>();
+            services.AddScoped<IRepository<Bus>, Repository<Bus>>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            // Register any other dependencies needed by BusService
+            _testServiceProvider = services.BuildServiceProvider();
+            _busService = _testServiceProvider.GetRequiredService<IBusService>();
         }
 
         [TearDown]
-        public async Task TearDown()
+        public void TearDown()
         {
-            await ClearDatabaseAsync();
+            _testDbContext?.Dispose();
+            _testDbContext = null!;
+            if (_testServiceProvider != null)
+            {
+                _testServiceProvider.Dispose();
+                _testServiceProvider = null!;
+            }
         }
 
         [Test]

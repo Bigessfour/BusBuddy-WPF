@@ -33,6 +33,12 @@ public class FuelService : IFuelService
 
     public async Task<Fuel> CreateFuelRecordAsync(Fuel fuel)
     {
+        if (fuel == null)
+            throw new ArgumentException("Fuel record cannot be null.", nameof(fuel));
+
+        if (fuel.Gallons.HasValue && fuel.Gallons.Value < 0)
+            throw new ArgumentException("Gallons cannot be negative.", nameof(fuel));
+
         _context.FuelRecords.Add(fuel);
         await _context.SaveChangesAsync();
         return fuel;

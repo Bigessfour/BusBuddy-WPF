@@ -13,6 +13,7 @@ namespace BusBuddy.Tests.UnitTests.Services
     /// This covers CRUD operations and fuel analytics without database dependencies
     /// </summary>
     [TestFixture]
+
     public class FuelServiceTests : TestBase
     {
         private IFuelService _fuelService = null!;
@@ -22,9 +23,7 @@ namespace BusBuddy.Tests.UnitTests.Services
         [SetUp]
         public async Task SetUp()
         {
-            // Complete database isolation per Microsoft EF testing best practices
-            await ClearDatabaseAsync();
-
+            SetupTestDatabase();
             _fuelService = GetService<IFuelService>();
 
             // Create test bus - let EF Core handle ID assignment completely
@@ -42,13 +41,14 @@ namespace BusBuddy.Tests.UnitTests.Services
 
             DbContext.Vehicles.Add(_testBus);
             await DbContext.SaveChangesAsync();
-
-            // Critical: Detach entities to prevent tracking conflicts
             DetachAllEntities();
-
-            // Create fresh test fuel records for each test
-            // Key insight: Don't reuse entity instances across tests
             _testFuelRecords = CreateFreshFuelRecords();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            TearDownTestDatabase();
         }
 
         /// <summary>
@@ -699,10 +699,5 @@ namespace BusBuddy.Tests.UnitTests.Services
 
         #endregion
 
-        [TearDown]
-        public void TearDown()
-        {
-            // Clean up handled by TestBase
-        }
     }
 }

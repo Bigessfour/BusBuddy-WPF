@@ -15,26 +15,24 @@ namespace BusBuddy.Tests.UnitTests.Services;
 /// Created following 9-step testing methodology from TEST_COVERAGE_ANALYSIS.md
 /// </summary>
 [TestFixture]
+
 public class MaintenanceServiceTests : TestBase
 {
-    private MaintenanceService _maintenanceService = null!;
+    private IMaintenanceService _maintenanceService = null!;
     private BusBuddyDbContext _context = null!;
 
     [SetUp]
-    public async Task SetUp()
+    public void SetUp()
     {
-        _context = ServiceProvider.GetRequiredService<BusBuddyDbContext>();
-        _maintenanceService = new MaintenanceService(_context);
-
-        // Clear database before each test to ensure isolation
-        await ClearDatabaseAsync();
+        SetupTestDatabase();
+        _context = GetService<BusBuddyDbContext>();
+        _maintenanceService = GetService<IMaintenanceService>();
     }
 
     [TearDown]
-    public async Task TearDown()
+    public void TearDown()
     {
-        // Clear database after each test to ensure clean state
-        await ClearDatabaseAsync();
+        TearDownTestDatabase();
     }
 
     #region GetAllMaintenanceRecordsAsync Tests

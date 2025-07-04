@@ -20,6 +20,7 @@ namespace BusBuddy.Tests.UnitTests.Services
     /// This should resolve our Entity Framework tracking conflicts
     /// </summary>
     [TestFixture]
+
     public class FuelServiceEnhancedTests : TestBase
     {
         private IFuelService _fuelService = null!;
@@ -29,9 +30,7 @@ namespace BusBuddy.Tests.UnitTests.Services
         [SetUp]
         public async Task SetUp()
         {
-            // Clear database for complete test isolation
-            await ClearDatabaseAsync();
-
+            SetupTestDatabase();
             _fuelService = GetService<IFuelService>();
 
             // Create test bus (SQLite will handle auto-increment properly)
@@ -78,6 +77,7 @@ namespace BusBuddy.Tests.UnitTests.Services
                 }
             };
         }
+
 
         #region Enhanced Tests with FluentAssertions Best Practices
 
@@ -211,7 +211,7 @@ namespace BusBuddy.Tests.UnitTests.Services
         [TearDown]
         public void TearDown()
         {
-            // SQLite cleanup handled by TestBaseWithSQLite
+            TearDownTestDatabase();
         }
     }
 }

@@ -31,6 +31,7 @@ namespace BusBuddy.Tests.Infrastructure
 
         protected ConsolidatedTestBase()
         {
+            BusBuddyDbContext.SkipGlobalSeedData = true;
             SetupServices();
             DbContext = ServiceProvider.GetRequiredService<BusBuddyDbContext>();
             DialogCapture = ServiceProvider.GetRequiredService<DialogEventCapture>();
@@ -151,6 +152,49 @@ namespace BusBuddy.Tests.Infrastructure
             await DbContext.Database.EnsureDeletedAsync();
             await DbContext.Database.EnsureCreatedAsync();
             DbContext.ChangeTracker.Clear();
+        }
+
+        /// <summary>
+        /// Sets up a new isolated database for the test
+        /// Creates a unique InMemory database to prevent test interference
+        /// </summary>
+        protected void SetupTestDatabase()
+        {
+
+
+
+            // Always clean up any previous test state before starting a new test
+            TearDownTestDatabase();
+
+            // Prevent global seed data for test isolation
+            BusBuddyDbContext.SkipGlobalSeedData = true;
+
+            // Rebuild DI container and all services for this test
+            var services = new ServiceCollection();
+            ConfigureSharedServices(services);
+            ConfigureTestSpecificServices(services);
+            ServiceProvider = services.BuildServiceProvider();
+
+            // Re-resolve DbContext and DialogCapture from the new provider
+            DbContext = ServiceProvider.GetRequiredService<BusBuddyDbContext>();
+            DialogCapture = ServiceProvider.GetRequiredService<DialogEventCapture>();
+
+            // Ensure the database is created and ready
+            DbContext.Database.EnsureCreated();
+            DbContext.ChangeTracker.Clear();
+        }
+
+        /// <summary>
+        /// Tears down the test database
+        /// Ensures proper cleanup of test data
+        /// </summary>
+        protected void TearDownTestDatabase()
+        {
+            if (DbContext != null)
+            {
+                DbContext.ChangeTracker.Clear();
+                DbContext.Database.EnsureDeleted();
+            }
         }
 
         /// <summary>

@@ -33,36 +33,82 @@ namespace BusBuddy.Tests.Infrastructure
     /// </summary>
     public abstract class TestBase : IDisposable, IAsyncDisposable
     {
+        protected BusBuddyDbContext CreateInMemoryDbContext()
+        {
+            BusBuddyDbContext.SkipGlobalSeedData = true;
+            var dbName = $"TestDb_{Guid.NewGuid()}_{DateTime.UtcNow.Ticks}";
+            var options = new DbContextOptionsBuilder<BusBuddyDbContext>()
+                .UseInMemoryDatabase(dbName)
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors()
+                .Options;
+            var ctx = new BusBuddyDbContext(options);
+            ctx.Database.EnsureDeleted();
+            ctx.Database.EnsureCreated();
+            return ctx;
+        }
         protected ServiceProvider ServiceProvider { get; private set; } = null!;
         protected BusBuddyDbContext DbContext { get; private set; } = null!;
         protected IConfiguration Configuration { get; private set; } = null!;
         protected DialogEventCapture DialogCapture { get; private set; } = null!;
+        private string? _currentTestDbName;
 
         protected TestBase()
         {
-            SetupServices();
-            DbContext = ServiceProvider.GetRequiredService<BusBuddyDbContext>();
-            DialogCapture = ServiceProvider.GetRequiredService<DialogEventCapture>();
-
-            // This is called by NUnit before each test, ensuring a clean slate.
-            SetupTestDatabase();
+            // No-op: services will be set up per test in SetupTestDatabase
         }
 
         /// <summary>
         /// Ensures a completely clean database state for each test.
-        /// This method is called before every test execution.
+        /// Creates a fresh DbContext with unique database name per test method.
+        /// This method should be called at the start of each test.
         /// </summary>
-        private void SetupTestDatabase()
+        protected void SetupTestDatabase()
         {
-            // Clear any existing tracked entities first
-            DbContext.ChangeTracker.Clear();
-            
-            // For both InMemory and SQL Server, deleting and recreating the database
-            // is the most reliable way to ensure 100% test isolation.
-            DbContext.Database.EnsureDeleted();
-            DbContext.Database.EnsureCreated();
+            if (Configuration == null)
+            {
+                // Configuration is set up in ConfigureSharedServices
+                var services = new ServiceCollection();
+                ConfigureSharedServices(services);
+                Configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+            }
+            if (Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
+            {
+                BusBuddyDbContext.SkipGlobalSeedData = true;
+            }
 
-            // For SQL Server, migrations might be needed if the model is complex.
+            // Rebuild DI container and all services for this test
+            SetupServices();
+            if (ServiceProvider == null)
+                throw new InvalidOperationException("ServiceProvider is not initialized.");
+            DialogCapture = ServiceProvider.GetRequiredService<DialogEventCapture>();
+
+            // Always generate a new unique database name for each test
+            _currentTestDbName = $"TestDb_{Guid.NewGuid()}_{DateTime.UtcNow.Ticks}";
+
+            // Create fresh DbContext with unique database for complete test isolation
+            if (Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
+            {
+                var options = new DbContextOptionsBuilder<BusBuddyDbContext>()
+                    .UseInMemoryDatabase(_currentTestDbName)
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors()
+                    .Options;
+
+                DbContext = new BusBuddyDbContext(options);
+                // Always ensure deleted and created for full isolation
+                DbContext.Database.EnsureDeleted();
+                DbContext.Database.EnsureCreated();
+            }
+            else
+            {
+                // For SQL Server, allow global seeding
+                BusBuddyDbContext.SkipGlobalSeedData = false;
+                DbContext = ServiceProvider.GetRequiredService<BusBuddyDbContext>();
+                DbContext.Database.EnsureCreated();
+            }
+
+            // For SQL Server, apply migrations if needed
             if (!Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
             {
                 try
@@ -75,9 +121,73 @@ namespace BusBuddy.Tests.Infrastructure
                     logger?.LogWarning(ex, "Migration failed during test setup, but proceeding as EnsureCreated should have built the schema.");
                 }
             }
-            
-            // Clear tracking again after database setup to ensure clean state
-            DbContext.ChangeTracker.Clear();
+
+            // Always ensure deleted and created for full isolation (in-memory DB)
+            if (Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
+            {
+                BusBuddyDbContext.SkipGlobalSeedData = true;
+                DbContext.Database.EnsureDeleted();
+                DbContext.Database.EnsureCreated();
+            }
+
+            // Always set SkipGlobalSeedData before creating the context for in-memory tests
+            // and before building the DI container
+            if (Configuration == null)
+            {
+                // Configuration is set up in ConfigureSharedServices
+                var services = new ServiceCollection();
+                ConfigureSharedServices(services);
+                Configuration = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+            }
+            if (Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
+            {
+                BusBuddyDbContext.SkipGlobalSeedData = true;
+            }
+
+            // Rebuild DI container and all services for this test
+            SetupServices();
+            if (ServiceProvider == null)
+                throw new InvalidOperationException("ServiceProvider is not initialized.");
+            DialogCapture = ServiceProvider.GetRequiredService<DialogEventCapture>();
+
+            // Always generate a new unique database name for each test
+            _currentTestDbName = $"TestDb_{Guid.NewGuid()}_{DateTime.UtcNow.Ticks}";
+
+            // Create fresh DbContext with unique database for complete test isolation
+            if (Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
+            {
+                var options = new DbContextOptionsBuilder<BusBuddyDbContext>()
+                    .UseInMemoryDatabase(_currentTestDbName)
+                    .EnableSensitiveDataLogging()
+                    .EnableDetailedErrors()
+                    .Options;
+
+                DbContext = new BusBuddyDbContext(options);
+                // Always ensure deleted and created for full isolation
+                DbContext.Database.EnsureDeleted();
+                DbContext.Database.EnsureCreated();
+            }
+            else
+            {
+                // For SQL Server, allow global seeding
+                BusBuddyDbContext.SkipGlobalSeedData = false;
+                DbContext = ServiceProvider.GetRequiredService<BusBuddyDbContext>();
+                DbContext.Database.EnsureCreated();
+            }
+
+            // For SQL Server, apply migrations if needed
+            if (!Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
+            {
+                try
+                {
+                    DbContext.Database.Migrate();
+                }
+                catch (Exception ex)
+                {
+                    var logger = ServiceProvider?.GetService<ILogger<TestBase>>();
+                    logger?.LogWarning(ex, "Migration failed during test setup, but proceeding as EnsureCreated should have built the schema.");
+                }
+            }
         }
 
         /// <summary>
@@ -181,8 +291,9 @@ namespace BusBuddy.Tests.Infrastructure
             {
                 if (Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
                 {
-                    // Fallback to InMemory database if specified
-                    options.UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}");
+                    // Use the same in-memory database name as the test's DbContext for true isolation
+                    var dbName = _currentTestDbName ?? "TestDb_Default";
+                    options.UseInMemoryDatabase(dbName);
                 }
                 else
                 {
@@ -228,72 +339,85 @@ namespace BusBuddy.Tests.Infrastructure
 
         /// <summary>
         /// Asynchronously clears all data from the database tables.
-        /// Optimized for SQL Server Express with proper cleanup order
+        /// NOTE: This method is deprecated in favor of SetupTestDatabase() which creates
+        /// a fresh database per test. Keep for backward compatibility.
         /// </summary>
         protected async Task ClearDatabaseAsync()
         {
-            // This method is now replaced by the more reliable SetupTestDatabase().
-            // We will keep it for now but the new logic in the constructor is what will be used.
+            // For InMemory databases with per-test isolation, just recreate the test database
             if (Configuration.GetValue<bool>("TestSettings:UseInMemoryDatabase"))
             {
-                // InMemory database - simple recreation
-                await DbContext.Database.EnsureDeletedAsync();
-                await DbContext.Database.EnsureCreatedAsync();
+                // Simply call SetupTestDatabase to get a fresh database
+                SetupTestDatabase();
+                return;
             }
-            else
-            {
-                // SQL Server Express - clear data but preserve schema
-                // Use transaction for atomic cleanup
-                using var transaction = await DbContext.Database.BeginTransactionAsync();
-                try
-                {
-                    // Disable foreign key constraints temporarily
-                    await DbContext.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL'");
 
-                    // Clear all tables
+            // SQL Server Express - clear data but preserve schema
+            // Use transaction for atomic cleanup
+            using var transaction = await DbContext.Database.BeginTransactionAsync();
+            try
+            {
+                // Disable foreign key constraints temporarily
+                await DbContext.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT ALL'");
+
+                // Clear all tables
 #pragma warning disable EF1002 // Possible SQL injection vulnerability.
-                    await DbContext.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable 'DELETE FROM ?'");
+                await DbContext.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable 'DELETE FROM ?'");
 #pragma warning restore EF1002 // Possible SQL injection vulnerability.
 
-                    // Re-enable foreign key constraints
-                    await DbContext.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT ALL'");
+                // Re-enable foreign key constraints
+                await DbContext.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT ALL'");
 
-                    // Reset identity columns
-                    var tables = new[] { "FuelRecords", "Vehicles", "Drivers", "Students", "Routes", "Activities", "Maintenance", "Tickets", "RouteStops" };
-                    foreach (var table in tables)
-                    {
-                        try
-                        {
-                            await DbContext.Database.ExecuteSqlRawAsync($"DBCC CHECKIDENT('{table}', RESEED, 0)");
-                        }
-                        catch
-                        {
-                            // Table might not exist or have identity column - ignore
-                        }
-                    }
-
-                    await transaction.CommitAsync();
-                }
-                catch (Exception ex)
+                // Reset identity columns
+                var tables = new[] { "FuelRecords", "Vehicles", "Drivers", "Students", "Routes", "Activities", "Maintenance", "Tickets", "RouteStops" };
+                foreach (var table in tables)
                 {
-                    await transaction.RollbackAsync();
-
-                    // Fallback: recreate database if cleanup fails
-                    var logger = ServiceProvider?.GetService<ILogger<TestBase>>();
-                    logger?.LogWarning(ex, "Database cleanup failed, recreating database");
-
-                    await DbContext.Database.EnsureDeletedAsync();
-                    DbContext.Database.Migrate();
+                    try
+                    {
+#pragma warning disable EF1002 // Risk acceptable for test table names
+                        await DbContext.Database.ExecuteSqlRawAsync($"DBCC CHECKIDENT('{table}', RESEED, 0)");
+#pragma warning restore EF1002
+                    }
+                    catch
+                    {
+                        // Table might not exist or have identity column - ignore
+                    }
                 }
-            }
 
-            // Critical: Clear EF change tracker
-            DbContext.ChangeTracker.Clear();
+                await transaction.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+
+                // Fallback: recreate database if cleanup fails
+                var logger = ServiceProvider?.GetService<ILogger<TestBase>>();
+                logger?.LogWarning(ex, "Database cleanup failed, recreating database");
+
+                await DbContext.Database.EnsureDeletedAsync();
+                DbContext.Database.Migrate();
+            }
+        }
+
+        /// <summary>
+        /// Disposes the current test's DbContext
+        /// Call this after each test to ensure proper cleanup
+        /// </summary>
+        protected void TearDownTestDatabase()
+        {
+            if (DbContext != null)
+            {
+                DbContext.Dispose();
+                DbContext = null!;
+            }
+            // Reset db name to ensure no accidental reuse
+            _currentTestDbName = null;
         }
 
         /// <summary>
         /// Clears the Entity Framework change tracker to prevent entity tracking conflicts
         /// Call this between test operations to prevent tracking conflicts
+        /// NOTE: With per-test databases, this is less critical but kept for compatibility
         /// </summary>
         protected void ClearChangeTracker()
         {
@@ -556,13 +680,24 @@ namespace BusBuddy.Tests.Infrastructure
                 DialogCapture.Dispose();
             }
 
-            if (ServiceProvider is IAsyncDisposable spAsyncDisposable)
+            // Dispose the current test's DbContext
+            if (DbContext != null)
             {
-                await spAsyncDisposable.DisposeAsync();
+                DbContext.Dispose();
+                DbContext = null!;
             }
-            else
+
+            if (ServiceProvider != null)
             {
-                ServiceProvider?.Dispose();
+                if (ServiceProvider is IAsyncDisposable spAsyncDisposable)
+                {
+                    await spAsyncDisposable.DisposeAsync();
+                }
+                else
+                {
+                    ServiceProvider.Dispose();
+                }
+                ServiceProvider = null!;
             }
 
             GC.SuppressFinalize(this);

@@ -119,6 +119,8 @@ jobs:
     runs-on: windows-latest
     needs: [workflow-history]
     if: always() && (needs.workflow-history.result == 'success' || needs.workflow-history.result == 'skipped')
+    env:
+      SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
     outputs:
       passed: ${{ steps.count-unit-tests.outputs.passed }}
       failed: ${{ steps.count-unit-tests.outputs.failed }}
@@ -212,6 +214,8 @@ jobs:
     name: Integration Tests
     runs-on: windows-latest
     needs: test
+    env:
+      SYNCFUSION_LICENSE_KEY: ${{ secrets.SYNCFUSION_LICENSE_KEY }}
     outputs:
       passed: ${{ steps.count-integration-tests.outputs.passed }}
       failed: ${{ steps.count-integration-tests.outputs.failed }}

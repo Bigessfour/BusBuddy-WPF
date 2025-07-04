@@ -26,13 +26,19 @@ public class RepositoryTests : TestBase
     private Repository<Student> _studentRepository = null!;
 
     [SetUp]
-    public async Task SetUp()
+    public void SetUp()
     {
-        await ClearDatabaseAsync(); // LESSON 2.2: Test Data Isolation
+        SetupTestDatabase(); // LESSON 2.2: Test Data Isolation
 
         _busRepository = new Repository<Bus>(DbContext);
         _driverRepository = new Repository<Driver>(DbContext);
         _studentRepository = new Repository<Student>(DbContext);
+    }
+
+    [TearDown]
+    public void TearDown()
+    {
+        TearDownTestDatabase();
     }
 
     #region CRUD Operations Tests
