@@ -20,18 +20,18 @@ namespace Bus_Buddy.Services
         public async Task<List<Activity>> GetAllSchedulesAsync()
         {
             return await _context.Activities
-                .Include(a => a.Vehicle)
+                .Include(a => a.AssignedVehicle)
                 .Include(a => a.Driver)
                 .Include(a => a.Route)
-                .OrderBy(a => a.ActivityDate)
-                .ThenBy(a => a.StartTime)
+                .OrderBy(a => a.Date)
+                .ThenBy(a => a.LeaveTime)
                 .ToListAsync();
         }
 
         public async Task<Activity> GetScheduleByIdAsync(int id)
         {
             return await _context.Activities
-                .Include(a => a.Vehicle)
+                .Include(a => a.AssignedVehicle)
                 .Include(a => a.Driver)
                 .Include(a => a.Route)
                 .FirstOrDefaultAsync(a => a.ActivityId == id) ?? throw new InvalidOperationException($"Activity with ID {id} not found.");
@@ -40,12 +40,12 @@ namespace Bus_Buddy.Services
         public async Task<List<Activity>> GetSchedulesByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             return await _context.Activities
-                .Include(a => a.Vehicle)
+                .Include(a => a.AssignedVehicle)
                 .Include(a => a.Driver)
                 .Include(a => a.Route)
-                .Where(a => a.ActivityDate >= startDate && a.ActivityDate <= endDate)
-                .OrderBy(a => a.ActivityDate)
-                .ThenBy(a => a.StartTime)
+                .Where(a => a.Date >= startDate && a.Date <= endDate)
+                .OrderBy(a => a.Date)
+                .ThenBy(a => a.LeaveTime)
                 .ToListAsync();
         }
 
@@ -67,12 +67,12 @@ namespace Bus_Buddy.Services
             // Validate schedule conflict before updating (excluding current schedule)
             var existingConflicts = await _context.Activities
                 .Where(a => a.ActivityId != schedule.ActivityId &&
-                           a.ActivityDate == schedule.ActivityDate &&
-                           ((a.VehicleId == schedule.VehicleId) ||
+                           a.Date == schedule.Date &&
+                           ((a.AssignedVehicleId == schedule.AssignedVehicleId) ||
                             (a.DriverId == schedule.DriverId)) &&
-                           ((a.StartTime <= schedule.StartTime && a.EndTime >= schedule.StartTime) ||
-                            (a.StartTime <= schedule.EndTime && a.EndTime >= schedule.EndTime) ||
-                            (schedule.StartTime <= a.StartTime && schedule.EndTime >= a.EndTime)))
+                           ((a.LeaveTime <= schedule.LeaveTime && a.EventTime >= schedule.LeaveTime) ||
+                            (a.LeaveTime <= schedule.EventTime && a.EventTime >= schedule.EventTime) ||
+                            (schedule.LeaveTime <= a.LeaveTime && schedule.EventTime >= a.EventTime)))
                 .AnyAsync();
 
             if (existingConflicts)
@@ -101,12 +101,12 @@ namespace Bus_Buddy.Services
             if (int.TryParse(vehicleId, out int parsedVehicleId))
             {
                 return await _context.Activities
-                    .Include(a => a.Vehicle)
+                    .Include(a => a.AssignedVehicle)
                     .Include(a => a.Driver)
                     .Include(a => a.Route)
-                    .Where(a => a.VehicleId == parsedVehicleId)
-                    .OrderBy(a => a.ActivityDate)
-                    .ThenBy(a => a.StartTime)
+                    .Where(a => a.AssignedVehicleId == parsedVehicleId)
+                    .OrderBy(a => a.Date)
+                    .ThenBy(a => a.LeaveTime)
                     .ToListAsync();
             }
             return new List<Activity>();
@@ -115,35 +115,35 @@ namespace Bus_Buddy.Services
         public async Task<List<Activity>> GetSchedulesByDriverAsync(string driverName)
         {
             return await _context.Activities
-                .Include(a => a.Vehicle)
+                .Include(a => a.AssignedVehicle)
                 .Include(a => a.Driver)
                 .Include(a => a.Route)
                 .Where(a => a.Driver.DriverName == driverName)
-                .OrderBy(a => a.ActivityDate)
-                .ThenBy(a => a.StartTime)
+                .OrderBy(a => a.Date)
+                .ThenBy(a => a.LeaveTime)
                 .ToListAsync();
         }
 
         public async Task<bool> ValidateScheduleConflictAsync(Activity schedule)
         {
-            // Check for vehicle conflicts
+            // Check for vehicle conflicts using mapped properties
             var vehicleConflict = await _context.Activities
-                .Where(a => a.VehicleId == schedule.VehicleId &&
-                           a.ActivityDate == schedule.ActivityDate &&
-                           ((a.StartTime <= schedule.StartTime && a.EndTime >= schedule.StartTime) ||
-                            (a.StartTime <= schedule.EndTime && a.EndTime >= schedule.EndTime) ||
-                            (schedule.StartTime <= a.StartTime && schedule.EndTime >= a.EndTime)))
+                .Where(a => a.AssignedVehicleId == schedule.AssignedVehicleId &&
+                           a.Date == schedule.Date &&
+                           ((a.LeaveTime <= schedule.LeaveTime && a.EventTime >= schedule.LeaveTime) ||
+                            (a.LeaveTime <= schedule.EventTime && a.EventTime >= schedule.EventTime) ||
+                            (schedule.LeaveTime <= a.LeaveTime && schedule.EventTime >= a.EventTime)))
                 .AnyAsync();
 
             if (vehicleConflict) return true;
 
-            // Check for driver conflicts
+            // Check for driver conflicts using mapped properties
             var driverConflict = await _context.Activities
                 .Where(a => a.DriverId == schedule.DriverId &&
-                           a.ActivityDate == schedule.ActivityDate &&
-                           ((a.StartTime <= schedule.StartTime && a.EndTime >= schedule.StartTime) ||
-                            (a.StartTime <= schedule.EndTime && a.EndTime >= schedule.EndTime) ||
-                            (schedule.StartTime <= a.StartTime && schedule.EndTime >= a.EndTime)))
+                           a.Date == schedule.Date &&
+                           ((a.LeaveTime <= schedule.LeaveTime && a.EventTime >= schedule.LeaveTime) ||
+                            (a.LeaveTime <= schedule.EventTime && a.EventTime >= schedule.EventTime) ||
+                            (schedule.LeaveTime <= a.LeaveTime && schedule.EventTime >= a.EventTime)))
                 .AnyAsync();
 
             if (driverConflict) return true;

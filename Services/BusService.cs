@@ -32,14 +32,18 @@ namespace Bus_Buddy.Services
         public async Task<List<Bus>> GetAllBusEntitiesAsync()
         {
             _logger.LogInformation("Retrieving all bus entities from database");
-            return await _context.Vehicles.Include(v => v.Routes).ToListAsync();
+            return await _context.Vehicles
+                .Include(v => v.AMRoutes)
+                .Include(v => v.PMRoutes)
+                .ToListAsync();
         }
 
         public async Task<Bus?> GetBusEntityByIdAsync(int busId)
         {
             _logger.LogInformation("Retrieving bus entity with ID: {BusId}", busId);
             return await _context.Vehicles
-                .Include(v => v.Routes)
+                .Include(v => v.AMRoutes)
+                .Include(v => v.PMRoutes)
                 .Include(v => v.Activities)
                 .Include(v => v.FuelRecords)
                 .Include(v => v.MaintenanceRecords)

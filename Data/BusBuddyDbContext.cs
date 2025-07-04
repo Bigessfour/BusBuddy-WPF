@@ -205,12 +205,19 @@ public class BusBuddyDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict)
                   .HasConstraintName("FK_Activities_Driver");
 
+            entity.HasOne(a => a.Route)
+                  .WithMany()
+                  .HasForeignKey(a => a.RouteId)
+                  .OnDelete(DeleteBehavior.SetNull)
+                  .HasConstraintName("FK_Activities_Route");
+
             // Indexes for scheduling and performance
             entity.HasIndex(e => e.Date).HasDatabaseName("IX_Activities_Date");
             entity.HasIndex(e => e.ActivityType).HasDatabaseName("IX_Activities_ActivityType");
             entity.HasIndex(e => e.Status).HasDatabaseName("IX_Activities_Status");
             entity.HasIndex(e => e.AssignedVehicleId).HasDatabaseName("IX_Activities_VehicleId");
             entity.HasIndex(e => e.DriverId).HasDatabaseName("IX_Activities_DriverId");
+            entity.HasIndex(e => e.RouteId).HasDatabaseName("IX_Activities_RouteId");
             entity.HasIndex(e => new { e.Date, e.LeaveTime, e.EventTime }).HasDatabaseName("IX_Activities_DateTimeRange");
             entity.HasIndex(e => new { e.AssignedVehicleId, e.Date, e.LeaveTime }).HasDatabaseName("IX_Activities_VehicleSchedule");
             entity.HasIndex(e => new { e.DriverId, e.Date, e.LeaveTime }).HasDatabaseName("IX_Activities_DriverSchedule");

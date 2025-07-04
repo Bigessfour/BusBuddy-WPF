@@ -238,8 +238,8 @@ public class Activity : INotifyPropertyChanged
         set => AssignedVehicleId = value;
     }
 
-    [NotMapped]
     [Display(Name = "Route ID")]
+    [ForeignKey("Route")]
     public int? RouteId
     {
         get => _routeId;
@@ -349,8 +349,7 @@ public class Activity : INotifyPropertyChanged
 
     public virtual Driver Driver { get; set; } = null!;
 
-    // Legacy navigation for routes (for backward compatibility)
-    [NotMapped]
+    // Route navigation property for activities
     public virtual Route? Route { get; set; }
 
     // INotifyPropertyChanged implementation for Syncfusion data binding

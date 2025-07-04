@@ -23,13 +23,12 @@ public class ActivityService : IActivityService
     {
         try
         {
-            _logger.LogInformation("Retrieving all activities");
-            return await _context.Activities
-                .Include(a => a.Vehicle)
-                .Include(a => a.Route)
-                .Include(a => a.Driver)
-                .OrderByDescending(a => a.ActivityDate)
-                .ToListAsync();
+            _logger.LogInformation("Retrieving all activities"); return await _context.Activities
+            .Include(a => a.AssignedVehicle)
+            .Include(a => a.Route)
+            .Include(a => a.Driver)
+            .OrderByDescending(a => a.Date)
+            .ToListAsync();
         }
         catch (Exception ex)
         {
@@ -42,12 +41,11 @@ public class ActivityService : IActivityService
     {
         try
         {
-            _logger.LogInformation("Retrieving activity with ID: {ActivityId}", id);
-            return await _context.Activities
-                .Include(a => a.Vehicle)
-                .Include(a => a.Route)
-                .Include(a => a.Driver)
-                .FirstOrDefaultAsync(a => a.ActivityId == id);
+            _logger.LogInformation("Retrieving activity with ID: {ActivityId}", id); return await _context.Activities
+            .Include(a => a.AssignedVehicle)
+            .Include(a => a.Route)
+            .Include(a => a.Driver)
+            .FirstOrDefaultAsync(a => a.ActivityId == id);
         }
         catch (Exception ex)
         {
@@ -60,7 +58,7 @@ public class ActivityService : IActivityService
     {
         try
         {
-            _logger.LogInformation("Creating new activity for date: {ActivityDate}", activity.ActivityDate);
+            _logger.LogInformation("Creating new activity for date: {ActivityDate}", activity.Date);
 
             _context.Activities.Add(activity);
             await _context.SaveChangesAsync();
@@ -126,12 +124,12 @@ public class ActivityService : IActivityService
         {
             _logger.LogInformation("Retrieving activities between {StartDate} and {EndDate}", startDate, endDate);
             return await _context.Activities
-                .Include(a => a.Vehicle)
+                .Include(a => a.AssignedVehicle)
                 .Include(a => a.Route)
                 .Include(a => a.Driver)
-                .Where(a => a.ActivityDate >= startDate && a.ActivityDate <= endDate)
-                .OrderBy(a => a.ActivityDate)
-                .ThenBy(a => a.StartTime)
+                .Where(a => a.Date >= startDate && a.Date <= endDate)
+                .OrderBy(a => a.Date)
+                .ThenBy(a => a.LeaveTime)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -147,11 +145,11 @@ public class ActivityService : IActivityService
         {
             _logger.LogInformation("Retrieving activities for route ID: {RouteId}", routeId);
             return await _context.Activities
-                .Include(a => a.Vehicle)
+                .Include(a => a.AssignedVehicle)
                 .Include(a => a.Route)
                 .Include(a => a.Driver)
                 .Where(a => a.RouteId == routeId)
-                .OrderByDescending(a => a.ActivityDate)
+                .OrderByDescending(a => a.Date)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -167,11 +165,11 @@ public class ActivityService : IActivityService
         {
             _logger.LogInformation("Retrieving activities for driver ID: {DriverId}", driverId);
             return await _context.Activities
-                .Include(a => a.Vehicle)
+                .Include(a => a.AssignedVehicle)
                 .Include(a => a.Route)
                 .Include(a => a.Driver)
                 .Where(a => a.DriverId == driverId)
-                .OrderByDescending(a => a.ActivityDate)
+                .OrderByDescending(a => a.Date)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -187,11 +185,11 @@ public class ActivityService : IActivityService
         {
             _logger.LogInformation("Retrieving activities for vehicle ID: {VehicleId}", vehicleId);
             return await _context.Activities
-                .Include(a => a.Vehicle)
+                .Include(a => a.AssignedVehicle)
                 .Include(a => a.Route)
                 .Include(a => a.Driver)
-                .Where(a => a.VehicleId == vehicleId)
-                .OrderByDescending(a => a.ActivityDate)
+                .Where(a => a.AssignedVehicleId == vehicleId)
+                .OrderByDescending(a => a.Date)
                 .ToListAsync();
         }
         catch (Exception ex)

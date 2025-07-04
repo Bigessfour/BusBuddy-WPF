@@ -76,7 +76,7 @@ namespace Bus_Buddy
             services.AddScoped<IFuelService, FuelService>();
             services.AddScoped<IMaintenanceService, MaintenanceService>();
             services.AddScoped<ITicketService, TicketService>();
-            // TODO: Add IRouteService when RouteService is implemented
+            services.AddScoped<IRouteService, RouteService>(); // Fixed: Added RouteService implementation
             services.AddScoped<BusBuddyScheduleDataProvider>();
 
             // Forms (as transient so they can be created multiple times if needed)
