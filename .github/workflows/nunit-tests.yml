@@ -1,0 +1,58 @@
+name: Run NUnit Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    name: Unit Testing
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Create appsettings.json with Syncfusion License
+      run: |
+        echo '{
+          "Syncfusion": {
+            "LicenseKey": "${{ secrets.SYNCFUSION_LICENSE_KEY }}"
+          }
+        }' > appsettings.json
+      shell: bash
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore
+
+    - name: Build Solution
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run NUnit Tests (Non-UI)
+      run: dotnet test --filter "Category!=UITest" --no-build --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory "TestResults"
+
+    - name: Verify Syncfusion DLL
+      run: |
+        $DllPaths = Get-ChildItem -Path "bin\Release\net8.0-windows" -Filter "Syncfusion.SfDataGrid.WinForms.dll" -Recurse
+        if (-not $DllPaths) {
+          Write-Warning "Syncfusion DLLs not found. UI tests may fail."
+        } else {
+          Write-Host "Found Syncfusion DLLs at: $($DllPaths.FullName)"
+        }
+      shell: pwsh
+
+    - name: Run UI Tests (Windows Only)
+      run: dotnet test --filter "Category=UITest" --no-build --configuration Release --logger "trx;LogFileName=ui-test-results.trx" --results-directory "TestResults"
+
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2
+      if: always()
+      with:
+        files: TestResults/*.trx

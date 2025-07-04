@@ -2,89 +2,68 @@ name: Bus Buddy CI/CD
 
 on:
   push:
-    branches: [ master, main, develop ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ master, main ]
+    branches: [ main, master ]
 
 jobs:
   test:
+    name: Unit Tests
     runs-on: windows-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
+    - name: Create appsettings.json
+      run: |
+        echo '{
+          "Syncfusion": {
+            "LicenseKey": "${{ secrets.SYNCFUSION_LICENSE_KEY }}"
+          }
+        }' > appsettings.json
+      shell: bash
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-        
+
     - name: Cache NuGet packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-          
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+        restore-keys: ${{ runner.os }}-nuget-
+
     - name: Restore dependencies
       run: dotnet restore "Bus Buddy.sln"
-      
+
     - name: Build solution
       run: dotnet build "Bus Buddy.sln" --no-restore --configuration Release
-      
+
     - name: Run unit tests
-      run: dotnet test "BusBuddy.Tests/BusBuddy.Tests.csproj" --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --logger trx --results-directory TestResults
-      
-    - name: Upload test results
-      uses: actions/upload-artifact@v3
+      run: dotnet test "Bus Buddy.sln" --no-build --configuration Release --filter "Category!=Integration" --logger "trx;LogFileName=test-results.trx" --results-directory TestResults --collect:"XPlat Code Coverage"
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2
       if: always()
       with:
-        name: test-results
-        path: TestResults/
-        
+        files: TestResults/*.trx
+
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       if: always()
       with:
-        files: ./TestResults/*/coverage.cobertura.xml
+        files: TestResults/*/coverage.cobertura.xml
         fail_ci_if_error: false
         verbose: true
 
-  build:
-    needs: test
-    runs-on: windows-latest
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-        
-    - name: Restore dependencies
-      run: dotnet restore "Bus Buddy.sln"
-      
-    - name: Build for release
-      run: dotnet build "Bus Buddy.sln" --no-restore --configuration Release
-      
-    - name: Publish application
-      run: dotnet publish "Bus Buddy.csproj" --no-build --configuration Release --output ./publish --self-contained false
-      
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: bus-buddy-release
-        path: ./publish/
-        retention-days: 30
-
   integration-tests:
+    name: Integration Tests
     runs-on: windows-latest
     needs: test
-    
+
     services:
       sqlserver:
         image: mcr.microsoft.com/mssql/server:2022-latest
@@ -97,88 +76,170 @@ jobs:
           --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P TestPassword123! -Q 'SELECT 1'"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
-    
+          --health-retries=5
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
+    - name: Create appsettings.json
+      run: |
+        echo '{
+          "Syncfusion": {
+            "LicenseKey": "${{ secrets.SYNCFUSION_LICENSE_KEY }}"
+          },
+          "ConnectionStrings": {
+            "TestConnection": "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true"
+          }
+        }' > BusBuddy.Tests/appsettings.test.json
+      shell: bash
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-        
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+        restore-keys: ${{ runner.os }}-nuget-
+
     - name: Restore dependencies
       run: dotnet restore "Bus Buddy.sln"
-      
+
     - name: Build solution
       run: dotnet build "Bus Buddy.sln" --no-restore --configuration Release
-      
-    - name: Setup test database
-      run: |
-        # Update connection string for integration tests
-        $connectionString = "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true"
-        $config = Get-Content "BusBuddy.Tests/appsettings.test.json" | ConvertFrom-Json
-        $config.ConnectionStrings.TestConnection = $connectionString
-        $config | ConvertTo-Json -Depth 10 | Set-Content "BusBuddy.Tests/appsettings.test.json"
-      shell: pwsh
-      
-    - name: Run integration tests
-      run: dotnet test "BusBuddy.Tests/BusBuddy.Tests.csproj" --no-build --configuration Release --filter "Category=Integration" --verbosity normal
+
+    - name: Apply database migrations
+      run: dotnet ef database update --project BusBuddy.Data --startup-project BusBuddy
       env:
         ConnectionStrings__TestConnection: "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true"
 
-  deployment-readiness:
-    runs-on: windows-latest
+    - name: Run integration tests
+      run: dotnet test "Bus Buddy.sln" --no-build --configuration Release --filter "Category=Integration" --logger "trx;LogFileName=integration-results.trx" --results-directory TestResults
+      env:
+        ConnectionStrings__TestConnection: "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true"
+
+    - name: Publish integration test results
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2
+      if: always()
+      with:
+        files: TestResults/*.trx
+
+  build:
+    name: Build and Publish
     needs: [test, integration-tests]
-    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
-    
+    runs-on: windows-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
+    - name: Create appsettings.json
+      run: |
+        echo '{
+          "Syncfusion": {
+            "LicenseKey": "${{ secrets.SYNCFUSION_LICENSE_KEY }}"
+          }
+        }' > appsettings.json
+      shell: bash
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
-        
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+        restore-keys: ${{ runner.os }}-nuget-
+
+    - name: Restore dependencies
+      run: dotnet restore "Bus Buddy.sln"
+
+    - name: Build for release
+      run: dotnet build "Bus Buddy.sln" --no-restore --configuration Release
+
+    - name: Publish application
+      run: dotnet publish "BusBuddy/BusBuddy.csproj" --no-build --configuration Release --output ./publish --self-contained false
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: bus-buddy-release
+        path: ./publish/
+        retention-days: 30
+
+  deployment-readiness:
+    name: Deployment Readiness
+    runs-on: windows-latest
+    needs: [test, integration-tests, build]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create appsettings.json
+      run: |
+        echo '{
+          "Syncfusion": {
+            "LicenseKey": "${{ secrets.SYNCFUSION_LICENSE_KEY }}"
+          }
+        }' > appsettings.json
+      shell: bash
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/*.sln') }}
+        restore-keys: ${{ runner.os }}-nuget-
+
     - name: Restore and build
       run: |
         dotnet restore "Bus Buddy.sln"
         dotnet build "Bus Buddy.sln" --no-restore --configuration Release
-        
+
     - name: Run deployment readiness checks
       run: |
         Write-Host "Running deployment readiness validation..."
-        
-        # Check if critical services are implemented
         $routeServiceExists = Test-Path "Services/RouteService.cs"
+        $busServiceExists = Test-Path "Services/BusService.cs"
+        $syncfusionDll = Test-Path "packages/Syncfusion.SfDataGrid.WinForms.30.1.37*/lib/net8.0-windows/Syncfusion.SfDataGrid.WinForms.dll"
         Write-Host "RouteService implemented: $routeServiceExists"
-        
-        # Check if tests pass
-        $testResult = dotnet test "BusBuddy.Tests/BusBuddy.Tests.csproj" --no-build --configuration Release --verbosity quiet
-        $testsPassed = $LASTEXITCODE -eq 0
-        Write-Host "All tests passed: $testsPassed"
-        
-        # Check build success
-        Write-Host "Build completed successfully"
-        
-        # Summary
+        Write-Host "BusService implemented: $busServiceExists"
+        Write-Host "Syncfusion SfDataGrid present: $syncfusionDll"
         Write-Host "=== Deployment Readiness Summary ==="
         Write-Host "✅ RouteService: $routeServiceExists"
-        Write-Host "✅ Tests: $testsPassed" 
-        Write-Host "✅ Build: Success"
+        Write-Host "✅ BusService: $busServiceExists"
+        Write-Host "✅ Syncfusion: $syncfusionDll"
+        if (-not ($routeServiceExists -and $busServiceExists -and $syncfusionDll)) {
+          Write-Error "Deployment readiness checks failed"
+          exit 1
+        }
         Write-Host "=== Ready for deployment ==="
       shell: pwsh
-      
+
     - name: Create deployment summary
       run: |
         echo "## Deployment Readiness Report" >> $GITHUB_STEP_SUMMARY
         echo "| Component | Status |" >> $GITHUB_STEP_SUMMARY
         echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-        echo "| RouteService Implementation | ✅ Complete |" >> $GITHUB_STEP_SUMMARY
+        echo "| RouteService | ✅ Complete |" >> $GITHUB_STEP_SUMMARY
+        echo "| BusService | ✅ Complete |" >> $GITHUB_STEP_SUMMARY
+        echo "| Syncfusion SfDataGrid | ✅ Present |" >> $GITHUB_STEP_SUMMARY
         echo "| Unit Tests | ✅ Passing |" >> $GITHUB_STEP_SUMMARY
         echo "| Integration Tests | ✅ Passing |" >> $GITHUB_STEP_SUMMARY
         echo "| Build | ✅ Success |" >> $GITHUB_STEP_SUMMARY
-        echo "| Critical Blockers | ✅ Resolved |" >> $GITHUB_STEP_SUMMARY
       shell: bash

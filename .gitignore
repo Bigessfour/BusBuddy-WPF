@@ -363,3 +363,27 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Syncfusion license keys in individual files
+Syncfusion.Licensing.Key.txt
+
+# User-specific files with potential license information
+appsettings.Development.json
+appsettings.local.json
+appsettings.*.json
+!appsettings.json
+!appsettings.test.json
+
+# Test Results
+TestResults/
+
+# Backup files created by editors
+*.bak
+*.backup
+*~
+*.swp
+*.Designer.cs.backup
+
+# Local environment files
+.env
+.env.local
