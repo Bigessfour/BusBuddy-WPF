@@ -49,19 +49,12 @@ public class MaintenanceService : IMaintenanceService
 
     public async Task<bool> DeleteMaintenanceRecordAsync(int id)
     {
-        var maintenance = await _context.MaintenanceRecords
-            .Include(m => m.Vehicle)
-            .FirstOrDefaultAsync(m => m.MaintenanceId == id);
+        var maintenance = await _context.MaintenanceRecords.FindAsync(id);
         if (maintenance == null)
             return false;
 
-        // Detach the entity to ensure it's not tracked
-        _context.Entry(maintenance).State = EntityState.Detached;
-        // Attach and mark as deleted
-        _context.MaintenanceRecords.Attach(maintenance);
         _context.MaintenanceRecords.Remove(maintenance);
         await _context.SaveChangesAsync();
-        _context.ChangeTracker.Clear();
         return true;
     }
 
