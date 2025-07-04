@@ -20,6 +20,19 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.showPreviousResults == true
     
     steps:
+    - name: Install GitHub CLI
+      run: |
+        if ! command -v gh &> /dev/null; then
+          echo "Installing GitHub CLI..."
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            choco install gh -y
+          else
+            sudo apt-get update && sudo apt-get install -y gh
+          fi
+        else
+          echo "GitHub CLI already installed."
+        fi
+      shell: bash
     - name: Check for Syncfusion License Key
       run: |
         if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
