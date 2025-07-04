@@ -77,11 +77,12 @@ namespace BusBuddy.Tests.Infrastructure
                 // Fallback to in-memory config if file doesn't exist
             }
 
-            // Add memory configuration for Syncfusion license
+            // Add memory configuration for test settings
             var inMemorySettings = new Dictionary<string, string?>
             {
                 ["Syncfusion:LicenseKey"] = "Ngo9BigBOggjHTQxAR8/V1JEaF5cXmRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXhec3RSRGRYU0R2WUBWYEk=",
-                ["TestSettings:UseSQLite"] = "true",
+                ["TestSettings:UseInMemoryDatabase"] = "true",
+                ["TestSettings:UseSQLite"] = "false",
                 ["TestSettings:EnableDetailedLogging"] = "false",
                 ["Logging:LogLevel:Default"] = "Information",
                 ["Logging:LogLevel:Microsoft.EntityFrameworkCore"] = "Warning"
@@ -103,12 +104,11 @@ namespace BusBuddy.Tests.Infrastructure
                 builder.AddFilter("Microsoft.EntityFrameworkCore", efLogLevel);
             });
 
-            // SQLite in-memory database configuration (Microsoft recommended approach)
+            // EF Core InMemory database configuration (same as TestBase for consistency)
             services.AddDbContext<BusBuddyDbContext>(options =>
             {
-                // Create unique in-memory SQLite database for each test
-                var connectionString = $"Data Source=:memory:;Cache=Shared;";
-                options.UseSqlite(connectionString);
+                // Create unique in-memory database for each test
+                options.UseInMemoryDatabase($"ConsolidatedTestDb_{Guid.NewGuid()}");
                 options.EnableSensitiveDataLogging();
             }, ServiceLifetime.Transient); // Transient for proper disposal
 

@@ -54,6 +54,9 @@ namespace BusBuddy.Tests.Infrastructure
         /// </summary>
         private void SetupTestDatabase()
         {
+            // Clear any existing tracked entities first
+            DbContext.ChangeTracker.Clear();
+            
             // For both InMemory and SQL Server, deleting and recreating the database
             // is the most reliable way to ensure 100% test isolation.
             DbContext.Database.EnsureDeleted();
@@ -72,6 +75,9 @@ namespace BusBuddy.Tests.Infrastructure
                     logger?.LogWarning(ex, "Migration failed during test setup, but proceeding as EnsureCreated should have built the schema.");
                 }
             }
+            
+            // Clear tracking again after database setup to ensure clean state
+            DbContext.ChangeTracker.Clear();
         }
 
         /// <summary>
