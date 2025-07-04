@@ -48,7 +48,7 @@ public class RepositoryTests : TestBase
             Make = "Blue Bird",
             Model = "Vision",
             SeatingCapacity = 72,
-            VINNumber = "TEST001234567890A",
+            VINNumber = "TEST0012345678901",
             LicenseNumber = "TST001"
         };
 
@@ -77,7 +77,7 @@ public class RepositoryTests : TestBase
             Make = "Thomas Built",
             Model = "Saf-T-Liner",
             SeatingCapacity = 48,
-            VINNumber = "TEST002234567890B",
+            VINNumber = "TEST0022345678901",
             LicenseNumber = "TST002"
         };
 
@@ -143,7 +143,7 @@ public class RepositoryTests : TestBase
             Make = "Blue Bird",
             Model = "Vision",
             SeatingCapacity = 36,
-            VINNumber = "DELETE01234567890",
+            VINNumber = "DELETE0123456789",
             LicenseNumber = "DEL001"
         };
 
@@ -171,7 +171,7 @@ public class RepositoryTests : TestBase
             Make = "Blue Bird",
             Model = "Vision",
             SeatingCapacity = 72,
-            VINNumber = "ACTIVE001234567890",
+            VINNumber = "ACTIVE0123456789",
             LicenseNumber = "ACT001"
         };
 
@@ -182,7 +182,7 @@ public class RepositoryTests : TestBase
             Make = "Thomas Built",
             Model = "Saf-T-Liner",
             SeatingCapacity = 48,
-            VINNumber = "INACTIVE01234567890",
+            VINNumber = "INACTIVE01234567",
             LicenseNumber = "INA001"
         };
 
@@ -287,7 +287,7 @@ public class RepositoryTests : TestBase
                 Make = "Blue Bird",
                 Model = "Vision",
                 SeatingCapacity = 72,
-                VINNumber = $"PAGE{i:D3}1234567890",
+                VINNumber = $"PAGE{i:D3}123456789".PadRight(17, '0').Substring(0, 17), // Ensure exactly 17 characters
                 LicenseNumber = $"PAG{i:D3}"
             });
         }
@@ -328,7 +328,7 @@ public class RepositoryTests : TestBase
                 Make = "Blue Bird",
                 Model = "Vision",
                 SeatingCapacity = 72,
-                VINNumber = $"LARGE{i:D3}1234567890",
+                VINNumber = $"LARGE{i:D3}123456789"[0..17], // Ensure exactly 17 characters
                 LicenseNumber = $"LRG{i:D3}"
             });
 
@@ -339,7 +339,7 @@ public class RepositoryTests : TestBase
                 Make = "Thomas Built",
                 Model = "Saf-T-Liner",
                 SeatingCapacity = 36,
-                VINNumber = $"SMALL{i:D3}1234567890",
+                VINNumber = $"SMALL{i:D3}123456789"[0..17], // Ensure exactly 17 characters
                 LicenseNumber = $"SML{i:D3}"
             });
         }
@@ -405,7 +405,7 @@ public class RepositoryTests : TestBase
             Make = "Blue Bird",
             Model = "Vision",
             SeatingCapacity = 48,
-            VINNumber = "NOTRACK01234567890",
+            VINNumber = "NOTRACK01234567",
             LicenseNumber = "NTR001"
         };
 
@@ -510,7 +510,7 @@ public class RepositoryTests : TestBase
             Make = "Blue Bird",
             Model = "Vision",
             SeatingCapacity = 72,
-            VINNumber = "SOFTDEL01234567890",
+            VINNumber = "SOFTDEL01234567",
             LicenseNumber = "SOF001"
         };
 
@@ -526,3 +526,4 @@ public class RepositoryTests : TestBase
 
     #endregion
 }
+

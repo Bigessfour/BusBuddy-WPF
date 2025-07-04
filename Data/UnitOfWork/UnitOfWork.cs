@@ -347,24 +347,56 @@ public class UnitOfWork : IUnitOfWork
     private void UpdateAuditFields()
     {
         var entries = _context.ChangeTracker.Entries()
-            .Where(e => e.Entity is Models.Base.BaseEntity &&
-                       (e.State == EntityState.Added || e.State == EntityState.Modified));
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
 
         foreach (var entry in entries)
         {
-            var entity = (Models.Base.BaseEntity)entry.Entity;
             var currentTime = DateTime.UtcNow;
             var currentUser = _currentAuditUser ?? "System";
 
-            if (entry.State == EntityState.Added)
+            // Handle BaseEntity pattern
+            if (entry.Entity is Models.Base.BaseEntity baseEntity)
             {
-                entity.CreatedDate = currentTime;
-                entity.CreatedBy = currentUser;
+                if (entry.State == EntityState.Added)
+                {
+                    baseEntity.CreatedDate = currentTime;
+                    baseEntity.CreatedBy = currentUser;
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    baseEntity.UpdatedDate = currentTime;
+                    baseEntity.UpdatedBy = currentUser;
+                }
             }
-            else if (entry.State == EntityState.Modified)
+            else
             {
-                entity.UpdatedDate = currentTime;
-                entity.UpdatedBy = currentUser;
+                // Handle entities with audit fields but not inheriting from BaseEntity (like Student)
+                var entityType = entry.Entity.GetType();
+
+                if (entry.State == EntityState.Added)
+                {
+                    // Set CreatedBy and CreatedDate if properties exist
+                    var createdByProperty = entityType.GetProperty("CreatedBy");
+                    var createdDateProperty = entityType.GetProperty("CreatedDate");
+
+                    if (createdByProperty != null && createdByProperty.CanWrite)
+                        createdByProperty.SetValue(entry.Entity, currentUser);
+
+                    if (createdDateProperty != null && createdDateProperty.CanWrite)
+                        createdDateProperty.SetValue(entry.Entity, currentTime);
+                }
+                else if (entry.State == EntityState.Modified)
+                {
+                    // Set UpdatedBy and UpdatedDate if properties exist
+                    var updatedByProperty = entityType.GetProperty("UpdatedBy");
+                    var updatedDateProperty = entityType.GetProperty("UpdatedDate");
+
+                    if (updatedByProperty != null && updatedByProperty.CanWrite)
+                        updatedByProperty.SetValue(entry.Entity, currentUser);
+
+                    if (updatedDateProperty != null && updatedDateProperty.CanWrite)
+                        updatedDateProperty.SetValue(entry.Entity, currentTime);
+                }
             }
         }
     }

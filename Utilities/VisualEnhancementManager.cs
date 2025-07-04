@@ -8,6 +8,7 @@ using Syncfusion.WinForms.DataGrid.Events;
 using Syncfusion.Windows.Forms;
 using Syncfusion.Windows.Forms.Tools;
 using Syncfusion.WinForms.Controls;
+using Syncfusion.Drawing;
 
 namespace Bus_Buddy.Utilities
 {
@@ -47,10 +48,51 @@ namespace Bus_Buddy.Utilities
         #region Theme Application Methods
 
         /// <summary>
+        /// Apply modern Office2019 theme with enhanced visuals for Syncfusion 30.1.37
+        /// </summary>
+        public static void ApplyModernOffice2019Theme(Form form)
+        {
+            if (form == null) return;
+
+            try
+            {
+                // Apply the latest Office2019 theme for modern look
+                Syncfusion.Windows.Forms.SkinManager.SetVisualStyle(form,
+                    Syncfusion.Windows.Forms.VisualTheme.Office2019Colorful);
+
+                // Enhanced MetroForm styling
+                if (form is MetroForm metroForm)
+                {
+                    metroForm.MetroColor = Color.FromArgb(0, 120, 215); // Windows 11 blue
+                    metroForm.CaptionBarColor = Color.FromArgb(0, 120, 215);
+                    metroForm.CaptionForeColor = Color.White;
+                    metroForm.BorderColor = Color.FromArgb(200, 200, 200);
+                    metroForm.BorderThickness = 1;
+                }
+
+                // Apply modern color scheme
+                form.BackColor = Color.FromArgb(255, 255, 255); // Pure white background
+                form.ForeColor = Color.FromArgb(32, 31, 30); // Windows 11 text color
+
+                // Enable high-quality font rendering
+                EnableHighQualityFontRendering(form);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Office2019 theme application error: {ex.Message}");
+                ApplyEnhancedTheme(form); // Fallback to existing method
+            }
+        }
+
+        /// <summary>
         /// Apply enhanced visual theme to form with anti-aliasing and high-quality rendering
         /// </summary>
         public static void ApplyEnhancedTheme(Form form)
         {
+            // Validate input parameter
+            if (form == null)
+                throw new ArgumentNullException(nameof(form));
+
             try
             {
                 // Apply Syncfusion Office2016Colorful theme for modern appearance
@@ -119,10 +161,7 @@ namespace Bus_Buddy.Utilities
         /// </summary>
         public static void ApplyEnhancedGridVisuals(SfDataGrid dataGrid)
         {
-            // Apply base configuration
-            SyncfusionLayoutManager.ConfigureSfDataGrid(dataGrid, true);
-
-            // Enhanced styling for better visual quality
+            // Enhanced styling for better visual quality (without calling ConfigureSfDataGrid to avoid recursion)
             ApplyEnhancedGridStyling(dataGrid);
 
             // Enable custom drawing for anti-aliased text rendering

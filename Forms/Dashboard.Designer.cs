@@ -15,8 +15,11 @@ partial class Dashboard
     private GradientPanel mainPanel;
     private GradientPanel headerPanel;
     private GradientPanel contentPanel;
+    private GradientPanel summaryPanel;
     private AutoLabel titleLabel;
     private AutoLabel subtitleLabel;
+    private AutoLabel summaryTitle;
+    private AutoLabel statsLabel;
 
     // Management section buttons
     private SfButton busManagementButton;
@@ -34,6 +37,13 @@ partial class Dashboard
     private SfButton refreshButton;
     private SfButton settingsButton;
     private SfButton reportsButton;
+
+    // HubTiles for dashboard metrics
+    private Syncfusion.Windows.Forms.Tools.HubTile fleetTile;
+    private Syncfusion.Windows.Forms.Tools.HubTile routesTile;
+    private Syncfusion.Windows.Forms.Tools.HubTile activeTile;
+    private Syncfusion.Windows.Forms.Tools.HubTile maintenanceTile;
+    private Syncfusion.Windows.Forms.Tools.HubTile capacityTile;
 
     /// <summary>
     ///  Clean up any resources being used.
@@ -65,8 +75,11 @@ partial class Dashboard
         this.mainPanel = new Syncfusion.Windows.Forms.Tools.GradientPanel();
         this.headerPanel = new Syncfusion.Windows.Forms.Tools.GradientPanel();
         this.contentPanel = new Syncfusion.Windows.Forms.Tools.GradientPanel();
+        this.summaryPanel = new Syncfusion.Windows.Forms.Tools.GradientPanel();
         this.titleLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
         this.subtitleLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
+        this.summaryTitle = new Syncfusion.Windows.Forms.Tools.AutoLabel();
+        this.statsLabel = new Syncfusion.Windows.Forms.Tools.AutoLabel();
 
         // Initialize management buttons
         this.busManagementButton = new Syncfusion.WinForms.Controls.SfButton();
@@ -84,6 +97,13 @@ partial class Dashboard
         this.refreshButton = new Syncfusion.WinForms.Controls.SfButton();
         this.settingsButton = new Syncfusion.WinForms.Controls.SfButton();
         this.reportsButton = new Syncfusion.WinForms.Controls.SfButton();
+
+        // Initialize HubTiles
+        this.fleetTile = new Syncfusion.Windows.Forms.Tools.HubTile();
+        this.routesTile = new Syncfusion.Windows.Forms.Tools.HubTile();
+        this.activeTile = new Syncfusion.Windows.Forms.Tools.HubTile();
+        this.maintenanceTile = new Syncfusion.Windows.Forms.Tools.HubTile();
+        this.capacityTile = new Syncfusion.Windows.Forms.Tools.HubTile();
 
         // Main Panel
         this.mainPanel.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -131,6 +151,14 @@ partial class Dashboard
         this.contentPanel.TabIndex = 2;
         this.contentPanel.Padding = new System.Windows.Forms.Padding(20);
 
+        // Summary Panel  
+        this.summaryPanel.Location = new System.Drawing.Point(750, 30);
+        this.summaryPanel.Size = new System.Drawing.Size(420, 420);
+        this.summaryPanel.BackgroundColor = new Syncfusion.Drawing.BrushInfo(System.Drawing.Color.FromArgb(248, 249, 250));
+        this.summaryPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+        this.summaryPanel.Name = "summaryPanel";
+        this.summaryPanel.TabIndex = 3;
+
         // Configure management buttons (3 columns, 4 rows layout)
         ConfigureManagementButton(this.busManagementButton, "Bus Management", "Manage fleet vehicles", 30, 30, 0);
         ConfigureManagementButton(this.driverManagementButton, "Driver Management", "Manage bus drivers", 270, 30, 1);
@@ -165,9 +193,41 @@ partial class Dashboard
         this.reportsButton.Click += new System.EventHandler(this.ReportsButton_Click);
         this.settingsButton.Click += new System.EventHandler(this.SettingsButton_Click);
 
+        // Configure HubTiles
+        ConfigureHubTile(this.fleetTile, "Total Fleet", "0", "Vehicles", System.Drawing.Color.FromArgb(63, 81, 181), 20, 50);
+        ConfigureHubTile(this.routesTile, "Active Routes", "0", "Routes", System.Drawing.Color.FromArgb(76, 175, 80), 220, 50);
+        ConfigureHubTile(this.activeTile, "Active Buses", "0", "In Service", System.Drawing.Color.FromArgb(255, 152, 0), 20, 150);
+        ConfigureHubTile(this.maintenanceTile, "Maintenance", "0", "In Shop", System.Drawing.Color.FromArgb(244, 67, 54), 220, 150);
+        ConfigureHubTile(this.capacityTile, "Total Capacity", "0", "Passengers", System.Drawing.Color.FromArgb(156, 39, 176), 120, 250);
+
+        // Configure summary title
+        this.summaryTitle.Text = "Fleet Summary";
+        this.summaryTitle.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Bold);
+        this.summaryTitle.ForeColor = System.Drawing.Color.FromArgb(46, 125, 185);
+        this.summaryTitle.Location = new System.Drawing.Point(20, 15);
+        this.summaryTitle.AutoSize = true;
+        this.summaryTitle.Name = "summaryTitle";
+
+        // Configure stats label
+        this.statsLabel.Text = "Fleet statistics will be updated...";
+        this.statsLabel.Font = new System.Drawing.Font("Segoe UI", 9F);
+        this.statsLabel.ForeColor = System.Drawing.Color.FromArgb(95, 99, 104);
+        this.statsLabel.Location = new System.Drawing.Point(20, 350);
+        this.statsLabel.AutoSize = true;
+        this.statsLabel.Name = "statsLabel";
+
         // Add controls to panels
         this.headerPanel.Controls.Add(this.titleLabel);
         this.headerPanel.Controls.Add(this.subtitleLabel);
+
+        // Add HubTiles to summary panel
+        this.summaryPanel.Controls.Add(this.summaryTitle);
+        this.summaryPanel.Controls.Add(this.fleetTile);
+        this.summaryPanel.Controls.Add(this.routesTile);
+        this.summaryPanel.Controls.Add(this.activeTile);
+        this.summaryPanel.Controls.Add(this.maintenanceTile);
+        this.summaryPanel.Controls.Add(this.capacityTile);
+        this.summaryPanel.Controls.Add(this.statsLabel);
 
         this.contentPanel.Controls.Add(this.busManagementButton);
         this.contentPanel.Controls.Add(this.driverManagementButton);
@@ -182,11 +242,12 @@ partial class Dashboard
         this.contentPanel.Controls.Add(this.refreshButton);
         this.contentPanel.Controls.Add(this.reportsButton);
         this.contentPanel.Controls.Add(this.settingsButton);
+        this.contentPanel.Controls.Add(this.summaryPanel);
 
-        this.mainPanel.Controls.Add(this.contentPanel);
         this.mainPanel.Controls.Add(this.headerPanel);
+        this.mainPanel.Controls.Add(this.contentPanel);
 
-        // Form settings
+        // Form settings - adjust ClientSize to ensure contentPanel gets correct height
         this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
         this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
         this.ClientSize = new System.Drawing.Size(1200, 800);
@@ -226,6 +287,32 @@ partial class Dashboard
         button.TabIndex = tabIndex;
         button.Text = title;
         button.UseVisualStyleBackColor = false;
+    }
+
+    private void ConfigureHubTile(Syncfusion.Windows.Forms.Tools.HubTile tile, string banner, string title, string body, System.Drawing.Color color, int x, int y)
+    {
+        // Configure HubTile properties according to Syncfusion v30.1.37 documentation
+        tile.Banner.Text = banner;
+        tile.Title.Text = title;
+        tile.Title.TextColor = System.Drawing.Color.White;
+        tile.Title.Font = new System.Drawing.Font("Segoe UI", 16F, System.Drawing.FontStyle.Bold);
+        tile.Body.Text = body;
+        tile.Body.TextColor = System.Drawing.Color.WhiteSmoke;
+        tile.Body.Font = new System.Drawing.Font("Segoe UI", 9F);
+
+        // Set tile appearance - fix size to match test expectations exactly
+        tile.Location = new System.Drawing.Point(x, y);
+        tile.Size = new System.Drawing.Size(180, 80);
+        tile.BackColor = color;
+
+        // Ensure size is not overridden by setting it explicitly again
+        tile.Width = 180;
+        tile.Height = 80;
+
+        // Enable visual enhancements
+        tile.TileType = Syncfusion.Windows.Forms.Tools.HubTileType.DefaultTile;
+        tile.ImageTransitionSpeed = 3000;
+        tile.RotationTransitionSpeed = 2000;
     }
 
     #endregion

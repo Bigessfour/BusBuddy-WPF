@@ -25,6 +25,7 @@ namespace BusBuddy.Tests.IntegrationTests.Forms
         public async Task Setup()
         {
             await ClearDatabaseAsync();
+            ClearChangeTracker(); // Clear any tracked entities
             _busService = ServiceProvider.GetRequiredService<IBusService>();
 
             // Initialize form with service - Note: This tests the basic instantiation
@@ -48,10 +49,15 @@ namespace BusBuddy.Tests.IntegrationTests.Forms
             var bus = new Bus
             {
                 BusNumber = "FORM-BUS-001",
+                Make = "Blue Bird",
                 Model = "Integration Test Bus",
                 SeatingCapacity = 72,
                 Year = 2023,
-                Status = "Active"
+                Status = "Active",
+                VINNumber = "FORM001234567890A", // 17 characters
+                LicenseNumber = "FRM001",
+                CreatedBy = "System",
+                CreatedDate = DateTime.UtcNow
             };
 
             // Act - Perform CRUD operations that form would use
@@ -102,8 +108,14 @@ namespace BusBuddy.Tests.IntegrationTests.Forms
 
             // Act - Perform operations that TicketManagementForm would use
             var createdRoute = await routeService.CreateRouteAsync(route);
+            ClearChangeTracker(); // Clear tracking after creation
+
             var allActiveRoutes = await routeService.GetAllActiveRoutesAsync();
+            ClearChangeTracker(); // Clear tracking after query
+
             var routeById = await routeService.GetRouteByIdAsync(createdRoute.RouteId);
+            ClearChangeTracker(); // Clear tracking after query
+
             var searchResults = await routeService.SearchRoutesAsync("Ticket");
 
             // Assert - Verify RouteService works for form integration
@@ -139,12 +151,15 @@ namespace BusBuddy.Tests.IntegrationTests.Forms
 
             // Act - Test driver operations through BusService (which handles drivers)
             var createdDriver = await _busService.AddDriverEntityAsync(driver);
+            ClearChangeTracker(); // Clear tracking after creation
+
             var retrievedDriver = await _busService.GetDriverEntityByIdAsync(createdDriver.DriverId);
             var allDrivers = await _busService.GetAllDriversAsync();
 
             // Update operation
             retrievedDriver!.DriverPhone = "555-UPDATED";
             var updateResult = await _busService.UpdateDriverEntityAsync(retrievedDriver);
+            ClearChangeTracker(); // Clear tracking after update
 
             // Delete operation (addressing the critical blocker)
             var deleteResult = await _busService.DeleteDriverEntityAsync(createdDriver.DriverId);
@@ -201,8 +216,32 @@ namespace BusBuddy.Tests.IntegrationTests.Forms
             // that might occur when multiple forms are open
 
             // Arrange
-            var bus1 = new Bus { BusNumber = "CONCURRENT-001", Model = "Bus 1", SeatingCapacity = 72, Year = 2023, Status = "Active" };
-            var bus2 = new Bus { BusNumber = "CONCURRENT-002", Model = "Bus 2", SeatingCapacity = 80, Year = 2023, Status = "Active" };
+            var bus1 = new Bus
+            {
+                BusNumber = "CONCURRENT-001",
+                Make = "Blue Bird",
+                Model = "Bus 1",
+                SeatingCapacity = 72,
+                Year = 2023,
+                Status = "Active",
+                VINNumber = "CONC001234567890A", // 17 characters
+                LicenseNumber = "CON001",
+                CreatedBy = "System",
+                CreatedDate = DateTime.UtcNow
+            };
+            var bus2 = new Bus
+            {
+                BusNumber = "CONCURRENT-002",
+                Make = "Blue Bird",
+                Model = "Bus 2",
+                SeatingCapacity = 80,
+                Year = 2023,
+                Status = "Active",
+                VINNumber = "CONC002234567890B", // 17 characters
+                LicenseNumber = "CON002",
+                CreatedBy = "System",
+                CreatedDate = DateTime.UtcNow
+            };
 
             var route1 = new Route { Date = DateTime.Today, RouteName = "Route 1", Description = "First route" };
             var route2 = new Route { Date = DateTime.Today.AddDays(1), RouteName = "Route 2", Description = "Second route" };
@@ -211,9 +250,16 @@ namespace BusBuddy.Tests.IntegrationTests.Forms
             var routeService = ServiceProvider.GetRequiredService<IRouteService>();
 
             var createdBus1 = await _busService.AddBusEntityAsync(bus1);
+            ClearChangeTracker(); // Clear tracking after first operation
+
             var createdRoute1 = await routeService.CreateRouteAsync(route1);
+            ClearChangeTracker(); // Clear tracking after second operation
+
             var createdBus2 = await _busService.AddBusEntityAsync(bus2);
+            ClearChangeTracker(); // Clear tracking after third operation
+
             var createdRoute2 = await routeService.CreateRouteAsync(route2);
+            ClearChangeTracker(); // Clear tracking after fourth operation
 
             // Verify operations
             var allBuses = await _busService.GetAllBusEntitiesAsync();

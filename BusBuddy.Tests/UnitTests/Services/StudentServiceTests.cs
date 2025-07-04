@@ -389,6 +389,8 @@ namespace BusBuddy.Tests.UnitTests.Services
             // Assert
             result.Should().BeTrue();
 
+            // ITERATION 8 FIX: Clear change tracker to get fresh entity state
+            _context.ChangeTracker.Clear();
             var deletedStudent = await _context.Students.FindAsync(student.StudentId);
             deletedStudent.Should().BeNull();
         }
@@ -539,6 +541,8 @@ namespace BusBuddy.Tests.UnitTests.Services
             // Assert
             result.Should().BeTrue();
 
+            // ITERATION 8 FIX: Clear change tracker to get fresh entity state
+            _context.ChangeTracker.Clear();
             var updatedStudent = await _context.Students.FindAsync(student.StudentId);
             updatedStudent!.AMRoute.Should().Be("Morning Route");
             updatedStudent.PMRoute.Should().Be("Evening Route");
@@ -574,6 +578,8 @@ namespace BusBuddy.Tests.UnitTests.Services
             // Assert
             result.Should().BeTrue();
 
+            // ITERATION 8 FIX: Clear change tracker to get fresh entity state
+            _context.ChangeTracker.Clear();
             var updatedStudent = await _context.Students.FindAsync(student.StudentId);
             updatedStudent!.Active.Should().BeFalse();
         }

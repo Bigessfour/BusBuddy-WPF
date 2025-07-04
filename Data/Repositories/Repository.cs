@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Bus_Buddy.Data.Interfaces;
 using Bus_Buddy.Models.Base;
+using System.Reflection;
 
 namespace Bus_Buddy.Data.Repositories;
 
@@ -21,19 +22,64 @@ public class Repository<T> : IRepository<T> where T : class
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
         _dbSet = _context.Set<T>();
-        _supportsSoftDelete = typeof(BaseEntity).IsAssignableFrom(typeof(T));
+        _supportsSoftDelete = typeof(BaseEntity).IsAssignableFrom(typeof(T)) ||
+                             typeof(T).GetProperty("Active")?.PropertyType == typeof(bool);
     }
 
     #region Async Query Operations
 
     public virtual async Task<T?> GetByIdAsync(int id)
     {
-        return await _dbSet.FindAsync(id);
+        var entity = await _dbSet.FindAsync(id);
+
+        if (entity != null && _supportsSoftDelete)
+        {
+            // Check if entity is soft deleted using reflection
+            if (entity is BaseEntity baseEntity && baseEntity.IsDeleted)
+            {
+                return null; // Entity is soft deleted
+            }
+
+            // Check Active property for Student/Driver entities
+            var activeProperty = typeof(T).GetProperty("Active");
+            if (activeProperty?.PropertyType == typeof(bool))
+            {
+                var isActive = (bool)activeProperty.GetValue(entity)!;
+                if (!isActive)
+                {
+                    return null; // Entity is marked inactive
+                }
+            }
+        }
+
+        return entity;
     }
 
     public virtual async Task<T?> GetByIdAsync(object id)
     {
-        return await _dbSet.FindAsync(id);
+        var entity = await _dbSet.FindAsync(id);
+
+        if (entity != null && _supportsSoftDelete)
+        {
+            // Check if entity is soft deleted using reflection
+            if (entity is BaseEntity baseEntity && baseEntity.IsDeleted)
+            {
+                return null; // Entity is soft deleted
+            }
+
+            // Check Active property for Student/Driver entities
+            var activeProperty = typeof(T).GetProperty("Active");
+            if (activeProperty?.PropertyType == typeof(bool))
+            {
+                var isActive = (bool)activeProperty.GetValue(entity)!;
+                if (!isActive)
+                {
+                    return null; // Entity is marked inactive
+                }
+            }
+        }
+
+        return entity;
     }
 
     public virtual async Task<IEnumerable<T>> GetAllAsync()
@@ -42,7 +88,23 @@ public class Repository<T> : IRepository<T> where T : class
 
         if (_supportsSoftDelete)
         {
-            query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+            // Handle BaseEntity pattern (IsDeleted property)
+            if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
+            {
+                query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+            }
+            // Handle Student/Driver pattern (Active property)
+            else if (typeof(T).GetProperty("Active")?.PropertyType == typeof(bool))
+            {
+                // Create expression: e => ((T)e).Active == true
+                var parameter = Expression.Parameter(typeof(T), "e");
+                var property = Expression.Property(parameter, "Active");
+                var constant = Expression.Constant(true);
+                var equal = Expression.Equal(property, constant);
+                var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
+
+                query = query.Where(lambda);
+            }
         }
 
         return await query.ToListAsync();
@@ -205,6 +267,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual async Task<T> AddAsync(T entity)
     {
+        if (entity == null) throw new ArgumentNullException(nameof(entity));
         SetAuditFields(entity, isUpdate: false);
         var result = await _dbSet.AddAsync(entity);
         return result.Entity;
@@ -223,6 +286,7 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual T Add(T entity)
     {
+        if (entity == null) throw new ArgumentNullException(nameof(entity));
         SetAuditFields(entity, isUpdate: false);
         var result = _dbSet.Add(entity);
         return result.Entity;
@@ -309,11 +373,26 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual void SoftDelete(T entity)
     {
-        if (!_supportsSoftDelete || entity is not BaseEntity baseEntity) return;
+        // Handle BaseEntity pattern (IsDeleted property)
+        if (entity is BaseEntity baseEntity)
+        {
+            baseEntity.IsDeleted = true;
+            SetAuditFields(entity, isUpdate: true);
+            _dbSet.Update(entity);
+            return;
+        }
 
-        baseEntity.IsDeleted = true;
-        SetAuditFields(entity, isUpdate: true);
-        _dbSet.Update(entity);
+        // Handle Student/Driver pattern (Active property)
+        var activeProperty = typeof(T).GetProperty("Active");
+        if (activeProperty != null && activeProperty.PropertyType == typeof(bool))
+        {
+            activeProperty.SetValue(entity, false);
+            SetAuditFields(entity, isUpdate: true);
+            _dbSet.Update(entity);
+            return;
+        }
+
+        // No soft delete support
     }
 
     public virtual async Task RestoreAsync(int id)
@@ -338,11 +417,26 @@ public class Repository<T> : IRepository<T> where T : class
 
     public virtual void Restore(T entity)
     {
-        if (!_supportsSoftDelete || entity is not BaseEntity baseEntity) return;
+        // Handle BaseEntity pattern (IsDeleted property)
+        if (entity is BaseEntity baseEntity)
+        {
+            baseEntity.IsDeleted = false;
+            SetAuditFields(entity, isUpdate: true);
+            _dbSet.Update(entity);
+            return;
+        }
 
-        baseEntity.IsDeleted = false;
-        SetAuditFields(entity, isUpdate: true);
-        _dbSet.Update(entity);
+        // Handle Student/Driver pattern (Active property)
+        var activeProperty = typeof(T).GetProperty("Active");
+        if (activeProperty != null && activeProperty.PropertyType == typeof(bool))
+        {
+            activeProperty.SetValue(entity, true);
+            SetAuditFields(entity, isUpdate: true);
+            _dbSet.Update(entity);
+            return;
+        }
+
+        // No soft delete support
     }
 
     #endregion
@@ -410,7 +504,23 @@ public class Repository<T> : IRepository<T> where T : class
 
         if (_supportsSoftDelete)
         {
-            query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+            // Handle BaseEntity pattern (IsDeleted property)
+            if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
+            {
+                query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+            }
+            // Handle Student/Driver pattern (Active property)
+            else if (typeof(T).GetProperty("Active")?.PropertyType == typeof(bool))
+            {
+                // Create expression: e => ((T)e).Active == true
+                var parameter = Expression.Parameter(typeof(T), "e");
+                var property = Expression.Property(parameter, "Active");
+                var constant = Expression.Constant(true);
+                var equal = Expression.Equal(property, constant);
+                var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
+
+                query = query.Where(lambda);
+            }
         }
 
         return query;
@@ -422,7 +532,23 @@ public class Repository<T> : IRepository<T> where T : class
 
         if (_supportsSoftDelete)
         {
-            query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+            // Handle BaseEntity pattern (IsDeleted property)
+            if (typeof(BaseEntity).IsAssignableFrom(typeof(T)))
+            {
+                query = query.Where(e => !((BaseEntity)(object)e).IsDeleted);
+            }
+            // Handle Student/Driver pattern (Active property)
+            else if (typeof(T).GetProperty("Active")?.PropertyType == typeof(bool))
+            {
+                // Create expression: e => ((T)e).Active == true
+                var parameter = Expression.Parameter(typeof(T), "e");
+                var property = Expression.Property(parameter, "Active");
+                var constant = Expression.Constant(true);
+                var equal = Expression.Equal(property, constant);
+                var lambda = Expression.Lambda<Func<T, bool>>(equal, parameter);
+
+                query = query.Where(lambda);
+            }
         }
 
         return query;
@@ -460,23 +586,49 @@ public class Repository<T> : IRepository<T> where T : class
 
     private void SetAuditFields(T entity, bool isUpdate)
     {
-        if (entity is not BaseEntity baseEntity) return;
-
         var currentUser = GetCurrentUser();
         var currentTime = DateTime.UtcNow;
 
+        // Handle BaseEntity pattern
+        if (entity is BaseEntity baseEntity)
+        {
+            if (!isUpdate)
+            {
+                baseEntity.CreatedDate = currentTime;
+                baseEntity.CreatedBy = currentUser;
+            }
+            else
+            {
+                baseEntity.UpdatedDate = currentTime;
+                baseEntity.UpdatedBy = currentUser;
+            }
+            baseEntity.OnSaving();
+            return;
+        }
+
+        // Handle Student/Driver pattern (audit fields as separate properties)
+        var entityType = typeof(T);
+
         if (!isUpdate)
         {
-            baseEntity.CreatedDate = currentTime;
-            baseEntity.CreatedBy = currentUser;
+            var createdDateProp = entityType.GetProperty("CreatedDate");
+            var createdByProp = entityType.GetProperty("CreatedBy");
+
+            if (createdDateProp?.PropertyType == typeof(DateTime))
+                createdDateProp.SetValue(entity, currentTime);
+            if (createdByProp?.PropertyType == typeof(string))
+                createdByProp.SetValue(entity, currentUser);
         }
         else
         {
-            baseEntity.UpdatedDate = currentTime;
-            baseEntity.UpdatedBy = currentUser;
-        }
+            var updatedDateProp = entityType.GetProperty("UpdatedDate");
+            var updatedByProp = entityType.GetProperty("UpdatedBy");
 
-        baseEntity.OnSaving();
+            if (updatedDateProp?.PropertyType == typeof(DateTime?))
+                updatedDateProp.SetValue(entity, currentTime);
+            if (updatedByProp?.PropertyType == typeof(string))
+                updatedByProp.SetValue(entity, currentUser);
+        }
     }
 
     private string? GetCurrentUser()
@@ -484,6 +636,22 @@ public class Repository<T> : IRepository<T> where T : class
         // This would typically get the current user from the security context
         // For now, return a default value or get from a service
         return "System"; // TODO: Implement proper user context
+    }
+
+    private string GetPrimaryKeyName()
+    {
+        // Common primary key names for different entity types
+        var entityType = typeof(T);
+
+        // Check for common patterns
+        if (entityType.Name == "Student") return "StudentId";
+        if (entityType.Name == "Driver") return "DriverId";
+        if (entityType.Name == "Bus") return "VehicleId";
+        if (entityType.Name == "Route") return "RouteId";
+        if (entityType.Name == "Activity") return "ActivityId";
+
+        // Default to "Id" for BaseEntity types
+        return "Id";
     }
 
     #endregion

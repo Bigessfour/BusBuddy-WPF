@@ -46,16 +46,28 @@ namespace Bus_Buddy.Utilities
         /// Configure SfDataGrid with optimal settings for Bus Buddy application
         /// Based on Syncfusion documentation for column sizing and alignment
         /// Enhanced with visual optimization features
+        /// IMPLEMENTS DOCUMENTED SYNCFUSION METHODS
         /// </summary>
         public static void ConfigureSfDataGrid(SfDataGrid dataGrid, bool enableFullScreen = true, bool enableVisualEnhancements = true)
         {
-            // Basic grid configuration
+            // Basic grid configuration - DOCUMENTED METHODS
             dataGrid.AllowEditing = false;
             dataGrid.AllowDeleting = false;
             dataGrid.AllowSorting = true;
             dataGrid.AllowFiltering = true;
             dataGrid.AllowResizingColumns = true;
             dataGrid.AllowDraggingColumns = true;
+            dataGrid.AllowGrouping = true;
+
+            // Enhanced grid features - DOCUMENTED METHODS
+            dataGrid.EditMode = EditMode.SingleClick;
+            dataGrid.ValidationMode = GridValidationMode.InView;
+            dataGrid.NavigationMode = Syncfusion.WinForms.DataGrid.Enums.NavigationMode.Cell;
+            dataGrid.ShowGroupDropArea = true;
+            dataGrid.ShowToolTip = true;
+            dataGrid.ShowHeaderToolTip = true;
+            dataGrid.ShowSortNumbers = true;
+            dataGrid.AllowTriStateSorting = true;
 
             // Auto-sizing configuration for optimal column layout
             dataGrid.AutoSizeColumnsMode = AutoSizeColumnsMode.Fill;

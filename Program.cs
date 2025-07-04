@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Syncfusion.Windows.Forms;
+using Syncfusion.Licensing;
 
 namespace Bus_Buddy;
 
@@ -11,48 +12,16 @@ static class Program
     [STAThread]
     static void Main()
     {
-        try
-        {
-            // Enable high DPI support
-            if (Environment.OSVersion.Version.Major >= 6)
-            {
-                SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-            }
+        Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JEaF5cXmRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXhec3RSRGRYU0R2WUBWYEk=");
 
-            // Initialize application configuration with high DPI settings
-            ApplicationConfiguration.Initialize();
+        // Initialize the service container
+        ServiceContainer.Initialize();
 
-            // Set high DPI mode
-            Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+        Application.EnableVisualStyles();
+        Application.SetCompatibleTextRenderingDefault(false);
 
-            // Initialize dependency injection container
-            ServiceContainer.Initialize();
-
-            var loggerFactory = ServiceContainer.GetService<ILoggerFactory>();
-            var logger = loggerFactory.CreateLogger("BusBuddy.Program");
-            logger.LogInformation("BusBuddy application starting...");
-
-            // Get the main form from the DI container
-            var mainForm = ServiceContainer.GetService<Dashboard>();
-
-            Application.Run(mainForm);
-
-            logger.LogInformation("BusBuddy application shutting down...");
-        }
-        catch (Exception ex)
-        {
-            MessageBoxAdv.Show($"An error occurred while starting the application: {ex.Message}",
-                "Startup Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-        finally
-        {
-            ServiceContainer.Dispose();
-        }
+        // Resolve the Dashboard from the service container
+        var dashboard = ServiceContainer.GetService<Dashboard>();
+        Application.Run(dashboard);
     }
-
-    // Windows API for DPI awareness
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern bool SetProcessDpiAwarenessContext(IntPtr dpiContext);
-
-    private static readonly IntPtr DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = new IntPtr(-4);
 }

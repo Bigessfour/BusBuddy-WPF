@@ -13,6 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="BusBuddy.Tests\**" />
+    <Compile Remove="Utilities\Temporarily_Disabled\**" />
+    <EmbeddedResource Remove="BusBuddy.Tests\**" />
+    <None Remove="BusBuddy.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
@@ -25,6 +32,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
@@ -62,28 +70,20 @@
     <Reference Include="Syncfusion.Tools.Base">
       <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Tools.Base.dll</HintPath>
     </Reference>
-    <Reference Include="Syncfusion.SfButton.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfButton.WinForms.dll</HintPath>
+    <Reference Include="Syncfusion.SfInput.WinForms">
+      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfInput.WinForms.dll</HintPath>
     </Reference>
     <Reference Include="Syncfusion.Office2019Theme.WinForms">
       <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Office2019Theme.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="Syncfusion.Themes.Office2019Colorful.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Themes.Office2019Colorful.WinForms.dll</HintPath>
-    </Reference>
-
-    <Reference Include="Syncfusion.SfComboBox.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfComboBox.WinForms.dll</HintPath>
-    </Reference>
     <Reference Include="Syncfusion.SfDataGrid.WinForms">
       <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfDataGrid.WinForms.dll</HintPath>
     </Reference>
-    <Reference Include="Syncfusion.SfCalendar.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfCalendar.WinForms.dll</HintPath>
-    </Reference>
-    <Reference Include="Syncfusion.SfDateTimePicker.WinForms">
-      <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.SfDateTimePicker.WinForms.dll</HintPath>
-    </Reference>
+    <!-- SfCalendar and SfDateTimePicker components are included in SfInput.WinForms assembly -->
+    <!-- Note: SfDateTimePicker is actually named SfDateTimeEdit according to API documentation -->
+    <!-- Removed: Syncfusion.SfCalendar.WinForms - components are in SfInput.WinForms -->
+    <!-- Removed: Syncfusion.SfDateTimePicker.WinForms - component is SfDateTimeEdit in SfInput.WinForms -->
+    <!-- Removed: Syncfusion.Themes.Office2019Colorful.WinForms - assembly does not exist -->
     <Reference Include="Syncfusion.Schedule.Windows">
       <HintPath>C:\Program Files (x86)\Syncfusion\Essential Studio\Windows\30.1.37\precompiledassemblies\net8.0\Syncfusion.Schedule.Windows.dll</HintPath>
     </Reference>

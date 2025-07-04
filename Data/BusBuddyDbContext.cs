@@ -13,9 +13,24 @@ namespace Bus_Buddy.Data;
 /// </summary>
 public class BusBuddyDbContext : DbContext
 {
+    private string _currentAuditUser = "System";
+
     public BusBuddyDbContext(DbContextOptions<BusBuddyDbContext> options) : base(options)
     {
     }
+
+    /// <summary>
+    /// Set the current audit user for tracking purposes
+    /// </summary>
+    public void SetAuditUser(string userName)
+    {
+        _currentAuditUser = userName ?? "System";
+    }
+
+    /// <summary>
+    /// Get the current audit user
+    /// </summary>
+    public string GetCurrentAuditUser() => _currentAuditUser;
 
     // DbSets for all entities
     public DbSet<Bus> Vehicles { get; set; }
@@ -560,5 +575,55 @@ public class BusBuddyDbContext : DbContext
                 TrainingComplete = true
             }
         );
+    }
+
+    /// <summary>
+    /// Override SaveChanges to apply audit fields
+    /// </summary>
+    public override int SaveChanges()
+    {
+        ApplyAuditFields();
+        return base.SaveChanges();
+    }
+
+    /// <summary>
+    /// Override SaveChangesAsync to apply audit fields
+    /// </summary>
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ApplyAuditFields();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Apply audit fields to entities before saving
+    /// </summary>
+    private void ApplyAuditFields()
+    {
+        var entities = ChangeTracker.Entries<BaseEntity>()
+            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified);
+
+        foreach (var entity in entities)
+        {
+            var now = DateTime.UtcNow;
+
+            if (entity.State == EntityState.Added)
+            {
+                entity.Entity.CreatedDate = now;
+                entity.Entity.CreatedBy = _currentAuditUser;
+            }
+
+            if (entity.State == EntityState.Modified)
+            {
+                entity.Entity.UpdatedDate = now;
+                entity.Entity.UpdatedBy = _currentAuditUser;
+                // Prevent modification of CreatedDate and CreatedBy
+                entity.Property(x => x.CreatedDate).IsModified = false;
+                entity.Property(x => x.CreatedBy).IsModified = false;
+            }
+
+            // Call entity-specific OnSaving method
+            entity.Entity.OnSaving();
+        }
     }
 }
