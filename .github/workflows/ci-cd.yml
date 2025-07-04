@@ -13,6 +13,12 @@ on:
         default: true
         type: boolean
 
+permissions:
+  contents: read
+  checks: write
+  actions: read
+  pull-requests: write
+
 jobs:
   workflow-history:
     name: Previous Workflow Results
@@ -33,6 +39,7 @@ jobs:
           echo "GitHub CLI already installed."
         fi
       shell: bash
+      
     - name: Check for Syncfusion License Key
       run: |
         if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
@@ -40,27 +47,7 @@ jobs:
           exit 1
         fi
       shell: bash
-    - name: Check for Syncfusion License Key
-      run: |
-        if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
-          echo "::error::SYNCFUSION_LICENSE_KEY secret is not set. Please add it in your repository settings."
-          exit 1
-        fi
-      shell: bash
-    - name: Check for Syncfusion License Key
-      run: |
-        if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
-          echo "::error::SYNCFUSION_LICENSE_KEY secret is not set. Please add it in your repository settings."
-          exit 1
-        fi
-      shell: bash
-    - name: Check for Syncfusion License Key
-      run: |
-        if [ -z "${{ secrets.SYNCFUSION_LICENSE_KEY }}" ]; then
-          echo "::error::SYNCFUSION_LICENSE_KEY secret is not set. Please add it in your repository settings."
-          exit 1
-        fi
-      shell: bash
+      
     - name: Checkout code
       uses: actions/checkout@v4
       
@@ -180,17 +167,17 @@ jobs:
           $xml = [xml](Get-Content TestResults/test-results.trx)
           $counters = $xml.TestRun.ResultSummary.Counters
           
-          echo "::set-output name=total::$($counters.total)"
-          echo "::set-output name=passed::$($counters.passed)"
-          echo "::set-output name=failed::$($counters.failed)"
-          echo "::set-output name=skipped::$($counters.notExecuted)"
+          "total=$($counters.total)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "passed=$($counters.passed)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "failed=$($counters.failed)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "skipped=$($counters.notExecuted)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           
           Write-Host "Test Results: $($counters.passed) passed, $($counters.failed) failed, $($counters.notExecuted) skipped"
         } else {
-          echo "::set-output name=total::0"
-          echo "::set-output name=passed::0"
-          echo "::set-output name=failed::0"
-          echo "::set-output name=skipped::0"
+          "total=0" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "passed=0" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "failed=0" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "skipped=0" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           
           Write-Host "No test results found"
         }
@@ -321,17 +308,17 @@ jobs:
           $xml = [xml](Get-Content TestResults/integration-results.trx)
           $counters = $xml.TestRun.ResultSummary.Counters
           
-          echo "::set-output name=total::$($counters.total)"
-          echo "::set-output name=passed::$($counters.passed)"
-          echo "::set-output name=failed::$($counters.failed)"
-          echo "::set-output name=skipped::$($counters.notExecuted)"
+          "total=$($counters.total)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "passed=$($counters.passed)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "failed=$($counters.failed)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "skipped=$($counters.notExecuted)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           
           Write-Host "Integration Test Results: $($counters.passed) passed, $($counters.failed) failed, $($counters.notExecuted) skipped"
         } else {
-          echo "::set-output name=total::0"
-          echo "::set-output name=passed::0"
-          echo "::set-output name=failed::0"
-          echo "::set-output name=skipped::0"
+          "total=0" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "passed=0" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "failed=0" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "skipped=0" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
           
           Write-Host "No integration test results found"
         }
