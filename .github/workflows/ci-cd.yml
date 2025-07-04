@@ -52,7 +52,7 @@ jobs:
         files: TestResults/*.trx
 
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       if: always()
       with:
         files: TestResults/*/coverage.cobertura.xml
@@ -112,8 +112,11 @@ jobs:
     - name: Build solution
       run: dotnet build "Bus Buddy.sln" --no-restore --configuration Release
 
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
+
     - name: Apply database migrations
-      run: dotnet ef database update --project BusBuddy.Data --startup-project BusBuddy
+      run: dotnet ef database update --project "BusBuddy.Data" --startup-project "Bus Buddy"
       env:
         ConnectionStrings__TestConnection: "Server=localhost,1433;Database=BusBuddyIntegrationTest;User Id=SA;Password=TestPassword123!;TrustServerCertificate=true"
 
@@ -166,7 +169,7 @@ jobs:
       run: dotnet build "Bus Buddy.sln" --no-restore --configuration Release
 
     - name: Publish application
-      run: dotnet publish "BusBuddy/BusBuddy.csproj" --no-build --configuration Release --output ./publish --self-contained false
+      run: dotnet publish "Bus Buddy.csproj" --no-build --configuration Release --output ./publish --self-contained false
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -214,9 +217,10 @@ jobs:
     - name: Run deployment readiness checks
       run: |
         Write-Host "Running deployment readiness validation..."
-        $routeServiceExists = Test-Path "Services/RouteService.cs"
-        $busServiceExists = Test-Path "Services/BusService.cs"
-        $syncfusionDll = Test-Path "packages/Syncfusion.SfDataGrid.WinForms.30.1.37*/lib/net8.0-windows/Syncfusion.SfDataGrid.WinForms.dll"
+        $routeServiceExists = Test-Path "Services/RouteService.cs" -or (Test-Path "Services/Implementations/RouteService.cs")
+        $busServiceExists = Test-Path "Services/BusService.cs" -or (Test-Path "Services/Implementations/BusService.cs")
+        $syncfusionDll = (Get-ChildItem -Path "bin", "publish" -Recurse -Filter "Syncfusion.SfDataGrid.WinForms.dll" -ErrorAction SilentlyContinue).Count -gt 0
+        
         Write-Host "RouteService implemented: $routeServiceExists"
         Write-Host "BusService implemented: $busServiceExists"
         Write-Host "Syncfusion SfDataGrid present: $syncfusionDll"
@@ -224,6 +228,7 @@ jobs:
         Write-Host "✅ RouteService: $routeServiceExists"
         Write-Host "✅ BusService: $busServiceExists"
         Write-Host "✅ Syncfusion: $syncfusionDll"
+        
         if (-not ($routeServiceExists -and $busServiceExists -and $syncfusionDll)) {
           Write-Error "Deployment readiness checks failed"
           exit 1
