@@ -1,0 +1,180 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CA1416</NoWarn>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UserSecretsId>ff9695ed-d3b1-41ee-b7bc-9731b55a8757</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BusBuddy.Core\BusBuddy.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\Dashboard\DashboardView.xaml.cs">
+      <DependentUpon>DashboardView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Bus\BusManagementView.xaml.cs">
+      <DependentUpon>BusManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Driver\DriverManagementView.xaml.cs">
+      <DependentUpon>DriverManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Route\RouteManagementView.xaml.cs">
+      <DependentUpon>RouteManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Schedule\ScheduleManagementView.xaml.cs">
+      <DependentUpon>ScheduleManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Student\StudentManagementView.xaml.cs">
+      <DependentUpon>StudentManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Student\StudentEditView.xaml.cs">
+      <DependentUpon>StudentEditView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Student\StudentEditDialog.xaml.cs">
+      <DependentUpon>StudentEditDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Maintenance\MaintenanceTrackingView.xaml.cs">
+      <DependentUpon>MaintenanceTrackingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Fuel\FuelManagementView.xaml.cs">
+      <DependentUpon>FuelManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Activity\ActivityLoggingView.xaml.cs">
+      <DependentUpon>ActivityLoggingView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Ticket\TicketManagementView.xaml.cs">
+      <DependentUpon>TicketManagementView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Settings\SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\StudentDetailView.xaml.cs">
+      <DependentUpon>StudentDetailView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\StudentListView.xaml.cs">
+      <DependentUpon>StudentListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\Student\AssignRouteDialog.xaml.cs">
+      <DependentUpon>AssignRouteDialog.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\Dashboard\DashboardView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Bus\BusManagementView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Driver\DriverManagementView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Route\RouteManagementView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Schedule\ScheduleManagementView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Student\StudentManagementView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Student\StudentEditView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Student\StudentEditDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Student\AssignRouteDialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Maintenance\MaintenanceTrackingView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Fuel\FuelManagementView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Activity\ActivityLoggingView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Ticket\TicketManagementView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Settings\SettingsView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\StudentDetailView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\StudentListView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3351.48" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
+    <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+    <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="Syncfusion.Licensing" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfBusyIndicator.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfChart.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfGrid.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfHubTile.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfInput.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfNavigationDrawer.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfRichTextBoxAdv.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfSchedule.WPF" Version="30.1.38" />
+    <PackageReference Include="Syncfusion.SfScheduler.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfSkinManager.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfTextInputLayout.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.Shared.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.Themes.Office2019Colorful.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.Tools.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.UI.WPF.NET" Version="30.1.39" />
+    <!-- Additional Syncfusion controls for enhanced functionality -->
+    <PackageReference Include="Syncfusion.SfGauge.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfMaps.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfTreeView.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfProgressBar.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.SfKanban.WPF" Version="30.1.39" />
+    <PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
+    <!-- Modern Theme Support -->
+    <PackageReference Include="Syncfusion.Themes.FluentLight.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.Themes.FluentDark.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.Themes.MaterialLight.WPF" Version="30.1.39" />
+    <PackageReference Include="Syncfusion.Themes.MaterialDark.WPF" Version="30.1.39" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
