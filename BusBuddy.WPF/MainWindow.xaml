@@ -1,0 +1,227 @@
+﻿<Window x:Class="BusBuddy.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BusBuddy.WPF"
+        xmlns:views="clr-namespace:BusBuddy.WPF.Views"
+        xmlns:bus="clr-namespace:BusBuddy.WPF.Views.Bus"
+        xmlns:dashboard="clr-namespace:BusBuddy.WPF.Views.Dashboard"
+        xmlns:route="clr-namespace:BusBuddy.WPF.Views.Route"
+        xmlns:driver="clr-namespace:BusBuddy.WPF.Views.Driver"
+        xmlns:schedule="clr-namespace:BusBuddy.WPF.Views.Schedule"
+        xmlns:viewModels="clr-namespace:BusBuddy.WPF.ViewModels"
+        xmlns:student="clr-namespace:BusBuddy.WPF.Views.Student"
+        xmlns:fuel="clr-namespace:BusBuddy.WPF.Views.Fuel"
+        xmlns:activity="clr-namespace:BusBuddy.WPF.Views.Activity"
+        xmlns:maintenance="clr-namespace:BusBuddy.WPF.Views.Maintenance"
+        xmlns:settings="clr-namespace:BusBuddy.WPF.Views.Settings"
+        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        xmlns:syncfusionskin="clr-namespace:Syncfusion.SfSkinManager;assembly=Syncfusion.SfSkinManager.WPF"
+        xmlns:converters="clr-namespace:BusBuddy.WPF.Converters"
+        xmlns:scheduleViewModels="clr-namespace:BusBuddy.WPF.ViewModels.Schedule"
+        mc:Ignorable="d"
+        Title="Bus Buddy - Transportation Management System"
+        Height="900" Width="1600"
+        WindowStartupLocation="CenterScreen"
+        syncfusionskin:SfSkinManager.VisualStyle="FluentDark"
+        Style="{StaticResource BusBuddyWindowStyle}"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <!-- Add converters -->
+        <local:DebugConverter x:Key="DebugConverter" />
+        <converters:BooleanToDeprecatedForegroundConverter x:Key="BooleanToDeprecatedForegroundConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <DataTemplate DataType="{x:Type viewModels:LoadingViewModel}">
+            <views:LoadingView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:DashboardViewModel}">
+            <dashboard:EnhancedDashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:BusManagementViewModel}">
+            <bus:BusManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:DriverManagementViewModel}">
+            <driver:DriverManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:RouteManagementViewModel}">
+            <route:RouteManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type scheduleViewModels:ScheduleManagementViewModel}">
+            <schedule:ScheduleManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:StudentManagementViewModel}">
+            <student:StudentManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:MaintenanceTrackingViewModel}">
+            <maintenance:MaintenanceTrackingView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:FuelManagementViewModel}">
+            <fuel:FuelManagementView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:ActivityLogViewModel}">
+            <activity:ActivityLoggingView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:SettingsViewModel}">
+            <settings:SettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:StudentListViewModel}">
+            <views:StudentListView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header with Navigation -->
+        <Border Grid.Row="0" Background="#005A9E" Height="50">
+            <DockPanel>
+                <!-- Navigation Drawer Toggle -->
+                <syncfusion:ButtonAdv DockPanel.Dock="Left"
+                        x:Name="MenuToggleButton"
+                        Label="☰"
+                        Width="30" Height="30"
+                        Click="MenuToggleButton_Click"
+                        Style="{StaticResource BusBuddyIconButtonStyle}"/>
+
+                <!-- Title and Navigation Buttons -->
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="0,0,20,0">
+                    <!-- Dashboard Navigation Buttons -->
+                    <syncfusion:ButtonAdv Label="Dashboard"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="Dashboard"
+                            Margin="5,0" Padding="10,5"
+                            Style="{StaticResource BusBuddyNavigationButtonStyle}"/>
+                    <syncfusion:ButtonAdv Label="Buses"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="Buses"
+                            Margin="5,0" Padding="10,5"
+                            Style="{StaticResource BusBuddyNavigationButtonStyle}"/>
+                    <syncfusion:ButtonAdv Label="Drivers"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="Drivers"
+                            Margin="5,0" Padding="10,5"
+                            Style="{StaticResource BusBuddyNavigationButtonStyle}"/>
+                    <syncfusion:ButtonAdv Label="Routes"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="Routes"
+                            Margin="5,0" Padding="10,5"
+                            Style="{StaticResource BusBuddyNavigationButtonStyle}"/>
+                    <syncfusion:ButtonAdv Label="Settings"
+                            Command="{Binding NavigateToCommand}"
+                            CommandParameter="Settings"
+                            Margin="5,0" Padding="10,5"
+                            Style="{StaticResource BusBuddyNavigationButtonStyle}"/>
+                </StackPanel>
+
+                <!-- Title and Debug Info -->
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Bus Buddy"
+                               VerticalAlignment="Center"
+                               Foreground="White"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="10,0"/>
+                    <!-- Debug info -->
+                    <TextBlock Text="{Binding CurrentViewModel, Converter={StaticResource DebugConverter}, StringFormat='Current View: {0}'}"
+                               Foreground="White"
+                               Margin="20,0,0,0"
+                               VerticalAlignment="Center"
+                               FontSize="12"/>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Main Content Area with Navigation Drawer -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Navigation Drawer Panel -->
+            <Border x:Name="NavigationPanel"
+                    Grid.Column="0"
+                    Width="240"
+                    Style="{StaticResource BusBuddyNavigationPanelStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Border Grid.Row="0" Background="#005A9E" Height="50">
+                        <TextBlock Text="Navigation"
+                                   Foreground="White"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   VerticalAlignment="Center"
+                                   Margin="15,0,0,0"/>
+                    </Border>
+
+                    <ListView Grid.Row="1"
+                              ItemsSource="{Binding NavigationItems}"
+                              Margin="0,10,0,0"
+                              Style="{StaticResource BusBuddyNavigationListViewStyle}">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem" BasedOn="{StaticResource BusBuddyNavigationListViewItemStyle}">
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <syncfusion:ButtonAdv Command="{Binding Path=DataContext.NavigateToCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}}"
+                                            CommandParameter="{Binding ViewModelName}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            HorizontalContentAlignment="Left"
+                                            HorizontalAlignment="Stretch"
+                                            FontSize="14"
+                                            Foreground="{Binding IsDeprecated, Converter={StaticResource BooleanToDeprecatedForegroundConverter}, FallbackValue=#FFFFFF}"
+                                            ToolTip="{Binding Tooltip}"
+                                            syncfusionskin:SfSkinManager.VisualStyle="FluentDark">
+                                        <syncfusion:ButtonAdv.Content>
+                                            <TextBlock Text="{Binding Name}"
+                                                       FontSize="14"
+                                                       Foreground="{Binding IsDeprecated, Converter={StaticResource BooleanToDeprecatedForegroundConverter}, FallbackValue=#FFFFFF}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsDeprecated}" Value="True">
+                                                                <Setter Property="TextDecorations" Value="Strikethrough"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </syncfusion:ButtonAdv.Content>
+                                    </syncfusion:ButtonAdv>
+                                    <TextBlock Text="(Deprecated)"
+                                               HorizontalAlignment="Right"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,10,0"
+                                               FontSize="10"
+                                               Foreground="Red"
+                                               Visibility="{Binding IsDeprecated, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+
+            <!-- Main Content Area with Stretch Alignment -->
+            <ContentControl x:Name="MainContentControl"
+                            Grid.Column="1"
+                            Content="{Binding CurrentViewModel}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            Margin="0"/>
+        </Grid>
+    </Grid>
+</Window>
